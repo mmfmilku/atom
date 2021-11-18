@@ -1,6 +1,7 @@
 import atom.Atom;
 import com.alibaba.fastjson.JSON;
 import dispatcher.BaseDispatcher;
+import org.junit.Test;
 import param.Param;
 import parser.BaseDefinition;
 import parser.BaseParser;
@@ -54,12 +55,8 @@ public class ParseTest {
         });
     }
 
-    public static void main(String[] args) {
-//        test1();
-        test2();
-    }
-
-    public static void test1() {
+    @Test
+    public void test1() {
         String def1 = "{" +
                 "\"name\":\"a1\"," +
                 "\"statements\":[" +
@@ -80,7 +77,8 @@ public class ParseTest {
         parse1.invoke(new MyParam("p2"));
     }
 
-    public static void test2() {
+    @Test
+    public void test2() {
         String def = "{" +
                 "\"name\":\"a2\"," +
                 "\"statements\":[" +

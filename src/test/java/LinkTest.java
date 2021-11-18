@@ -1,14 +1,10 @@
 import atom.Atom;
 import dispatcher.BaseDispatcher;
 import dispatcher.DefaultDispatcher;
+import org.junit.Test;
 import param.Param;
 
 public class LinkTest {
-
-    public static void main(String[] args) {
-//        test1();
-        test2();
-    }
 
     private static Atom<MyParam> printA = param -> System.out.println("a");
     private static Atom<MyParam> printB = param -> System.out.println("b");
@@ -21,7 +17,8 @@ public class LinkTest {
 
     private static MyAtom myHandle = param -> System.out.println(param.value());
 
-    private static void test1() {
+    @Test
+    public void test1() {
         BaseDispatcher<MyParam> baseDispatcher = new BaseDispatcher<>();
         baseDispatcher
                 .add(printA)
@@ -34,7 +31,8 @@ public class LinkTest {
         baseDispatcher.invoke(myParam);
     }
 
-    private static void test2() {
+    @Test
+    public void test2() {
         MyParam myParamA = () -> "value";
         int i = 4;
         DefaultDispatcher<MyParam> defaultDispatcher = new DefaultDispatcher<>();
@@ -63,13 +61,6 @@ public class LinkTest {
                 .thenExecute(param -> System.out.println("i == 5"))
                 .elseExecute(param -> System.out.println("i not in [1,5]"))
                 .invoke(myParamA);
-    }
-
-    private static void test3() {
-        int i = 1;
-        long l = 2;
-        Number n = i;
-        n = l;
     }
 
     interface MyAtom extends Atom<MyParam> {
