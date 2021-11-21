@@ -3,7 +3,7 @@ package parser;
 
 import atom.Atom;
 import atom.decorator.PrePostAtom;
-import dispatcher.BaseDispatcher;
+import dispatcher.BaseAtomChain;
 import param.Param;
 import util.AssertUtils;
 import util.LambdaUtil;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class BaseParser<T extends Param> implements Parser<BaseDefinition, BaseDispatcher<T>> {
+public class BaseParser<T extends Param> implements Parser<BaseDefinition, BaseAtomChain<T>> {
 
     // atom实例工厂
     private Function<String, Atom<T>> handleFactory;
@@ -29,9 +29,9 @@ public class BaseParser<T extends Param> implements Parser<BaseDefinition, BaseD
     }
 
     @Override
-    public BaseDispatcher<T> parse(BaseDefinition baseDefinition) {
+    public BaseAtomChain<T> parse(BaseDefinition baseDefinition) {
         AssertUtils.notNull(baseDefinition);
-        BaseDispatcher<T> baseDispatcher = new BaseDispatcher<>();
+        BaseAtomChain<T> baseAtomChain = new BaseAtomChain<>();
         List<BaseDefinition.Statement> statements = baseDefinition.getStatements();
         if (statements != null && statements.size() > 0) {
             statements.forEach(statement -> {
@@ -50,10 +50,10 @@ public class BaseParser<T extends Param> implements Parser<BaseDefinition, BaseD
                     atom = new PrePostAtom<>(LambdaUtil.nonNull(preAtom), LambdaUtil.nonNull(postAtom), atom);
                 }
                 // 获取指令对应的操作
-                BiConsumer<BaseDispatcher, Atom> operator = baseDispatcher.operator(statement.operate);
-                operator.accept(baseDispatcher, atom);
+                BiConsumer<BaseAtomChain, Atom> operator = baseAtomChain.operator(statement.operate);
+                operator.accept(baseAtomChain, atom);
             });
         }
-        return baseDispatcher;
+        return baseAtomChain;
     }
 }

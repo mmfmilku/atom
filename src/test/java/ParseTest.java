@@ -1,6 +1,6 @@
 import atom.Atom;
 import com.alibaba.fastjson.JSON;
-import dispatcher.BaseDispatcher;
+import dispatcher.BaseAtomChain;
 import org.junit.Test;
 import param.Param;
 import parser.BaseDefinition;
@@ -71,9 +71,9 @@ public class ParseTest {
                 "]}";
         BaseDefinition definition = JSON.parseObject(def1, BaseDefinition.class);
         BaseDefinition definition2 = JSON.parseObject(def2, BaseDefinition.class);
-        BaseDispatcher<MyParam> parse = parse(definition);
+        BaseAtomChain<MyParam> parse = parse(definition);
         parse.invoke(new MyParam("p1"));
-        BaseDispatcher<MyParam> parse1 = parse(definition2);
+        BaseAtomChain<MyParam> parse1 = parse(definition2);
         parse1.invoke(new MyParam("p2"));
     }
 
@@ -90,16 +90,16 @@ public class ParseTest {
                 "{\"operate\":\"ADD\",\"atom\":\"print\"}" +
                 "]}";
         BaseDefinition definition = JSON.parseObject(def, BaseDefinition.class);
-        BaseDispatcher<MyParam> parse = parse2(definition);
+        BaseAtomChain<MyParam> parse = parse2(definition);
         parse.invoke(new MyParam("p1"));
     }
 
-    public static BaseDispatcher<MyParam> parse(BaseDefinition definition) {
+    public static BaseAtomChain<MyParam> parse(BaseDefinition definition) {
         BaseParser<MyParam> baseParser = new BaseParser<>(s -> map.get(s));
         return baseParser.parse(definition);
     }
 
-    public static BaseDispatcher<MyParam> parse2(BaseDefinition definition) {
+    public static BaseAtomChain<MyParam> parse2(BaseDefinition definition) {
         BaseParser<MyParam> baseParser = new BaseParser<>(s -> map.get(s),
                 new ELParser<>(MyParam::set));
         return baseParser.parse(definition);

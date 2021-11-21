@@ -1,6 +1,6 @@
 import atom.Atom;
-import dispatcher.BaseDispatcher;
-import dispatcher.DefaultDispatcher;
+import dispatcher.BaseAtomChain;
+import dispatcher.DefaultAtomChain;
 import org.junit.Test;
 import param.Param;
 
@@ -19,8 +19,8 @@ public class LinkTest {
 
     @Test
     public void test1() {
-        BaseDispatcher<MyParam> baseDispatcher = new BaseDispatcher<>();
-        baseDispatcher
+        BaseAtomChain<MyParam> baseAtomChain = new BaseAtomChain<>();
+        baseAtomChain
                 .add(printA)
                 .add(printB)
                 .add(param -> System.out.println("c"))
@@ -28,14 +28,14 @@ public class LinkTest {
                 .add((MyAtom) param -> System.out.println(param.value()));
 
         MyParam myParam = () -> "MyParam d";
-        baseDispatcher.invoke(myParam);
+        baseAtomChain.invoke(myParam);
     }
 
     @Test
     public void test2() {
         MyParam myParamA = () -> "value";
         int i = 4;
-        DefaultDispatcher<MyParam> defaultDispatcher = new DefaultDispatcher<>();
+        DefaultAtomChain<MyParam> defaultDispatcher = new DefaultAtomChain<>();
         defaultDispatcher
                 .add(printA)
                 .tryProcess(throwNPE)
