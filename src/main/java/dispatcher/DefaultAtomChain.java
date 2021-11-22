@@ -86,13 +86,13 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
     public BiConsumer<DefaultAtomChain, Atom> operator(String operate) {
         switch (operate) {
             case "ADD":
-                return DefaultAtomChain::add;
+                return DefaultAtomChain<T>::add;
             case "TRY":
-                return DefaultAtomChain::tryProcess;
+                return DefaultAtomChain<T>::tryProcess;
             case "CATCH":
-                return DefaultAtomChain::catchProcess;
+                return DefaultAtomChain<T>::catchProcess;
             case "FINALLY":
-                return DefaultAtomChain::finallyProcess;
+                return DefaultAtomChain<T>::finallyProcess;
             default:
                 return AtomConst.NO_OPERATE;
         }
@@ -100,7 +100,7 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
 
     @Override
     public void execute(T param) {
-
+        invoke(param);
     }
 
     abstract class AbstractAtom implements Atom<T> {

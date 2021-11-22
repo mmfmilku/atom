@@ -5,7 +5,6 @@ import atom.Atom;
 import param.Param;
 import util.AssertUtils;
 import util.AtomConst;
-import util.LambdaUtil;
 
 import java.util.function.BiConsumer;
 
@@ -80,12 +79,10 @@ public class BaseAtomChain<T extends Param> implements AtomChain<T> {
 
     public <D extends BaseAtomChain> BiConsumer<D, Atom> operator(String operate) {
         AssertUtils.notNull(operate);
-        switch (operate) {
-            case "ADD":
-                return D::add;
-            default:
-                return AtomConst.NO_OPERATE;
+        if ("ADD".equals(operate)) {
+            return D::add;
         }
+        return AtomConst.NO_OPERATE;
     }
 
 }

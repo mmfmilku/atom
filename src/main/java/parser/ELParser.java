@@ -19,7 +19,7 @@ public class ELParser<T extends Param> implements Parser<List<String>, Atom<T>> 
     private Copier<T, String> copier;
 
     public ELParser() {
-        this((param, k, v) -> {},
+        this((param, k, v) -> null,
                 (param, k) -> "v",
                 (param, source, target) -> {});
     }
