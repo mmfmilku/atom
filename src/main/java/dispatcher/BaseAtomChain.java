@@ -4,11 +4,11 @@ package dispatcher;
 import atom.Atom;
 import param.Param;
 import util.AssertUtils;
-import util.LambdaUtil;
+import util.AtomConst;
 
 import java.util.function.BiConsumer;
 
-public class BaseDispatcher<T extends Param> implements Dispatcher<T> {
+public class BaseAtomChain<T extends Param> implements AtomChain<T> {
 
     private Node<T> head = new Node<>(param -> {
     });
@@ -16,10 +16,10 @@ public class BaseDispatcher<T extends Param> implements Dispatcher<T> {
     private Atom<T> beforeAtom;
     private Atom<T> afterAtom;
 
-    public BaseDispatcher() {
+    public BaseAtomChain() {
     }
 
-    public BaseDispatcher(Atom<T> beforeAtom, Atom<T> afterAtom) {
+    public BaseAtomChain(Atom<T> beforeAtom, Atom<T> afterAtom) {
         this.beforeAtom = beforeAtom;
         this.afterAtom = afterAtom;
     }
@@ -33,7 +33,7 @@ public class BaseDispatcher<T extends Param> implements Dispatcher<T> {
     }
 
     @Override
-    public BaseDispatcher<T> add(Atom<T> atom) {
+    public BaseAtomChain<T> add(Atom<T> atom) {
         Node<T> newNode = new Node<>(atom);
         tail.next = newNode;
         tail = newNode;
@@ -77,16 +77,12 @@ public class BaseDispatcher<T extends Param> implements Dispatcher<T> {
         Node<T> next;
     }
 
-    protected BiConsumer NO_OPERATE = LambdaUtil.biNop();
-
-    public <D extends BaseDispatcher> BiConsumer<D, Atom> operator(String operate) {
+    public <D extends BaseAtomChain> BiConsumer<D, Atom> operator(String operate) {
         AssertUtils.notNull(operate);
-        switch (operate) {
-            case "ADD":
-                return D::add;
-            default:
-                return NO_OPERATE;
+        if ("ADD".equals(operate)) {
+            return D::add;
         }
+        return AtomConst.NO_OPERATE;
     }
 
 }

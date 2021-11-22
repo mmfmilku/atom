@@ -3,6 +3,7 @@ package dispatcher;
 import atom.Atom;
 import param.Param;
 import util.AssertUtils;
+import util.AtomConst;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,37 +12,56 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class DefaultDispatcher<T extends Param> extends BaseDispatcher<T> {
+public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
 
     private TryAtom currentAtom;
 
+    private BaseAtomChain<T> atomChain;
+
+    public DefaultAtomChain() {
+        this.atomChain = new BaseAtomChain<>();
+    }
+
+    public DefaultAtomChain(BaseAtomChain<T> atomChain) {
+        this.atomChain = atomChain;
+    }
+
+    public DefaultAtomChain(Atom<T> beforeAtom, Atom<T> afterAtom) {
+        this.atomChain = new BaseAtomChain<>(beforeAtom, afterAtom);
+    }
+
     @Override
-    public DefaultDispatcher<T> add(Atom<T> atom) {
+    public DefaultAtomChain<T> add(Atom<T> atom) {
         currentAtom = null;
-        super.add(atom);
+        this.atomChain.add(atom);
         return this;
     }
 
-    public DefaultDispatcher<T> tryProcess(Atom<T> atom) {
+    @Override
+    public void invoke(T param) {
+        this.atomChain.invoke(param);
+    }
+
+    public DefaultAtomChain<T> tryProcess(Atom<T> atom) {
         TryAtom tryAtom = new TryAtom(atom);
         add(tryAtom);
         currentAtom = tryAtom;
         return this;
     }
 
-    public DefaultDispatcher<T> catchProcess(Atom<T> catchProcess) {
+    public DefaultAtomChain<T> catchProcess(Atom<T> catchProcess) {
         AssertUtils.notNull(catchProcess);
         currentAtom.catchProcess = (exception, param) -> catchProcess.execute(param);
         return this;
     }
 
-    public DefaultDispatcher<T> catchProcess(BiConsumer<Exception, T> catchProcess) {
+    public DefaultAtomChain<T> catchProcess(BiConsumer<Exception, T> catchProcess) {
         AssertUtils.notNull(catchProcess);
         currentAtom.catchProcess = catchProcess;
         return this;
     }
 
-    public DefaultDispatcher<T> finallyProcess(Atom<T> finallyProcess) {
+    public DefaultAtomChain<T> finallyProcess(Atom<T> finallyProcess) {
         currentAtom.finallyProcess = finallyProcess;
         currentAtom = null;
         return this;
@@ -54,33 +74,38 @@ public class DefaultDispatcher<T extends Param> extends BaseDispatcher<T> {
         return multipleCondition;
     }
 
+    /**
+     * 未完成的方法 TODO
+     * */
     public <R> ForEachAtom forEach(Function<T, Iterable<R>> iterableGetter) {
         ForEachAtom<R> forEachHandle = new ForEachAtom<>(iterableGetter);
         add(forEachHandle);
         return forEachHandle;
     }
 
-    @Override
-    public BiConsumer<DefaultDispatcher, Atom> operator(String operate) {
-        BiConsumer<DefaultDispatcher, Atom> operator = super.operator(operate);
-        if (NO_OPERATE == operator) {
-            switch (operate) {
-                case "TRY":
-                    return DefaultDispatcher::tryProcess;
-                case "CATCH":
-                    return DefaultDispatcher::catchProcess;
-                case "FINALLY":
-                    return DefaultDispatcher::finallyProcess;
-                default:
-                    return NO_OPERATE;
-            }
+    public BiConsumer<DefaultAtomChain, Atom> operator(String operate) {
+        switch (operate) {
+            case "ADD":
+                return DefaultAtomChain<T>::add;
+            case "TRY":
+                return DefaultAtomChain<T>::tryProcess;
+            case "CATCH":
+                return DefaultAtomChain<T>::catchProcess;
+            case "FINALLY":
+                return DefaultAtomChain<T>::finallyProcess;
+            default:
+                return AtomConst.NO_OPERATE;
         }
-        return operator;
+    }
+
+    @Override
+    public void execute(T param) {
+        invoke(param);
     }
 
     abstract class AbstractAtom implements Atom<T> {
-        public DefaultDispatcher<T> then() {
-            return DefaultDispatcher.this;
+        public DefaultAtomChain<T> then() {
+            return DefaultAtomChain.this;
         }
     }
 
@@ -141,7 +166,7 @@ public class DefaultDispatcher<T extends Param> extends BaseDispatcher<T> {
             return this;
         }
 
-        public DefaultDispatcher<T> elseExecute(Atom<T> elseAtom) {
+        public DefaultAtomChain<T> elseExecute(Atom<T> elseAtom) {
             if (currentStatement != null && !currentStatement.finish()) {
                 // 确保语句是完成状态
                 throw new IllegalStateException("empty execute handle!");
