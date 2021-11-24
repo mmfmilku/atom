@@ -21,13 +21,15 @@ public class ELParser<T extends Param> implements Parser<List<String>, Atom<T>> 
     public ELParser() {
         this((param, k, v) -> null,
                 (param, k) -> "v",
-                (param, source, target) -> {});
+                (param, source, target) -> {
+                });
     }
 
     public ELParser(Setter<T, String, String> setter) {
         this(setter,
                 (param, k) -> "v",
-                (param, source, target) -> {});
+                (param, source, target) -> {
+                });
     }
 
     public ELParser(Setter<T, String, String> setter, Getter<T, String, String> getter, Copier<T, String> copier) {
@@ -61,7 +63,10 @@ public class ELParser<T extends Param> implements Parser<List<String>, Atom<T>> 
                 }
             }
         });
-        return param -> consumers.forEach(consumer -> consumer.accept(param));
+        return param -> {
+            consumers.forEach(consumer -> consumer.accept(param));
+            return true;
+        };
     }
 
     private String[] getParam(String rawParam) {

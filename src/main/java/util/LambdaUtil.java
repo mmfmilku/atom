@@ -21,11 +21,11 @@ public class LambdaUtil {
     }
 
     public static <T extends Param> Atom<T> nopAtom() {
-        return param -> {};
+        return param -> true;
     }
 
     public static <T extends Param> Atom<T> nonNull(Atom<T> atom) {
-        return atom == null ? param -> {} : atom;
+        return atom == null ? param -> true : atom;
     }
 
     public static <T> Function<T, T> same() {

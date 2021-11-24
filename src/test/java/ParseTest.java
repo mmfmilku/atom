@@ -37,21 +37,26 @@ public class ParseTest {
         map.put("a", param -> {
             param.value += " [from after handle a] ";
             System.out.println("in handle a,value=" + param);
+            return true;
         });
         map.put("b", param -> {
             param.value += " [from after handle b] ";
             System.out.println("in handle b,value=" + param);
+            return true;
         });
         map.put("c", param -> {
             param.value += " [from after handle c] ";
             System.out.println("in handle c,value=" + param);
+            return true;
         });
         map.put("d", param -> {
             param.value += " [from after handle d] ";
             System.out.println("in handle d,value=" + param);
+            return true;
         });
         map.put("print", param -> {
             System.out.println("in handle print,value=" + param.value + ",map=" + param.map);
+            return true;
         });
     }
 

@@ -17,9 +17,10 @@ public class PrePostAtom<T extends Param> implements Atom<T> {
     }
 
     @Override
-    public void execute(T param) {
+    public Boolean execute(T param) {
         pre.execute(param);
-        atom.execute(param);
+        Boolean success = atom.execute(param);
         post.execute(param);
+        return success;
     }
 }

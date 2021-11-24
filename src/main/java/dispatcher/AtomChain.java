@@ -8,5 +8,5 @@ public interface AtomChain<T extends Param> extends Atom<T> {
 
     AtomChain<T> add(Atom<T> atom);
 
-    void invoke(T param);
+    Boolean invoke(T param);
 }

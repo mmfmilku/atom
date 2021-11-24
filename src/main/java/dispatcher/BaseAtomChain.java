@@ -10,8 +10,7 @@ import java.util.function.BiConsumer;
 
 public class BaseAtomChain<T extends Param> implements AtomChain<T> {
 
-    private Node<T> head = new Node<>(param -> {
-    });
+    private Node<T> head = new Node<>(param -> true);
     private Node<T> tail = head;
     private Atom<T> beforeAtom;
     private Atom<T> afterAtom;
@@ -41,16 +40,19 @@ public class BaseAtomChain<T extends Param> implements AtomChain<T> {
     }
 
     @Override
-    public void invoke(T param) {
+    public Boolean invoke(T param) {
         Node<T> point = head.next;
         while (point != null) {
             System.out.println("execute...");
             beforeExecute(param);
             Atom<T> atom = point.atom;
-            atom.execute(param);
+            Boolean success = atom.execute(param);
             afterExecute(param);
+            if (!Boolean.TRUE.equals(success))
+                return success;
             point = point.next;
         }
+        return true;
     }
 
     private void beforeExecute(T param) {
@@ -64,8 +66,8 @@ public class BaseAtomChain<T extends Param> implements AtomChain<T> {
     }
 
     @Override
-    public void execute(T param) {
-        invoke(param);
+    public Boolean execute(T param) {
+        return invoke(param);
     }
 
     private static class Node<T extends Param> {

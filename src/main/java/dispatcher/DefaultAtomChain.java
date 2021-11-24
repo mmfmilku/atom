@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -38,8 +39,8 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
     }
 
     @Override
-    public void invoke(T param) {
-        this.atomChain.invoke(param);
+    public Boolean invoke(T param) {
+        return this.atomChain.invoke(param);
     }
 
     public DefaultAtomChain<T> tryProcess(Atom<T> atom) {
@@ -55,7 +56,7 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
         return this;
     }
 
-    public DefaultAtomChain<T> catchProcess(BiConsumer<Exception, T> catchProcess) {
+    public DefaultAtomChain<T> catchProcess(BiFunction<Exception, T, Boolean> catchProcess) {
         AssertUtils.notNull(catchProcess);
         currentAtom.catchProcess = catchProcess;
         return this;
@@ -99,8 +100,8 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
     }
 
     @Override
-    public void execute(T param) {
-        invoke(param);
+    public Boolean execute(T param) {
+        return invoke(param);
     }
 
     abstract class AbstractAtom implements Atom<T> {
@@ -112,7 +113,7 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
     public class TryAtom extends AbstractAtom {
 
         private Atom<T> atom;
-        private BiConsumer<Exception, T> catchProcess;
+        private BiFunction<Exception, T, Boolean> catchProcess;
         private Atom<T> finallyProcess;
 
         private TryAtom(Atom<T> atom) {
@@ -120,12 +121,13 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
         }
 
         @Override
-        public void execute(T param) {
+        public Boolean execute(T param) {
             try {
-                atom.execute(param);
+                return atom.execute(param);
             } catch (Exception e) {
                 if (catchProcess != null)
-                    catchProcess.accept(e, param);
+                    return catchProcess.apply(e, param);
+                return true;
             } finally {
                 if (finallyProcess != null)
                     finallyProcess.execute(param);
@@ -176,18 +178,19 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
         }
 
         @Override
-        public void execute(T param) {
+        public Boolean execute(T param) {
             if (statements != null) {
                 for (ConditionalStatement statement : statements) {
-                    if (statement.executeStatement(param)) {
+                    if (statement.predicate.test(param)) {
                         // 执行为true则结束
-                        return;
+                        return statement.affirmation.execute(param);
                     }
                 }
                 if (elseAtom != null) {
-                    elseAtom.execute(param);
+                    return elseAtom.execute(param);
                 }
             }
+            return true;
         }
 
         private Atom<T> elseAtom;
@@ -234,13 +237,15 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
         }
 
         @Override
-        public void execute(T param) {
+        public Boolean execute(T param) {
             Iterator<R> iterator = iterableGetter.apply(param).iterator();
             int index = 0;
+            Boolean success = true;
             while (iterator.hasNext()) {
                 R next = iterator.next();
-                eachAtom.execute(param);
+                success &= eachAtom.execute(param);
             }
+            return success;
         }
     }
 
