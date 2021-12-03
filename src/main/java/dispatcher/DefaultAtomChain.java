@@ -17,18 +17,18 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
 
     private TryAtom currentAtom;
 
-    private BaseAtomChain<T> atomChain;
+    private AtomChain<T> atomChain;
 
     public DefaultAtomChain() {
-        this.atomChain = new BaseAtomChain<>();
+        this.atomChain = new LinkedAtomChain<>();
     }
 
-    public DefaultAtomChain(BaseAtomChain<T> atomChain) {
+    public DefaultAtomChain(AtomChain<T> atomChain) {
         this.atomChain = atomChain;
     }
 
     public DefaultAtomChain(Atom<T> beforeAtom, Atom<T> afterAtom) {
-        this.atomChain = new BaseAtomChain<>(beforeAtom, afterAtom);
+        this.atomChain = new LinkedAtomChain<>(beforeAtom, afterAtom);
     }
 
     @Override

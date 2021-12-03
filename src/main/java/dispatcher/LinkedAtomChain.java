@@ -8,17 +8,17 @@ import util.AtomConst;
 
 import java.util.function.BiConsumer;
 
-public class BaseAtomChain<T extends Param> implements AtomChain<T> {
+public class LinkedAtomChain<T extends Param> implements AtomChain<T> {
 
     private Node<T> head = new Node<>(param -> true);
     private Node<T> tail = head;
     private Atom<T> beforeAtom;
     private Atom<T> afterAtom;
 
-    public BaseAtomChain() {
+    public LinkedAtomChain() {
     }
 
-    public BaseAtomChain(Atom<T> beforeAtom, Atom<T> afterAtom) {
+    public LinkedAtomChain(Atom<T> beforeAtom, Atom<T> afterAtom) {
         this.beforeAtom = beforeAtom;
         this.afterAtom = afterAtom;
     }
@@ -32,7 +32,7 @@ public class BaseAtomChain<T extends Param> implements AtomChain<T> {
     }
 
     @Override
-    public BaseAtomChain<T> add(Atom<T> atom) {
+    public LinkedAtomChain<T> add(Atom<T> atom) {
         Node<T> newNode = new Node<>(atom);
         tail.next = newNode;
         tail = newNode;
@@ -79,7 +79,7 @@ public class BaseAtomChain<T extends Param> implements AtomChain<T> {
         Node<T> next;
     }
 
-    public <D extends BaseAtomChain> BiConsumer<D, Atom> operator(String operate) {
+    public <D extends LinkedAtomChain> BiConsumer<D, Atom> operator(String operate) {
         AssertUtils.notNull(operate);
         if ("ADD".equals(operate)) {
             return D::add;

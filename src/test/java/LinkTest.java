@@ -1,5 +1,7 @@
 import atom.Atom;
-import dispatcher.BaseAtomChain;
+import dispatcher.AtomChain;
+import dispatcher.IntegrateAtomChain;
+import dispatcher.LinkedAtomChain;
 import dispatcher.DefaultAtomChain;
 import org.junit.Test;
 import param.Param;
@@ -27,8 +29,8 @@ public class LinkTest {
 
     @Test
     public void test1() {
-        BaseAtomChain<MyParam> baseAtomChain = new BaseAtomChain<>();
-        baseAtomChain
+        AtomChain<MyParam> linkedAtomChain = new LinkedAtomChain<>();
+        linkedAtomChain
                 .add(printA)
                 .add(printB)
                 .add(printAtom("c"))
@@ -36,7 +38,21 @@ public class LinkTest {
                 .add(AtomUtils.toAtom(param -> System.out.println(param.value())));
 
         MyParam myParam = () -> "MyParam d";
-        baseAtomChain.invoke(myParam);
+        linkedAtomChain.invoke(myParam);
+    }
+
+    @Test
+    public void test3() {
+        AtomChain<MyParam> linkedAtomChain = new IntegrateAtomChain<>();
+        linkedAtomChain
+                .add(printA)
+                .add(printB)
+                .add(printAtom("c"))
+                .add(myHandle)
+                .add(AtomUtils.toAtom(param -> System.out.println(param.value())));
+
+        MyParam myParam = () -> "MyParam d";
+        linkedAtomChain.invoke(myParam);
     }
 
     @Test
