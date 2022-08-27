@@ -6,10 +6,16 @@
 
     <groupId>org.mmfmilku</groupId>
     <artifactId>atom</artifactId>
+    <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
+    <modules>
+        <module>atom-core</module>
+        <module>atom-parse</module>
+    </modules>
 
     <properties>
         <junit.version>4.13</junit.version>
+        <atom-core-version>0.0.1-SNAPSHOT</atom-core-version>
     </properties>
 
     <dependencies>
