@@ -44,7 +44,7 @@ public class BaseDefinition implements Serializable {
                 '}';
     }
 
-    static class Statement implements Serializable {
+    public static class Statement implements Serializable {
         String operate;
         String atom;
         List<String> preEL;

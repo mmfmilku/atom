@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.dispatcher;
 
 import org.mmfmilku.atom.Atom;
+import org.mmfmilku.atom.decorator.TryAtom;
 import org.mmfmilku.atom.param.Param;
 import org.mmfmilku.atom.util.AssertUtils;
 import org.mmfmilku.atom.util.AtomConst;
@@ -11,11 +12,10 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
 
-    private TryAtom currentAtom;
+    private TryAtom<T> currentAtom;
 
     private AtomChain<T> atomChain;
 
@@ -44,31 +44,29 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
     }
 
     public DefaultAtomChain<T> tryProcess(Atom<T> atom) {
-        TryAtom tryAtom = new TryAtom(atom);
+        TryAtom<T> tryAtom = new TryAtom<>(atom);
         add(tryAtom);
         currentAtom = tryAtom;
         return this;
     }
 
     public DefaultAtomChain<T> catchProcess(Atom<T> catchProcess) {
-        AssertUtils.notNull(catchProcess);
-        currentAtom.catchProcess = (exception, param) -> catchProcess.execute(param);
+        currentAtom.catchProcess(catchProcess);
         return this;
     }
 
     public DefaultAtomChain<T> catchProcess(BiFunction<Exception, T, Boolean> catchProcess) {
-        AssertUtils.notNull(catchProcess);
-        currentAtom.catchProcess = catchProcess;
+        currentAtom.catchProcess(catchProcess);
         return this;
     }
 
     public DefaultAtomChain<T> finallyProcess(Atom<T> finallyProcess) {
-        currentAtom.finallyProcess = finallyProcess;
+        currentAtom.finallyProcess(finallyProcess);
         currentAtom = null;
         return this;
     }
 
-    public ConditionAtom ifTrue(Predicate<T> predicate) {
+    public ConditionAtom ifTrue(Atom<T> predicate) {
         ConditionAtom multipleCondition =
                 new ConditionAtom(predicate);
         add(multipleCondition);
@@ -94,14 +92,10 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
                 return DefaultAtomChain<T>::catchProcess;
             case "FINALLY":
                 return DefaultAtomChain<T>::finallyProcess;
+                // todo 条件操作提取外层
             default:
                 return AtomConst.NO_OPERATE;
         }
-    }
-
-    @Override
-    public Boolean execute(T param) {
-        return invoke(param);
     }
 
     abstract class AbstractAtom implements Atom<T> {
@@ -110,39 +104,39 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
         }
     }
 
-    public class TryAtom extends AbstractAtom {
-
-        private Atom<T> atom;
-        private BiFunction<Exception, T, Boolean> catchProcess;
-        private Atom<T> finallyProcess;
-
-        private TryAtom(Atom<T> atom) {
-            this.atom = atom;
-        }
-
-        @Override
-        public Boolean execute(T param) {
-            try {
-                return atom.execute(param);
-            } catch (Exception e) {
-                if (catchProcess != null)
-                    return catchProcess.apply(e, param);
-                return true;
-            } finally {
-                if (finallyProcess != null)
-                    finallyProcess.execute(param);
-            }
-        }
-
-    }
+//    public class TryAtom extends AbstractAtom {
+//
+//        private Atom<T> atom;
+//        private BiFunction<Exception, T, Boolean> catchProcess;
+//        private Atom<T> finallyProcess;
+//
+//        private TryAtom(Atom<T> atom) {
+//            this.atom = atom;
+//        }
+//
+//        @Override
+//        public Boolean execute(T param) {
+//            try {
+//                return atom.execute(param);
+//            } catch (Exception e) {
+//                if (catchProcess != null)
+//                    return catchProcess.apply(e, param);
+//                return true;
+//            } finally {
+//                if (finallyProcess != null)
+//                    finallyProcess.execute(param);
+//            }
+//        }
+//
+//    }
 
     public class ConditionAtom extends AbstractAtom {
 
-        private ConditionAtom(Predicate<T> predicate) {
+        private ConditionAtom(Atom<T> predicate) {
             currentStatement = new ConditionalStatement(predicate);
         }
 
-        public ConditionAtom ifTrue(Predicate<T> predicate) {
+        public ConditionAtom ifTrue(Atom<T> predicate) {
             AssertUtils.notNull(predicate);
             if (currentStatement == null) {
                 // 新建条件语句
@@ -181,7 +175,7 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
         public Boolean execute(T param) {
             if (statements != null) {
                 for (ConditionalStatement statement : statements) {
-                    if (statement.predicate.test(param)) {
+                    if (statement.predicate.execute(param)) {
                         // 执行为true则结束
                         return statement.affirmation.execute(param);
                     }
@@ -198,15 +192,15 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
         private List<ConditionalStatement> statements;
 
         private class ConditionalStatement {
-            private Predicate<T> predicate;
+            private Atom<T> predicate;
             private Atom<T> affirmation;
 
-            private ConditionalStatement(Predicate<T> predicate) {
+            private ConditionalStatement(Atom<T> predicate) {
                 this.predicate = predicate;
             }
 
             private boolean executeStatement(T param) {
-                if (predicate.test(param)) {
+                if (predicate.execute(param)) {
                     affirmation.execute(param);
                     return true;
                 } else

@@ -23,8 +23,4 @@ public class IntegrateAtomChain<T extends Param> implements AtomChain<T> {
         return param != null && integrationAtom.execute(param);
     }
 
-    @Override
-    public Boolean execute(T param) {
-        return invoke(param);
-    }
 }

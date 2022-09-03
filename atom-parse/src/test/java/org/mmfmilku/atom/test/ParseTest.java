@@ -8,7 +8,9 @@ import org.mmfmilku.atom.param.Param;
 import org.mmfmilku.atom.parser.BaseDefinition;
 import org.mmfmilku.atom.parser.BaseParser;
 import org.mmfmilku.atom.parser.ELParser;
+import org.mmfmilku.atom.util.AssertUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,14 +21,17 @@ public class ParseTest {
             this.value = value;
         }
 
-        private Map<String,String> map = new HashMap<>();
+        private Map<String, String> map = new HashMap<>();
         private String value;
+
         public String get(String key) {
             return map.get(key);
         }
+
         String set(String key, String value) {
             return map.put(key, value);
         }
+
         @Override
         public String toString() {
             return value;
@@ -56,8 +61,20 @@ public class ParseTest {
             System.out.println("in handle d,value=" + param);
             return true;
         });
+        map.put("e", param -> {
+            param.value += " [from after handle e] ";
+            System.out.println("in handle e,value=" + param);
+            return true;
+        });
         map.put("print", param -> {
             System.out.println("in handle print,value=" + param.value + ",map=" + param.map);
+            return true;
+        });
+        map.put("alwaysTrue", param -> true);
+        map.put("alwaysFalse", param -> false);
+        map.put("exception", param -> {
+            System.out.println("now throw exception");
+            AssertUtils.notNull(null);
             return true;
         });
     }
@@ -101,6 +118,41 @@ public class ParseTest {
         parse.invoke(new MyParam("p1"));
     }
 
+    @Test
+    public void test3() {
+        String def = "{" +
+                "\"name\":\"a3\"," +
+                "\"statements\":[" +
+                "{\"operate\":\"ADD\",\"atom\":\"print\"," +
+                "\"postEL\":[" +
+                "\"$SET(\\\"k1\\\",\\\"111\\\")\"," +
+                "\"$COPY(\\\"k1\\\",\\\"k2\\\")\"," +
+                "\"$SET(\\\"k3\\\",\\\"777\\\")\"" +
+                "]}," +
+                "{\"operate\":\"ADD\",\"atom\":\"print\"}" +
+                "]}";
+        BaseDefinition definition = JSON.parseObject(def, BaseDefinition.class);
+        LinkedAtomChain<MyParam> parse = parse3(definition);
+        parse.invoke(new MyParam("pp"));
+    }
+
+    @Test
+    public void test4() {
+        String def = "{" +
+                "\"name\":\"a4\"," +
+                "\"statements\":[" +
+                "{\"operate\":\"TRY\",\"atom\":\"exception\"}," +
+                "{\"operate\":\"CATCH\",\"atom\":\"a\"}," +
+                "{\"operate\":\"FINALLY\",\"atom\":\"b\"}," +
+                "{\"operate\":\"TRY\",\"atom\":\"c\"}," +
+                "{\"operate\":\"CATCH\",\"atom\":\"d\"}," +
+                "{\"operate\":\"FINALLY\",\"atom\":\"e\"}" +
+                "]}";
+        BaseDefinition definition = JSON.parseObject(def, BaseDefinition.class);
+        LinkedAtomChain<MyParam> parse = parse3(definition);
+        parse.invoke(new MyParam("pp"));
+    }
+
     private static LinkedAtomChain<MyParam> parse(BaseDefinition definition) {
         BaseParser<MyParam> baseParser = new BaseParser<>(s -> map.get(s));
         return baseParser.parse(definition);
@@ -109,6 +161,14 @@ public class ParseTest {
     private static LinkedAtomChain<MyParam> parse2(BaseDefinition definition) {
         BaseParser<MyParam> baseParser = new BaseParser<>(s -> map.get(s),
                 new ELParser<>(MyParam::set));
+        return baseParser.parse(definition);
+    }
+
+    private static LinkedAtomChain<MyParam> parse3(BaseDefinition definition) {
+        BaseParser<MyParam> baseParser = new BaseParser<>(s -> map.get(s),
+                new ELParser<>(MyParam::set
+                        , MyParam::get
+                        , (param, source, target) -> param.set(target, param.get(source))));
         return baseParser.parse(definition);
     }
 

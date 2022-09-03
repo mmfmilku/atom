@@ -2,7 +2,7 @@ package org.mmfmilku.atom.parser;
 
 
 import org.mmfmilku.atom.Atom;
-import org.mmfmilku.atom.decorator.PrePostAtom;
+import org.mmfmilku.atom.decorator.AroundAtom;
 import org.mmfmilku.atom.dispatcher.LinkedAtomChain;
 import org.mmfmilku.atom.param.Param;
 import org.mmfmilku.atom.util.AssertUtils;
@@ -32,6 +32,8 @@ public class BaseParser<T extends Param> implements Parser<BaseDefinition, Linke
     public LinkedAtomChain<T> parse(BaseDefinition baseDefinition) {
         AssertUtils.notNull(baseDefinition);
         LinkedAtomChain<T> linkedAtomChain = new LinkedAtomChain<>();
+        // todo 其他AtomChain的支持，如何抽象
+//        DefaultAtomChain<T> linkedAtomChain = new DefaultAtomChain<>();
         List<BaseDefinition.Statement> statements = baseDefinition.getStatements();
         if (statements != null && statements.size() > 0) {
             statements.forEach(statement -> {
@@ -47,7 +49,7 @@ public class BaseParser<T extends Param> implements Parser<BaseDefinition, Linke
                     postAtom = elParser.parse(postEL);
                 }
                 if (preAtom != null || postAtom != null) {
-                    atom = new PrePostAtom<>(LambdaUtil.nonNull(preAtom), LambdaUtil.nonNull(postAtom), atom);
+                    atom = new AroundAtom<>(LambdaUtil.nonNull(preAtom), LambdaUtil.nonNull(postAtom), atom);
                 }
                 // 获取指令对应的操作
                 BiConsumer<LinkedAtomChain, Atom> operator = linkedAtomChain.operator(statement.operate);

@@ -72,7 +72,7 @@ public class ELParser<T extends Param> implements Parser<List<String>, Atom<T>> 
     private String[] getParam(String rawParam) {
         String[] split = rawParam.split(",");
         String p1 = split[0].trim().replaceAll("\"", "");
-        String p2 = split[0].trim().replaceAll("\"", "");
+        String p2 = split[1].trim().replaceAll("\"", "");
         return new String[]{p1, p2};
     }
 

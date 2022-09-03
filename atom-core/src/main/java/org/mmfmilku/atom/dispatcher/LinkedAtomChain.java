@@ -65,11 +65,6 @@ public class LinkedAtomChain<T extends Param> implements AtomChain<T> {
             afterAtom.execute(param);
     }
 
-    @Override
-    public Boolean execute(T param) {
-        return invoke(param);
-    }
-
     private static class Node<T extends Param> {
         Node(Atom<T> atom) {
             this.atom = atom;

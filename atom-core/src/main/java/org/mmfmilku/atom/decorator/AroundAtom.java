@@ -4,13 +4,13 @@ package org.mmfmilku.atom.decorator;
 import org.mmfmilku.atom.Atom;
 import org.mmfmilku.atom.param.Param;
 
-public class PrePostAtom<T extends Param> implements Atom<T> {
+public class AroundAtom<T extends Param> implements Atom<T> {
 
     private Atom<T> pre;
     private Atom<T> post;
     private Atom<T> atom;
 
-    public PrePostAtom(Atom<T> pre, Atom<T> post, Atom<T> atom) {
+    public AroundAtom(Atom<T> pre, Atom<T> post, Atom<T> atom) {
         this.pre = pre;
         this.post = post;
         this.atom = atom;

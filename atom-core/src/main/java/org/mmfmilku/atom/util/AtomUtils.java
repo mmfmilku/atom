@@ -5,6 +5,7 @@ import org.mmfmilku.atom.Process;
 import org.mmfmilku.atom.param.Param;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class AtomUtils {
@@ -14,6 +15,10 @@ public class AtomUtils {
             consumer.accept(param);
             return true;
         };
+    }
+
+    public static <T extends Param> Atom<T> toAtom(Predicate<T> predicate) {
+        return predicate::test;
     }
 
     public static <T extends Param> Atom<T> toAtom(Supplier<Boolean> supplier) {
