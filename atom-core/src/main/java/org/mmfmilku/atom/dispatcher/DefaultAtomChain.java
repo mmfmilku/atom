@@ -83,22 +83,6 @@ public class DefaultAtomChain<T extends BaseParam> implements AtomChain<T>, Atom
         return forEachHandle;
     }
 
-    public BiConsumer<DefaultAtomChain, Atom> operator(String operate) {
-        switch (operate) {
-            case "ADD":
-                return DefaultAtomChain<T>::add;
-            case "TRY":
-                return DefaultAtomChain<T>::tryProcess;
-            case "CATCH":
-                return DefaultAtomChain<T>::catchProcess;
-            case "FINALLY":
-                return DefaultAtomChain<T>::finallyProcess;
-                // todo 条件操作提取外层
-            default:
-                return AtomConst.NO_OPERATE;
-        }
-    }
-
     @Override
     public void operate(String operate, Atom<T> atom) {
         switch (operate) {
