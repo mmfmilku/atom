@@ -8,7 +8,7 @@ import org.mmfmilku.atom.util.AtomConst;
 
 import java.util.function.BiConsumer;
 
-public class LinkedAtomChain<T extends Param> implements AtomChain<T> {
+public class LinkedAtomChain<T extends Param> implements AtomChain<T>, AtomOperator<T> {
 
     private Node<T> head = new Node<>(param -> true);
     private Node<T> tail = head;
@@ -63,6 +63,11 @@ public class LinkedAtomChain<T extends Param> implements AtomChain<T> {
     private void afterExecute(T param) {
         if (afterAtom != null)
             afterAtom.execute(param);
+    }
+
+    @Override
+    public void operate(String operate, Atom<T> atom) {
+        this.add(atom);
     }
 
     private static class Node<T extends Param> {

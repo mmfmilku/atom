@@ -2,7 +2,8 @@ package org.mmfmilku.atom.dispatcher;
 
 import org.mmfmilku.atom.Atom;
 import org.mmfmilku.atom.decorator.TryAtom;
-import org.mmfmilku.atom.param.Param;
+import org.mmfmilku.atom.exeption.AtomException;
+import org.mmfmilku.atom.param.BaseParam;
 import org.mmfmilku.atom.util.AssertUtils;
 import org.mmfmilku.atom.util.AtomConst;
 
@@ -13,7 +14,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
+public class DefaultAtomChain<T extends BaseParam> implements AtomChain<T>, AtomOperator<T> {
 
     private TryAtom<T> currentAtom;
 
@@ -95,6 +96,26 @@ public class DefaultAtomChain<T extends Param> implements AtomChain<T> {
                 // todo 条件操作提取外层
             default:
                 return AtomConst.NO_OPERATE;
+        }
+    }
+
+    @Override
+    public void operate(String operate, Atom<T> atom) {
+        switch (operate) {
+            case "ADD":
+                this.add(atom);
+                break;
+            case "TRY":
+                this.tryProcess(atom);
+                break;
+            case "CATCH":
+                this.catchProcess(atom);
+                break;
+            case "FINALLY":
+                this.finallyProcess(atom);
+                break;
+            default:
+                throw new AtomException(operate + " not support in DefaultAtomChain");
         }
     }
 

@@ -2,21 +2,22 @@ package org.mmfmilku.atom.test;
 
 import org.mmfmilku.atom.Atom;
 import com.alibaba.fastjson.JSON;
+import org.mmfmilku.atom.dispatcher.DefaultAtomChain;
+import org.mmfmilku.atom.dispatcher.IntegrateAtomChain;
 import org.mmfmilku.atom.dispatcher.LinkedAtomChain;
 import org.junit.Test;
-import org.mmfmilku.atom.param.Param;
+import org.mmfmilku.atom.param.BaseParam;
 import org.mmfmilku.atom.parser.BaseDefinition;
-import org.mmfmilku.atom.parser.BaseParser;
+import org.mmfmilku.atom.parser.BaseAtomChainParser;
 import org.mmfmilku.atom.parser.ELParser;
 import org.mmfmilku.atom.util.AssertUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ParseTest {
 
-    private static class MyParam implements Param {
+    private static class MyParam extends BaseParam {
         MyParam(String value) {
             this.value = value;
         }
@@ -73,8 +74,15 @@ public class ParseTest {
         map.put("alwaysTrue", param -> true);
         map.put("alwaysFalse", param -> false);
         map.put("exception", param -> {
-            System.out.println("now throw exception");
+            System.out.println("here throw exception");
             AssertUtils.notNull(null);
+            return true;
+        });
+        map.put("catch", param -> {
+            System.out.println("in handle catch,value=" + param);
+            if (param.getLastCause() != null) {
+                System.out.println(param.getLastCause().getMessage());
+            }
             return true;
         });
     }
@@ -95,9 +103,9 @@ public class ParseTest {
                 "]}";
         BaseDefinition definition = JSON.parseObject(def1, BaseDefinition.class);
         BaseDefinition definition2 = JSON.parseObject(def2, BaseDefinition.class);
-        LinkedAtomChain<MyParam> parse = parse(definition);
+        IntegrateAtomChain<MyParam> parse = parse(definition);
         parse.invoke(new MyParam("p1"));
-        LinkedAtomChain<MyParam> parse1 = parse(definition2);
+        IntegrateAtomChain<MyParam> parse1 = parse(definition2);
         parse1.invoke(new MyParam("p2"));
     }
 
@@ -132,7 +140,7 @@ public class ParseTest {
                 "{\"operate\":\"ADD\",\"atom\":\"print\"}" +
                 "]}";
         BaseDefinition definition = JSON.parseObject(def, BaseDefinition.class);
-        LinkedAtomChain<MyParam> parse = parse3(definition);
+        DefaultAtomChain<MyParam> parse = parse3(definition);
         parse.invoke(new MyParam("pp"));
     }
 
@@ -149,27 +157,28 @@ public class ParseTest {
                 "{\"operate\":\"FINALLY\",\"atom\":\"e\"}" +
                 "]}";
         BaseDefinition definition = JSON.parseObject(def, BaseDefinition.class);
-        LinkedAtomChain<MyParam> parse = parse3(definition);
+        DefaultAtomChain<MyParam> parse = parse3(definition);
         parse.invoke(new MyParam("pp"));
     }
 
-    private static LinkedAtomChain<MyParam> parse(BaseDefinition definition) {
-        BaseParser<MyParam> baseParser = new BaseParser<>(s -> map.get(s));
-        return baseParser.parse(definition);
+    private static IntegrateAtomChain<MyParam> parse(BaseDefinition definition) {
+        BaseAtomChainParser<MyParam> baseParser = new BaseAtomChainParser<>(s -> map.get(s));
+        IntegrateAtomChain<MyParam> parse = baseParser.parse(definition, IntegrateAtomChain.class);
+        return baseParser.parse(definition, IntegrateAtomChain.class);
     }
 
     private static LinkedAtomChain<MyParam> parse2(BaseDefinition definition) {
-        BaseParser<MyParam> baseParser = new BaseParser<>(s -> map.get(s),
+        BaseAtomChainParser<MyParam> baseParser = new BaseAtomChainParser<>(s -> map.get(s),
                 new ELParser<>(MyParam::set));
-        return baseParser.parse(definition);
+        return baseParser.parse(definition, LinkedAtomChain.class);
     }
 
-    private static LinkedAtomChain<MyParam> parse3(BaseDefinition definition) {
-        BaseParser<MyParam> baseParser = new BaseParser<>(s -> map.get(s),
+    private static DefaultAtomChain<MyParam> parse3(BaseDefinition definition) {
+        BaseAtomChainParser<MyParam> baseParser = new BaseAtomChainParser<>(s -> map.get(s),
                 new ELParser<>(MyParam::set
                         , MyParam::get
                         , (param, source, target) -> param.set(target, param.get(source))));
-        return baseParser.parse(definition);
+        return baseParser.parse(definition, DefaultAtomChain.class);
     }
 
 }

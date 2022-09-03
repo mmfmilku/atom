@@ -4,7 +4,7 @@ import org.mmfmilku.atom.Atom;
 import org.mmfmilku.atom.param.Param;
 import org.mmfmilku.atom.util.AssertUtils;
 
-public class IntegrateAtomChain<T extends Param> implements AtomChain<T> {
+public class IntegrateAtomChain<T extends Param> implements AtomChain<T>, AtomOperator<T> {
 
     private Atom<T> integrationAtom;
 
@@ -23,4 +23,8 @@ public class IntegrateAtomChain<T extends Param> implements AtomChain<T> {
         return param != null && integrationAtom.execute(param);
     }
 
+    @Override
+    public void operate(String operate, Atom<T> atom) {
+        this.add(atom);
+    }
 }

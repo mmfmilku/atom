@@ -1,12 +1,12 @@
 package org.mmfmilku.atom.decorator;
 
 import org.mmfmilku.atom.Atom;
-import org.mmfmilku.atom.param.Param;
+import org.mmfmilku.atom.param.BaseParam;
 import org.mmfmilku.atom.util.AssertUtils;
 
 import java.util.function.BiFunction;
 
-public class TryAtom<T extends Param> implements Atom<T> {
+public class TryAtom<T extends BaseParam> implements Atom<T> {
 
     private Atom<T> atom;
     private BiFunction<Exception, T, Boolean> catchProcess;
@@ -39,6 +39,7 @@ public class TryAtom<T extends Param> implements Atom<T> {
         try {
             return atom.execute(param);
         } catch (Exception e) {
+            param.setLastCause(e);
             if (catchProcess != null)
                 return catchProcess.apply(e, param);
             return true;
