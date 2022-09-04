@@ -4,6 +4,7 @@ import org.mmfmilku.atom.Atom;
 import org.mmfmilku.atom.exeption.AtomException;
 import org.mmfmilku.atom.param.Param;
 import org.mmfmilku.atom.util.AssertUtils;
+import org.mmfmilku.atom.util.AtomOperatesConst;
 
 public class IntegrateAtomChain<T extends Param> implements AtomChain<T>, AtomOperator<T> {
 

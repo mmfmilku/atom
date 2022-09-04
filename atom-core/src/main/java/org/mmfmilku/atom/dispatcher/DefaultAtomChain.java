@@ -5,12 +5,11 @@ import org.mmfmilku.atom.decorator.TryAtom;
 import org.mmfmilku.atom.exeption.AtomException;
 import org.mmfmilku.atom.param.BaseParam;
 import org.mmfmilku.atom.util.AssertUtils;
-import org.mmfmilku.atom.util.AtomConst;
+import org.mmfmilku.atom.util.AtomOperatesConst;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -85,6 +84,7 @@ public class DefaultAtomChain<T extends BaseParam> implements AtomChain<T>, Atom
 
     @Override
     public void operate(String operate, Atom<T> atom) {
+        // todo 添加if,else操作
         switch (operate) {
             case AtomOperatesConst.ADD:
                 this.add(atom);
@@ -108,32 +108,6 @@ public class DefaultAtomChain<T extends BaseParam> implements AtomChain<T>, Atom
             return DefaultAtomChain.this;
         }
     }
-
-//    public class TryAtom extends AbstractAtom {
-//
-//        private Atom<T> atom;
-//        private BiFunction<Exception, T, Boolean> catchProcess;
-//        private Atom<T> finallyProcess;
-//
-//        private TryAtom(Atom<T> atom) {
-//            this.atom = atom;
-//        }
-//
-//        @Override
-//        public Boolean execute(T param) {
-//            try {
-//                return atom.execute(param);
-//            } catch (Exception e) {
-//                if (catchProcess != null)
-//                    return catchProcess.apply(e, param);
-//                return true;
-//            } finally {
-//                if (finallyProcess != null)
-//                    finallyProcess.execute(param);
-//            }
-//        }
-//
-//    }
 
     public class ConditionAtom extends AbstractAtom {
 

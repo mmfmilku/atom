@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.dispatcher;
+package org.mmfmilku.atom.util;
 
 public class AtomOperatesConst {
 
