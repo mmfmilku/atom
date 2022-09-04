@@ -7,4 +7,6 @@ public interface AtomOperator<T extends Param> {
 
     void operate(String operate, Atom<T> atom);
 
+    // todo 获取 Setter,Getter,Copier接口
+
 }

@@ -20,11 +20,19 @@ public class DefaultParam extends BaseParam {
         this.params.putAll(params);
     }
 
-    public Object put(String k, String v) {
-        return params.put(k, v);
+    public <T> T put(String k, String v) {
+        return (T) params.put(k, v);
     }
 
-    public Object get(String k) {
-        return params.get(k);
+    public <T> T putIfAbsent(String k, String v) {
+        return (T) params.putIfAbsent(k, v);
+    }
+
+    public <T> T get(String k) {
+        return (T) params.get(k);
+    }
+
+    public <T> T get(String k, String defaultValue) {
+        return (T) params.getOrDefault(k, defaultValue);
     }
 }

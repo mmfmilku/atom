@@ -163,7 +163,6 @@ public class ParseTest {
 
     private static IntegrateAtomChain<MyParam> parse(BaseDefinition definition) {
         BaseAtomChainParser<MyParam> baseParser = new BaseAtomChainParser<>(s -> map.get(s));
-        IntegrateAtomChain<MyParam> parse = baseParser.parse(definition, IntegrateAtomChain.class);
         return baseParser.parse(definition, IntegrateAtomChain.class);
     }
 
