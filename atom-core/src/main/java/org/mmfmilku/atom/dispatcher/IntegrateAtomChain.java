@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.dispatcher;
 
 import org.mmfmilku.atom.Atom;
+import org.mmfmilku.atom.exeption.AtomException;
 import org.mmfmilku.atom.param.Param;
 import org.mmfmilku.atom.util.AssertUtils;
 
@@ -25,6 +26,9 @@ public class IntegrateAtomChain<T extends Param> implements AtomChain<T>, AtomOp
 
     @Override
     public void operate(String operate, Atom<T> atom) {
+        if (!AtomOperatesConst.ADD.equals(operate)) {
+            throw new AtomException(operate + " not support in DefaultAtomChain");
+        }
         this.add(atom);
     }
 }

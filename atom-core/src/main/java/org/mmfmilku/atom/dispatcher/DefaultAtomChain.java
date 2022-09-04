@@ -86,16 +86,16 @@ public class DefaultAtomChain<T extends BaseParam> implements AtomChain<T>, Atom
     @Override
     public void operate(String operate, Atom<T> atom) {
         switch (operate) {
-            case "ADD":
+            case AtomOperatesConst.ADD:
                 this.add(atom);
                 break;
-            case "TRY":
+            case AtomOperatesConst.TRY:
                 this.tryProcess(atom);
                 break;
-            case "CATCH":
+            case AtomOperatesConst.CATCH:
                 this.catchProcess(atom);
                 break;
-            case "FINALLY":
+            case AtomOperatesConst.FINALLY:
                 this.finallyProcess(atom);
                 break;
             default:

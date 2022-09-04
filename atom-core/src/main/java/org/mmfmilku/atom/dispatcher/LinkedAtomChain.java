@@ -2,6 +2,7 @@ package org.mmfmilku.atom.dispatcher;
 
 
 import org.mmfmilku.atom.Atom;
+import org.mmfmilku.atom.exeption.AtomException;
 import org.mmfmilku.atom.param.Param;
 import org.mmfmilku.atom.util.AssertUtils;
 import org.mmfmilku.atom.util.AtomConst;
@@ -67,6 +68,9 @@ public class LinkedAtomChain<T extends Param> implements AtomChain<T>, AtomOpera
 
     @Override
     public void operate(String operate, Atom<T> atom) {
+        if (!AtomOperatesConst.ADD.equals(operate)) {
+            throw new AtomException(operate + " not support in DefaultAtomChain");
+        }
         this.add(atom);
     }
 
