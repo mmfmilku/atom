@@ -20,7 +20,7 @@ public class DefaultParam extends BaseParam {
         this.params.putAll(params);
     }
 
-    public <T> T put(String k, String v) {
+    public <T> T put(String k, Object v) {
         return (T) params.put(k, v);
     }
 

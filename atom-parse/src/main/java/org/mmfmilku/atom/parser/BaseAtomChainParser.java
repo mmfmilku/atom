@@ -19,10 +19,11 @@ public class BaseAtomChainParser<T extends Param> implements AtomChainParser<Bas
     // atom实例工厂
     private Function<String, Atom<T>> handleFactory;
 
-    private ELParser<T> elParser = new ELParser<>();
+    private ELParser<T> elParser;
 
     public BaseAtomChainParser(Function<String, Atom<T>> handleFactory) {
         this.handleFactory = handleFactory;
+        this.elParser = new ELParser<>();
     }
 
     public BaseAtomChainParser(Function<String, Atom<T>> handleFactory, ELParser<T> elParser) {
@@ -34,17 +35,18 @@ public class BaseAtomChainParser<T extends Param> implements AtomChainParser<Bas
     public <R extends AtomChain<T>> R parse(BaseDefinition baseDefinition, Class<R> clazz) throws AtomException {
         AssertUtils.notNull(baseDefinition);
         AssertUtils.notNull(clazz);
+        Class<?>[] clazzInterfaces = clazz.getInterfaces();
+        boolean canOperate = Stream.of(clazzInterfaces)
+                .anyMatch(clazzInterface -> clazzInterface == AtomOperator.class);
+        if (!canOperate) {
+            throw new AtomException(clazz.getName() + " did not implement AtomOperator interface");
+        }
+
         R atomChain;
         try {
             atomChain = clazz.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new AtomException(clazz.getName() + " get instance failed", e);
-        }
-        Class<?>[] clazzInterfaces = clazz.getInterfaces();
-        boolean canOperate = Stream.of(clazzInterfaces)
-                .anyMatch(clazzInterface -> clazzInterface == AtomOperator.class);
-        if (!canOperate) {
-            throw new AtomException(clazz.getName() + " did not implement org.mmfmilku.atom.dispatcher.AtomOperator");
         }
         AtomOperator<T> operator = (AtomOperator<T>) atomChain;
         List<BaseDefinition.Statement> statements = baseDefinition.getStatements();

@@ -1,0 +1,23 @@
+{
+  "name": "exception",
+  "statements": [
+    {
+      "operate": "TRY",
+      "atom": "SumListAtom"
+    },
+    {
+      "operate": "CATCH",
+      "atom": "AppendAtom",
+      "preEL": [
+        "$SET(\"APPEND_KEY\",\"catch\")"
+      ]
+    },
+    {
+      "operate": "FINALLY",
+      "atom": "AppendAtom",
+      "preEL": [
+        "$SET(\"APPEND_KEY\",\"finally\")"
+      ]
+    }
+  ]
+}

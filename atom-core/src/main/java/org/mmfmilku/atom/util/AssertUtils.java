@@ -7,4 +7,8 @@ public class AssertUtils {
             throw new NullPointerException();
     }
 
+    public static void assertTrue(Boolean express) {
+        assert Boolean.TRUE.equals(express);
+    }
+
 }

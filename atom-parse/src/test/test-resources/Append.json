@@ -3,21 +3,21 @@
   "statements": [
     {
       "operate": "ADD",
-      "atom": "a",
+      "atom": "AppendAtom",
       "preEL": [
         "$SET(\"APPEND_KEY\",\"111\")"
       ]
     },
     {
       "operate": "ADD",
-      "atom": "b",
+      "atom": "AppendAtom",
       "preEL": [
         "$SET(\"APPEND_KEY\",\"996\")"
       ]
     },
     {
       "operate": "ADD",
-      "atom": "b",
+      "atom": "AppendAtom",
       "preEL": [
         "$SET(\"APPEND_KEY\",\"007\")"
       ]
