@@ -1,12 +1,8 @@
 package org.mmfmilku.atom.test;
 
-import com.alibaba.fastjson.JSON;
 import org.junit.Test;
 import org.mmfmilku.atom.Atom;
 import org.mmfmilku.atom.dispatcher.DefaultAtomChain;
-import org.mmfmilku.atom.parser.BaseAtomChainParser;
-import org.mmfmilku.atom.parser.BaseDefinition;
-import org.mmfmilku.atom.parser.ELParser;
 import org.mmfmilku.atom.test.atom.AppendAtom;
 import org.mmfmilku.atom.test.utils.FileUtil;
 import org.mmfmilku.atom.test.param.TestParam;

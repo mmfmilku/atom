@@ -10,7 +10,7 @@ public class AppendAtom implements Atom<TestParam> {
     @Override
     public Boolean execute(TestParam param) {
         String toAppend = "|" + param.get(APPEND_KEY, "");
-        System.out.println("execute in AppendAtom, append " + toAppend);
+//        System.out.println("execute in AppendAtom, append " + toAppend);
         param.appendFlag(toAppend);
         return true;
     }

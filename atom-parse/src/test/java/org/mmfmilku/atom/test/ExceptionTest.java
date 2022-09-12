@@ -22,6 +22,7 @@ public class ExceptionTest {
         String sumList = param.get("sumList");
         System.out.println(sumList);
         System.out.println(param.getFlags());
+        AssertUtils.assertTrue("|finally".equals(param.getFlags()));
         AssertUtils.assertTrue("27".equals(sumList));
 
         param.put("list", Arrays.asList("9", "9", "0", "7", "50"));
@@ -29,6 +30,7 @@ public class ExceptionTest {
         sumList = param.get("sumList");
         System.out.println(sumList);
         System.out.println(param.getFlags());
+        AssertUtils.assertTrue("|finally|finally".equals(param.getFlags()));
         AssertUtils.assertTrue("75".equals(sumList));
     }
 
@@ -42,7 +44,10 @@ public class ExceptionTest {
         atomChain.invoke(param);
         String sumList = param.get("sumList");
         System.out.println(sumList);
-        AssertUtils.assertTrue("27".equals(sumList));
+        System.out.println(param.getFlags());
+        System.out.println("the exception message is " + param.getLastCause());
+        AssertUtils.assertTrue("|catch|finally".equals(param.getFlags()));
+        AssertUtils.assertTrue(sumList == null);
 
     }
 
