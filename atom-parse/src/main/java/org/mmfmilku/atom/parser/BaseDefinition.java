@@ -49,6 +49,15 @@ public class BaseDefinition implements Serializable {
         String atom;
         List<String> preEL;
         List<String> postEL;
+        String type;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
 
         public List<String> getPreEL() {
             return preEL;

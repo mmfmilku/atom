@@ -1,0 +1,23 @@
+{
+  "name": "start",
+  "statements": [
+    {
+      "operate": "ADD",
+      "atom": "EndAtom",
+      "preEL": [
+        "$SET(\"printSymbol\",\"#\")"
+      ]
+    },
+    {
+      "operate": "ADD",
+      "atom": "EndAtom",
+      "preEL": [
+        "$SET(\"printSymbol\",\"$\")"
+      ]
+    },
+    {
+      "operate": "ADD",
+      "atom": "PrintParamAtom"
+    }
+  ]
+}

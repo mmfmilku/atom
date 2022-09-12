@@ -45,7 +45,6 @@ public class LinkedAtomChain<T extends Param> implements AtomChain<T>, AtomOpera
     public Boolean invoke(T param) {
         Node<T> point = head.next;
         while (point != null) {
-            System.out.println("execute...");
             beforeExecute(param);
             Atom<T> atom = point.atom;
             Boolean success = atom.execute(param);

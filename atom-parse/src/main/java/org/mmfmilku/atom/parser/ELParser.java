@@ -77,10 +77,10 @@ public class ELParser<T extends Param> implements Parser<List<String>, Atom<T>> 
     }
 
     // $SET("", "")
-    private Pattern setPattern = Pattern.compile("\\$SET\\(\"\\w+\",\\s*\"\\w*\"\\)");
+    private Pattern setPattern = Pattern.compile("\\$SET\\(\"\\w+\",\\s*\"\\S*\"\\)");
     // $COPY("", "")
-    private Pattern copyPattern = Pattern.compile("\\$COPY\\(\"\\w+\",\\s*\"\\w*\"\\)");
-    private Pattern twoParamPattern = Pattern.compile("\"\\w+\",\\s*\"\\w*\"");
+    private Pattern copyPattern = Pattern.compile("\\$COPY\\(\"\\w+\",\\s*\"\\S*\"\\)");
+    private Pattern twoParamPattern = Pattern.compile("\"\\w+\",\\s*\"\\S*\"");
 
 
 }

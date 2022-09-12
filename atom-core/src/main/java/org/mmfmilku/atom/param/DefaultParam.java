@@ -35,4 +35,8 @@ public class DefaultParam extends BaseParam {
     public <T> T get(String k, String defaultValue) {
         return (T) params.getOrDefault(k, defaultValue);
     }
+
+    public Map<String, Object> getAllParams() {
+        return new HashMap<>(params);
+    }
 }
