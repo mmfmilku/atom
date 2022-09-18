@@ -3,7 +3,7 @@ package org.mmfmilku.atom.test;
 import org.junit.Test;
 import org.mmfmilku.atom.dispatcher.DefaultAtomChain;
 import org.mmfmilku.atom.test.param.TestParam;
-import org.mmfmilku.atom.test.utils.FileUtil;
+import org.mmfmilku.atom.test.utils.FileTestUtil;
 import org.mmfmilku.atom.test.utils.ParseTestUtil;
 import org.mmfmilku.atom.util.AssertUtils;
 
@@ -13,9 +13,9 @@ public class NestAtomTest {
 
     @Test
     public void nestTest() throws IOException {
-        String data = FileUtil.getData("F:\\dev\\project\\atom\\atom-parse\\src\\test\\test-resources\\CommonStart.json");
+        String data = FileTestUtil.getData("F:\\dev\\project\\atom\\atom-parse\\src\\test\\test-resources\\CommonStart.json");
         DefaultAtomChain<TestParam> chainStart = ParseTestUtil.parse(data, DefaultAtomChain.class);
-        String data2 = FileUtil.getData("F:\\dev\\project\\atom\\atom-parse\\src\\test\\test-resources\\CommonEnd.json");
+        String data2 = FileTestUtil.getData("F:\\dev\\project\\atom\\atom-parse\\src\\test\\test-resources\\CommonEnd.json");
         DefaultAtomChain<TestParam> chainEnd = ParseTestUtil.parse(data2, DefaultAtomChain.class);
         TestParam param = new TestParam();
         chainStart.add(chainEnd).invoke(param);
