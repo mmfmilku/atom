@@ -1,0 +1,30 @@
+{
+  "name": "append",
+  "statements": [
+    {
+      "operate": "ADD",
+      "atom": "$CommonStart"
+    },
+    {
+      "operate": "ADD",
+      "atom": "AppendAtom",
+      "preEL": [
+        "$SET(\"APPEND_KEY\",\"add one\")"
+      ]
+    },
+    {
+      "operate": "ADD",
+      "atom": "AppendAtom",
+      "preEL": [
+        "$SET(\"APPEND_KEY\",\"add two\")"
+      ]
+    },
+    {
+      "operate": "ADD",
+      "atom": "$CommonEnd",
+      "preEL": [
+        "$SET(\"APPEND_KEY\",\"add two\")"
+      ]
+    }
+  ]
+}

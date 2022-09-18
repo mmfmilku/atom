@@ -8,8 +8,9 @@ import java.util.Collections;
 public class PrintParamAtom implements Atom<TestParam> {
     @Override
     public Boolean execute(TestParam param) {
-        System.out.println("param:" + param.getAllParams());
         param.appendFlag("|print");
+        System.out.println("param:" + param.getAllParams());
+        System.out.println("flags=" + param.getFlags());
         return true;
     }
 }
