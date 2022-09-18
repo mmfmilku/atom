@@ -44,11 +44,20 @@ public class BaseDefinition implements Serializable {
                 '}';
     }
 
-    static class Statement implements Serializable {
+    public static class Statement implements Serializable {
         String operate;
         String atom;
         List<String> preEL;
         List<String> postEL;
+        String type;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
 
         public List<String> getPreEL() {
             return preEL;

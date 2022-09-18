@@ -6,7 +6,7 @@ import org.mmfmilku.atom.dispatcher.IntegrateAtomChain;
 import org.mmfmilku.atom.dispatcher.LinkedAtomChain;
 import org.mmfmilku.atom.dispatcher.DefaultAtomChain;
 import org.junit.Test;
-import org.mmfmilku.atom.param.Param;
+import org.mmfmilku.atom.param.BaseParam;
 import org.mmfmilku.atom.util.AtomUtils;
 
 public class LinkTest {
@@ -37,29 +37,33 @@ public class LinkTest {
                 .add(printB)
                 .add(printAtom("c"))
                 .add(myHandle)
-                .add(AtomUtils.toAtom(param -> System.out.println(param.value())));
+                .add(AtomUtils.toAtom(param -> {
+                    System.out.println(param.value());
+                }));
 
-        MyParam myParam = () -> "MyParam d";
+        MyParam myParam = new MyParam("MyParam d");
         linkedAtomChain.invoke(myParam);
     }
 
     @Test
     public void test3() {
-        AtomChain<MyParam> linkedAtomChain = new IntegrateAtomChain<>();
-        linkedAtomChain
+        AtomChain<MyParam> integrateAtomChain = new IntegrateAtomChain<>();
+        integrateAtomChain
                 .add(printA)
                 .add(printB)
                 .add(printAtom("c"))
                 .add(myHandle)
-                .add(AtomUtils.toAtom(param -> System.out.println(param.value())));
+                .add(AtomUtils.toAtom(param -> {
+                    System.out.println(param.value());
+                }));
 
-        MyParam myParam = () -> "MyParam d";
-        linkedAtomChain.invoke(myParam);
+        MyParam myParam = new MyParam("MyParam d");
+        integrateAtomChain.invoke(myParam);
     }
 
     @Test
     public void test2() {
-        MyParam myParamA = () -> "value";
+        MyParam myParamA = new MyParam("value");
         int i = 4;
         int j = 10;
         DefaultAtomChain<MyParam> defaultDispatcher = new DefaultAtomChain<>();
@@ -104,8 +108,14 @@ public class LinkTest {
     interface MyAtom extends Atom<MyParam> {
     }
 
-    private interface MyParam extends Param {
-        String value();
+    static class MyParam extends BaseParam {
+        String value;
+        MyParam(String value) {
+            this.value = value;
+        }
+        String value(){
+            return value;
+        }
     }
 
 }

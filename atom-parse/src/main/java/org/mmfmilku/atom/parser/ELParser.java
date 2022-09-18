@@ -72,15 +72,16 @@ public class ELParser<T extends Param> implements Parser<List<String>, Atom<T>> 
     private String[] getParam(String rawParam) {
         String[] split = rawParam.split(",");
         String p1 = split[0].trim().replaceAll("\"", "");
-        String p2 = split[0].trim().replaceAll("\"", "");
+        String p2 = split[1].trim().replaceAll("\"", "");
         return new String[]{p1, p2};
     }
 
-    // $SET("", "")
-    private Pattern setPattern = Pattern.compile("\\$SET\\(\"\\w+\",\\s*\"\\w*\"\\)");
-    // $COPY("", "")
-    private Pattern copyPattern = Pattern.compile("\\$COPY\\(\"\\w+\",\\s*\"\\w*\"\\)");
-    private Pattern twoParamPattern = Pattern.compile("\"\\w+\",\\s*\"\\w*\"");
+    // $SET("\\w", "[\\S\\s]")
+    private Pattern setPattern = Pattern.compile("\\$SET\\(\"\\w+\",\\s*\"[\\S\\s]*\"\\)");
+    // $COPY("\\w", "[\\S\\s")
+    private Pattern copyPattern = Pattern.compile("\\$COPY\\(\"\\w+\",\\s*\"[\\S\\s]*\"\\)");
+    // "\\w", "[\\S\\s]"
+    private Pattern twoParamPattern = Pattern.compile("\"\\w+\",\\s*\"[\\S\\s]*\"");
 
 
 }

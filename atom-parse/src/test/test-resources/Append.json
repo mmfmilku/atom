@@ -1,0 +1,26 @@
+{
+  "name": "append",
+  "statements": [
+    {
+      "operate": "ADD",
+      "atom": "AppendAtom",
+      "preEL": [
+        "$SET(\"APPEND_KEY\",\"111\")"
+      ]
+    },
+    {
+      "operate": "ADD",
+      "atom": "AppendAtom",
+      "preEL": [
+        "$SET(\"APPEND_KEY\",\"996\")"
+      ]
+    },
+    {
+      "operate": "ADD",
+      "atom": "AppendAtom",
+      "preEL": [
+        "$SET(\"APPEND_KEY\",\"007\")"
+      ]
+    }
+  ]
+}

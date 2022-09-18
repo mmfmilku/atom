@@ -2,13 +2,15 @@ package org.mmfmilku.atom.dispatcher;
 
 
 import org.mmfmilku.atom.Atom;
+import org.mmfmilku.atom.exeption.AtomException;
 import org.mmfmilku.atom.param.Param;
 import org.mmfmilku.atom.util.AssertUtils;
 import org.mmfmilku.atom.util.AtomConst;
+import org.mmfmilku.atom.util.AtomOperatesConst;
 
 import java.util.function.BiConsumer;
 
-public class LinkedAtomChain<T extends Param> implements AtomChain<T> {
+public class LinkedAtomChain<T extends Param> implements AtomChain<T>, AtomOperator<T> {
 
     private Node<T> head = new Node<>(param -> true);
     private Node<T> tail = head;
@@ -43,7 +45,6 @@ public class LinkedAtomChain<T extends Param> implements AtomChain<T> {
     public Boolean invoke(T param) {
         Node<T> point = head.next;
         while (point != null) {
-            System.out.println("execute...");
             beforeExecute(param);
             Atom<T> atom = point.atom;
             Boolean success = atom.execute(param);
@@ -66,8 +67,11 @@ public class LinkedAtomChain<T extends Param> implements AtomChain<T> {
     }
 
     @Override
-    public Boolean execute(T param) {
-        return invoke(param);
+    public void operate(String operate, Atom<T> atom) {
+        if (!AtomOperatesConst.ADD.equals(operate)) {
+            throw new AtomException(operate + " not support in DefaultAtomChain");
+        }
+        this.add(atom);
     }
 
     private static class Node<T extends Param> {

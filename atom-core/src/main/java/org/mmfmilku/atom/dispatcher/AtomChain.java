@@ -9,4 +9,12 @@ public interface AtomChain<T extends Param> extends Atom<T> {
     AtomChain<T> add(Atom<T> atom);
 
     Boolean invoke(T param);
+
+    /**
+     *  AtomChain can be an Atom
+     */
+    @Override
+    default Boolean execute(T param) {
+        return invoke(param);
+    }
 }
