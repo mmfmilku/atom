@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style>
+.flex {
+  display: flex;
+}
+.vm-list{
+    flex-direction: column;
+}
+.vm-list-block {
+    border: 2px solid #2196F3;
+    margin-top: 5px;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+.vm-field {
+    display: flex;
+    justify-content: flex-start;
+    margin: 4px;
+}
+.vm-field-label {
+    width: 75px;
+}
+.vm-field-value {
+    word-wrap: break-word;
+    width: 85%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.vm-button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin: 4px;
+}
+</style>
+<script>
+    console.log('111')
+    
+    var post = (path, data) => {
+        return new Promise((resolve, reject) => {
+            let xhr = new XMLHttpRequest()
+            xhr.open("POST",path,true)
+            xhr.onloadend = () => {
+                try {
+                    resolve(JSON.parse(xhr.response))
+                } catch(e) {
+                    resolve(xhr.response)
+                }
+            }
+            xhr.send(data)
+        })
+    }
+
+    post('/listVm', {})
+        .then(res => {
+            console.log(res)
+            let listHtml = res.map(e => 
+                `
+                <div class="vm-list-block">
+                    <div class="vm-field">
+                        <label class="vm-field-label">应用名称:</label>
+                        <div class="vm-field-value">${e.displayName}</div>
+                    </div>
+                    <div class="vm-field">
+                        <label class="vm-field-label">id:</label>
+                        <div class="vm-field-value">${e.vmId}</div>
+                    </div>
+                    <div class="vm-button-container">
+                        <button onclick="attach(${e.vmId})">attach</button>
+                    </div>
+                </div>
+                `
+            ).join('')
+            document.querySelector('.vm-list').innerHTML  = listHtml
+        })
+
+    let attach = (id) => {
+        console.log(id)
+        
+        post('/loadAgent?vmId=' + id, {})
+        .then(res => {
+            console.log(res)
+            alert(res)
+        })
+    }
+
+</script>
+<h1>JVM进程</h1>
+<div class="vm-list flex">
+    <div class="vm-list-block">
+        <div class="vm-field">
+            <label class="vm-field-label">应用名称:</label>
+            <div class="vm-field-value">${e.displayName}sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的</div>
+        </div>
+        <div class="vm-field">
+            <label class="vm-field-label">id:</label>
+            <div class="vm-field-value">${e.vmId}</div>
+        </div>
+        <div class="vm-button-container">
+            <button onclick="attach(333)">attach</button>
+        </div>
+    </div>
+    
+    <div class="vm-list-block">
+        <div class="vm-field">
+            <label class="vm-field-label">应用名称:</label>
+            <div class="vm-field-value">${e.displayName}</div>
+        </div>
+        <div class="vm-field">
+            <label class="vm-field-label">id:</label>
+            <div class="vm-field-value">${e.vmId}</div>
+        </div>
+        <div class="vm-button-container">
+            <button onclick="attach(${e.vmId})">attach</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

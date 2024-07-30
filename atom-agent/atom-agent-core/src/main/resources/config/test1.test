@@ -1,0 +1,68 @@
+class a {method a1(){fff}}
+class com.hundsun.jres.impl.db.session.DBSession {
+    method test(){
+        asjflajdlksaj
+    }
+    method getDate(ff) {
+        fasgfd
+    }
+}
+class com.hundsun.lcpt.util.DateUtil {
+    method test() {fds}
+    method getSysDate() {
+        String s = null;
+                try {
+                    s = FileUtils.readString("E:/project/atom/atom-agent/src/main/resources/config/agent.conf");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(s);
+    }
+    method execute300209(sdfs) {
+            R300200Dataset hostRequest = new R300200Dataset(request, transPub.getClient(), transPub.getClientSeller());
+            
+                    // 发送主机日期
+                    // 1-分TA对账  0-按系统对账日期对账(默认)
+                    if (IDict.K_YORN.YORN_YES.equals(ParamCache.getInstance().getSysParamValue(
+                            IConstant.CHECK_HOST_BY_TA, false))) {
+                        hostRequest.setTransDate(transPub.getTaInfo().getHostCheckDate());
+                        transReq.setHostCheckDate(transPub.getTaInfo().getHostCheckDate());
+                    } else {
+                        hostRequest.setTransDate(transPub.getSysArg().getHostCheckDate());
+                        transReq.setHostCheckDate(transPub.getSysArg().getHostCheckDate());
+                    }
+            String s = null;
+                    try {
+                        s = FileUtils.readString("E:/project/atom/atom-agent/src/main/resources/config/agent.conf");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(s);
+        }
+}
+class b {method a1(){fff}}
+
+
+class com.hundsun.jres.impl.db.session.DBSession {
+    method dbSessionDebugLog(){
+        if ($1.contains("file")) {
+             System.out.println("in ord11 msg:" + $1);
+        } else {
+             System.out.println("in ord222 msg:" + $1);
+        }
+    }
+    method test() {}
+    method ggg(fds) {fs{}fds}
+    method ddd() {}
+    method fff() {fff}
+}
+class flsd.gdl.cjkfd.Tse {
+    method aaa(){}
+}
+class fff {
+    method dd() {{}{}}
+}
+
+
+
+
