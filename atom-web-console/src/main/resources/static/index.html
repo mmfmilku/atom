@@ -54,8 +54,6 @@ h3 { text-align: center; }
 </style>
 <script src=./js/util.js></script>
 <script>
-    UI.openInputDialog()
-
     let post = (path, data) => {
         return atom.post(path, data)
     }
@@ -101,7 +99,7 @@ h3 { text-align: center; }
         if (typeof favDialog.showModal === "function") {
             favDialog.showModal()
         } else {
-            alert("Sorry, this browser is to low.")
+            alert("Sorry, this browser is too low.")
         }
         
         post('/listOrd?appName=' + appName)
@@ -117,12 +115,19 @@ h3 { text-align: center; }
                     <form method="dialog">
                         ${pListHtml}
                         <div class="vm-button-container">
-                            <button onclick="writeOrd('${appName}', 'aa')" value="commit">新增</button>
+                            <button onclick="addOrd('${appName}', 'aa')" value="commit">新增</button>
                             <button value="cancel">关闭</button>
                         </div>
                     </form>
                     `
                 favDialog.innerHTML  = listHtml
+            })
+    }
+
+    let addOrd = (appName) => {
+        UI.openInputDialog()
+            .then(ordFileName => {
+                readOrd(appName, ordFileName)
             })
     }
 

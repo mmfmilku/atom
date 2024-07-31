@@ -90,6 +90,9 @@ public class OrdFileOperation implements IOrdFileOperation {
     public String getText(OrdFile ordFile) {
         String dir = getDir(ordFile.getOrdId());
         File file = new File(dir, ordFile.getFileName());
+        if (!file.exists()) {
+            return "";
+        }
         // TODO @chenxp 2024/7/31 添加util
         StringBuilder sb = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
