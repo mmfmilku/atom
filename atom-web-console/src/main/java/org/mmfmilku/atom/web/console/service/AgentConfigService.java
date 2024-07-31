@@ -14,7 +14,19 @@
  *********************************************/
 package org.mmfmilku.atom.web.console.service;
 
+import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdFile;
+import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
+import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * AgentConfigService
@@ -23,8 +35,55 @@ import org.springframework.stereotype.Service;
  * @date 2024/7/30:19:46
  */
 @Service
-public class AgentConfigService {
+public class AgentConfigService implements IAgentConfigService {
+
+    private static ConcurrentMap<String, AgentConfig> configMap = new ConcurrentHashMap<>();
     
-    
-    
+    @Autowired
+    private IOrdFileOperation ordFileOperation;
+
+    @Override
+    public Collection<AgentConfig> list() {
+        return configMap.values();
+    }
+
+    @Override
+    public AgentConfig getConfig(String appName) {
+        if (configMap.containsKey(appName)) {
+            return configMap.get(appName);
+        }
+        String ordId = ordFileOperation.getOrdId(appName);
+        AgentConfig agentConfig = new AgentConfig();
+        agentConfig.setOrdId(ordId);
+        configMap.put(appName, agentConfig);
+        return agentConfig;
+    }
+
+    @Override
+    public List<String> listOrd(String appName) {
+        AgentConfig config = getConfig(appName);
+        return ordFileOperation.listFiles(config.getOrdId());
+    }
+
+    @Override
+    public OrdFile readOrd(String appName, String ordFileName) {
+        AgentConfig config = getConfig(appName);
+        OrdFile ordFile = new OrdFile();
+        ordFile.setFileName(ordFileName);
+        ordFile.setOrdId(config.getOrdId());
+        String text = ordFileOperation.getText(ordFile);
+        ordFile.setText(text);
+        return ordFile;
+    }
+
+    @Override
+    public void writeOrd(String appName, String ordFileName, String text) {
+        AgentConfig config = getConfig(appName);
+        OrdFile ordFile = new OrdFile();
+        ordFile.setFileName(ordFileName);
+        ordFile.setOrdId(config.getOrdId());
+        ordFile.setText(text);
+        ordFileOperation.setText(ordFile);
+    }
+
 }
