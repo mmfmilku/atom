@@ -6,9 +6,19 @@ const UI = {
 	
 	openInputDialog: () => {
 	  	console.log('UI.openInputDialog')
-        var dialog = document.createElement("dialog");
+        let dialog = document.createElement("dialog");
         document.body.appendChild(dialog);
         dialog.showModal();
+        dialog.innerHTML =
+            `
+            <h3>title</h3>
+            <form method="dialog">
+                <div class="vm-button-container">
+                    <button value="cancel">关闭</button>
+                </div>
+            </form>
+            `
+
 	}
 }
 
