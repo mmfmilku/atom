@@ -52,13 +52,13 @@ h3 { text-align: center; }
 }
 
 </style>
-<script src=./util.js></script>
+<script src=./js/util.js></script>
 <script>
     UI.openInputDialog()
 
-    const post = (path, data) => {
+    let post = (path, data) => {
         return atom.post(path, data)
-    };
+    }
 
     post('/listVm', {})
         .then(res => {
