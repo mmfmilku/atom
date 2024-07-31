@@ -6,6 +6,8 @@
 </head>
 <body>
 <style>
+h1 { text-align: center; }
+h3 { text-align: center; }
 .flex {
   display: flex;
 }
@@ -38,24 +40,25 @@
     justify-content: flex-end;
     margin: 4px;
 }
+.vm-button-container>button{
+    margin-left: 5px;
+}
+
+#confDialog {
+    width: 75%;
+}
+#ordDialog {
+    width: 75%;
+}
+
 </style>
+<script src=./util.js></script>
 <script>
-    console.log('111')
-    
-    var post = (path, data) => {
-        return new Promise((resolve, reject) => {
-            let xhr = new XMLHttpRequest()
-            xhr.open("POST",path,true)
-            xhr.onloadend = () => {
-                try {
-                    resolve(JSON.parse(xhr.response))
-                } catch(e) {
-                    resolve(xhr.response)
-                }
-            }
-            xhr.send(data)
-        })
-    }
+    UI.openInputDialog()
+
+    const post = (path, data) => {
+        return atom.post(path, data)
+    };
 
     post('/listVm', {})
         .then(res => {
@@ -72,7 +75,8 @@
                         <div class="vm-field-value">${e.vmId}</div>
                     </div>
                     <div class="vm-button-container">
-                        <button onclick="attach(${e.vmId})">attach</button>
+                        <button onclick="configPage('${e.displayName}')">config</button>
+                        <button onclick="attach('${e.vmId}')">attach</button>
                     </div>
                 </div>
                 `
@@ -84,40 +88,133 @@
         console.log(id)
         
         post('/loadAgent?vmId=' + id, {})
-        .then(res => {
-            console.log(res)
-            alert(res)
-        })
+            .then(res => {
+                console.log(res)
+                alert(res)
+            })
+    }
+    
+    <!--  配置部分  -->
+
+    let configPage = (appName) => {
+        let favDialog = document.getElementById("confDialog");
+        if (typeof favDialog.showModal === "function") {
+            favDialog.showModal()
+        } else {
+            alert("Sorry, this browser is to low.")
+        }
+        
+        post('/listOrd?appName=' + appName)
+            .then(res => {
+                let pListHtml = res.map(e => 
+                    `
+                    <p onclick="readOrd('${appName}', '${e}')">${e}</p>
+                    `
+                ).join('')
+                let listHtml = 
+                    `
+                    <h3>${appName}</h3>
+                    <form method="dialog">
+                        ${pListHtml}
+                        <div class="vm-button-container">
+                            <button onclick="writeOrd('${appName}', 'aa')" value="commit">新增</button>
+                            <button value="cancel">关闭</button>
+                        </div>
+                    </form>
+                    `
+                favDialog.innerHTML  = listHtml
+            })
+    }
+
+    let readOrd = (appName, ordFileName) => {
+        console.log(ordFileName);
+        post(`/readOrd?appName=${appName}&ordFileName=${ordFileName}`)
+            .then(res => {
+                let ordDialog = document.getElementById("ordDialog")
+                ordDialog.showModal()
+                ordDialog.innerHTML = 
+                    `
+                    <h3>${appName}</h3>
+                    <h4>${ordFileName}</h4>
+                    <textarea id="ordFileText" cols="150" rows="10">${res.text}</textarea>
+                    <form method="dialog">
+                        <div class="vm-button-container">
+                            <button onclick="writeOrd('${appName}', '${ordFileName}')" value="commit">提交</button>
+                            <button value="cancel">关闭</button>
+                        </div>
+                    </form>
+                    `
+            })
+    }
+    
+    let writeOrd = (appName, ordFileName) => {
+        console.log('writeOrd')
+        let ordText = document.getElementById("ordFileText").value
+        post(`/writeOrd?appName=${appName}&ordFileName=${ordFileName}`, ordText)
+            .then(res => {
+                console.log(res)
+            })
     }
 
 </script>
-<h1>JVM进程</h1>
-<div class="vm-list flex">
-    <div class="vm-list-block">
-        <div class="vm-field">
-            <label class="vm-field-label">应用名称:</label>
-            <div class="vm-field-value">${e.displayName}sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的</div>
+<div id="app">
+    <dialog id="confDialog">
+        <h3>${appName}</h3>
+        <form method="dialog">
+            <p onclick="readOrd(1, 9)">/sfa/fadf/asdfa/asdfa/adfa/afdsfa/afda/afa/adfa.ord</p>
+            <p onclick="readOrd(2, 8)">/sfa/fadf/asdfa/asdfa/adfa/afdsfa/afda/afa/adfa.ord</p>
+            <div class="vm-button-container">
+                <button value="cancel">关闭</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog id="ordDialog">
+        <h3>${appName}</h3>
+        <h4>${ordFileName}</h4>
+        <textarea id="ordFileText" cols="150" rows="10">
+            a;lkdfjaklafjlkdjasfl;kajkldajflk;ajl;kf
+            jaslkjaslkffjakldjalkffalksdjfdkl;aj法
+            兰克的骄傲234241234
+        </textarea>
+        <form method="dialog">
+            <div class="vm-button-container">
+                <button onclick="writeOrd(4444)" value="commit">提交</button>
+                <button value="cancel">关闭</button>
+            </div>
+        </form>
+    </dialog>
+    <h1>JVM进程</h1>
+    <div class="vm-list flex">
+        <div class="vm-list-block">
+            <div class="vm-field">
+                <label class="vm-field-label">应用名称:</label>
+                <div class="vm-field-value">
+                    sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的
+                </div>
+            </div>
+            <div class="vm-field">
+                <label class="vm-field-label">id:</label>
+                <div class="vm-field-value">${e.vmId}</div>
+            </div>
+            <div class="vm-button-container">
+                <button onclick="configPage(4444)">config</button>
+                <button onclick="attach(333)">attach</button>
+            </div>
         </div>
-        <div class="vm-field">
-            <label class="vm-field-label">id:</label>
-            <div class="vm-field-value">${e.vmId}</div>
-        </div>
-        <div class="vm-button-container">
-            <button onclick="attach(333)">attach</button>
-        </div>
-    </div>
-    
-    <div class="vm-list-block">
-        <div class="vm-field">
-            <label class="vm-field-label">应用名称:</label>
-            <div class="vm-field-value">${e.displayName}</div>
-        </div>
-        <div class="vm-field">
-            <label class="vm-field-label">id:</label>
-            <div class="vm-field-value">${e.vmId}</div>
-        </div>
-        <div class="vm-button-container">
-            <button onclick="attach(${e.vmId})">attach</button>
+
+        <div class="vm-list-block">
+            <div class="vm-field">
+                <label class="vm-field-label">应用名称:</label>
+                <div class="vm-field-value">${e.displayName}</div>
+            </div>
+            <div class="vm-field">
+                <label class="vm-field-label">id:</label>
+                <div class="vm-field-value">${e.vmId}</div>
+            </div>
+            <div class="vm-button-container">
+                <button onclick="configPage('${e.displayName}')">config</button>
+                <button onclick="attach('${e.vmId}')">attach</button>
+            </div>
         </div>
     </div>
 </div>
