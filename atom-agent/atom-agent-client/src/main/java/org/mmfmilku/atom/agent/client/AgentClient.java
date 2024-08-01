@@ -1,7 +1,6 @@
 package org.mmfmilku.atom.agent.client;
 
 import com.sun.tools.attach.*;
-import sun.tools.attach.HotSpotVirtualMachine;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,21 +67,25 @@ public class AgentClient {
     }
     
     public static void loadAgent(String id) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
+        loadAgent(id, 
+                "base-path=E:/project/atom/atom-agent/src/main/resources/config/;to-string-method=com.alibaba.fastjson.JSON.toJSONString");
+    }
+
+    public static void loadAgent(String id, String args) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
         String userDir = System.getProperty("user.dir");
         System.out.println("userDir=" + userDir);
         File agentJar = new File(userDir, "atom-agent-jar-with-dependencies.jar");
         if (!agentJar.exists()) {
             System.out.println(agentJar.getAbsolutePath() + " not exists");
-            agentJar = new File(userDir, "atom-agent/atom-agent-core/target/atom-agent-core-jar-with-dependencies.jar");
+            agentJar = new File(userDir, "atom-agent/target/atom-agent-jar-with-dependencies.jar");
         }
         if (!agentJar.exists()) {
             System.out.println(agentJar.getAbsolutePath() + " not exists");
             throw new RuntimeException("can not find agentJar");
         }
-        
+
         VirtualMachine virtualMachine = VirtualMachine.attach(id);
-        virtualMachine.loadAgent(agentJar.getAbsolutePath(),
-                "base-path=E:/project/atom/atom-agent/src/main/resources/config/;to-string-method=com.alibaba.fastjson.JSON.toJSONString");
+        virtualMachine.loadAgent(agentJar.getAbsolutePath(), args);
         virtualMachine.detach();
     }
 
