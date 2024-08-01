@@ -19,11 +19,9 @@ import org.mmfmilku.atom.agent.instrument.FileDefineTransformer;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * InstrumentationUtils
@@ -85,6 +83,18 @@ public class InstrumentationContext {
         for (Class<?> loadedClass : loadedClasses) {
             if (loadedClass.getName().equals(searchClassName)) {
                 return loadedClass;
+            }
+        }
+        return null;
+    }
+
+    public static ClassLoader searchClassLoader(String searchClassLoaderName) {
+        checkInit();
+        Class<?>[] loadedClasses = instance.inst.getAllLoadedClasses();
+        for (Class<?> loadedClass : loadedClasses) {
+            ClassLoader classLoader = loadedClass.getClassLoader();
+            if (classLoader != null && classLoader.getClass().getName().equals(searchClassLoaderName)) {
+                return classLoader;
             }
         }
         return null;

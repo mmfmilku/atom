@@ -210,7 +210,6 @@ public class ParamPrintTransformer implements ClassFileTransformer {
         String toStringClass = toStringLongName.substring(0, i);
         String toStringMethod = toStringLongName.substring(i + 1);
         try {
-            // TODO @chenxp 2024/7/30 获取类的方式
             Class<?> toStringClazz = InstrumentationContext.searchClass(toStringClass);
             if (toStringClazz == null) {
                 return o.toString();

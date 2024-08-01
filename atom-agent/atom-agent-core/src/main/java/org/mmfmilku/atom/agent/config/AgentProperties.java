@@ -40,6 +40,8 @@ public class AgentProperties {
     
     public static final String PROP_TO_STRING_METHOD = "to-string-method";
     
+    public static final String PROP_APP_CLASSLOADER = "app-classloader";
+    
     public static void loadProperties(String args) {
         
         // 设置默认配置
@@ -58,6 +60,7 @@ public class AgentProperties {
     }
 
     private static void loadDefault() {
+        properties.put(PROP_APP_CLASSLOADER, "org.springframework.boot.loader.LaunchedURLClassLoader");
     }
 
     public static void loadPropertiesFile(String basePath) {

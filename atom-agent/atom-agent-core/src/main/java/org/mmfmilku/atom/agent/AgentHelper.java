@@ -19,6 +19,7 @@ import org.mmfmilku.atom.agent.config.OverrideBodyHolder;
 import org.mmfmilku.atom.agent.context.InstrumentationContext;
 import org.mmfmilku.atom.agent.handle.AgentHandle;
 import org.mmfmilku.atom.agent.handle.TestHandle;
+import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
@@ -50,12 +51,24 @@ public class AgentHelper {
         try {
             InstrumentationContext.init(inst);
 
+            // 初始化配置
             if (Objects.nonNull(agentArgs)) {
                 AgentProperties.loadProperties(agentArgs);
                 System.out.println("init properties end");
                 System.out.println(AgentProperties.getInstance());
-
                 OverrideBodyHolder.load(AgentProperties.getProperty(AgentProperties.PROP_BASE_PATH));
+            }
+            
+            // 初始化自定义类路径
+            String appClassLoader = AgentProperties.getProperty(AgentProperties.PROP_APP_CLASSLOADER);
+            if (appClassLoader != null && appClassLoader.trim().length() > 0) {
+                ClassLoader classLoader = InstrumentationContext.searchClassLoader(appClassLoader);
+                if (classLoader != null) {
+                    System.out.println("classPool add appClassLoader " + appClassLoader);
+                    ByteCodeUtils.appendClassPath(classLoader);
+                } else {
+                    System.out.println("classPool add appClassLoader fail");
+                }
             }
 
             for (AgentHandle handle : handleChain) {
@@ -66,7 +79,6 @@ public class AgentHelper {
             e.printStackTrace();
             throw e;
         }
-        
         
     }
     

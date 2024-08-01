@@ -66,6 +66,7 @@ public class OverrideBodyHolder {
                 }
             }
             System.out.println("------------------new ord loaded:" + overrideClassMap.size());
+            System.out.println(overrideClassMap);
         }
     }
 

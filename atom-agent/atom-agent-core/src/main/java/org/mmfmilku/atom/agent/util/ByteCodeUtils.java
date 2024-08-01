@@ -16,6 +16,8 @@ package org.mmfmilku.atom.agent.util;
 
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.LoaderClassPath;
+import org.mmfmilku.atom.agent.context.InstrumentationContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,6 +40,11 @@ public class ByteCodeUtils {
             e.printStackTrace();
             throw e;
         }
+    }
+    
+    public static void appendClassPath(ClassLoader classLoader) {
+        ClassPool classPool = ClassPool.getDefault();
+        classPool.appendClassPath(new LoaderClassPath(classLoader));
     }
 
 }
