@@ -24,4 +24,6 @@ public interface IOrdFileOperation {
     
     void setText(OrdFile ordFile);
     
+    void delete(OrdFile ordFile);
+    
 }

@@ -81,9 +81,9 @@ public class OrdFileOperation implements IOrdFileOperation {
         return Arrays.asList(Objects.requireNonNull(new File(dir).list()));
     }
     
-    private String getOrdFullPath(OrdFile ordFile) {
+    private File getFile(OrdFile ordFile) {
         String dir = getDir(ordFile.getOrdId());
-        return new File(dir, ordFile.getFileName()).getAbsolutePath();
+        return new File(dir, ordFile.getFileName());
     }
 
     @Override
@@ -111,11 +111,19 @@ public class OrdFileOperation implements IOrdFileOperation {
     public void setText(OrdFile ordFile) {
 
         String ordFileText = ordFile.getText();
-        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(getOrdFullPath(ordFile)))) {
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(getFile(ordFile)))) {
             out.write(ordFileText.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("setText fail:" + ordFile.getOrdId());
+        }
+    }
+
+    @Override
+    public void delete(OrdFile ordFile) {
+        File file = getFile(ordFile);
+        if (file.exists() && !file.delete()) {
+            throw new RuntimeException("delete ord dir fail:" + ordFile);
         }
     }
 }

@@ -21,6 +21,10 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 import org.mmfmilku.atom.agent.client.AgentClient;
+import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.interfaces.IOrdConfigService;
+import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -38,6 +42,12 @@ import java.util.stream.Collectors;
 @RestController
 public class AgentController {
 
+    @Autowired
+    IOrdConfigService ordConfigService;
+    
+    @Autowired
+    IOrdFileOperation ordFileOperation;
+
     @RequestMapping("listVm")
     @ResponseBody
     public List<Map<String, String>> listVm() {
@@ -51,9 +61,11 @@ public class AgentController {
     }
 
     @RequestMapping("loadAgent")
-    public String loadAgent(@RequestParam String vmId) {
+    public String loadAgent(@RequestParam String vmId, @RequestParam String appName) {
+        AgentConfig config = ordConfigService.getConfig(appName);
+        String dir = ordFileOperation.getDir(config.getOrdId());
         try {
-            AgentClient.loadAgent(vmId);
+            AgentClient.loadAgent(vmId, "base-path=" + dir);
         } catch (Exception e) {
             e.printStackTrace();
             return "fail";

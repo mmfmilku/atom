@@ -16,15 +16,13 @@ package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
-import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
+import org.mmfmilku.atom.web.console.interfaces.IOrdConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -35,9 +33,11 @@ import java.util.concurrent.ConcurrentMap;
  * @date 2024/7/30:19:46
  */
 @Service
-public class AgentConfigService implements IAgentConfigService {
+public class OrdConfigService implements IOrdConfigService {
 
     private static ConcurrentMap<String, AgentConfig> configMap = new ConcurrentHashMap<>();
+    
+    public static final String ORD_SUFFIX = ".ord";
     
     @Autowired
     private IOrdFileOperation ordFileOperation;
@@ -66,6 +66,15 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
+    public void deleteOrd(String appName, String ordFileName) {
+        AgentConfig config = getConfig(appName);
+        OrdFile ordFile = new OrdFile();
+        ordFile.setFileName(ordFileName);
+        ordFile.setOrdId(config.getOrdId());
+        ordFileOperation.delete(ordFile);
+    }
+
+    @Override
     public OrdFile readOrd(String appName, String ordFileName) {
         AgentConfig config = getConfig(appName);
         OrdFile ordFile = new OrdFile();
@@ -77,13 +86,21 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public void writeOrd(String appName, String ordFileName, String text) {
+    public void writeOrd(String appName, OrdFile ordFile) {
         AgentConfig config = getConfig(appName);
-        OrdFile ordFile = new OrdFile();
-        ordFile.setFileName(ordFileName);
         ordFile.setOrdId(config.getOrdId());
-        ordFile.setText(text);
+        ordFile.setFileName(ordFileNameFormat(ordFile.getFileName()));
         ordFileOperation.setText(ordFile);
+    }
+    
+    private String ordFileNameFormat(String ordFileName) {
+        if (ordFileName.endsWith(ORD_SUFFIX)) {
+            return ordFileName;
+        }
+        if (ordFileName.endsWith(".")) {
+            return ordFileName + ORD_SUFFIX.substring(1);
+        }
+        return ordFileName + ORD_SUFFIX;
     }
 
 }

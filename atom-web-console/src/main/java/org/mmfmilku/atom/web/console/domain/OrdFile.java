@@ -49,4 +49,12 @@ public class OrdFile {
     public void setText(String text) {
         this.text = text;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "ordId='" + ordId + '\'' +
+                ", fileName='" + fileName + '\'' +
+                '}';
+    }
 }
