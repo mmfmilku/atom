@@ -77,7 +77,7 @@ public class AgentClient {
         File agentJar = new File(userDir, "atom-agent-jar-with-dependencies.jar");
         if (!agentJar.exists()) {
             System.out.println(agentJar.getAbsolutePath() + " not exists");
-            agentJar = new File(userDir, "atom-agent/target/atom-agent-jar-with-dependencies.jar");
+            agentJar = new File(userDir, "atom-agent/atom-agent-core/target/atom-agent-core-jar-with-dependencies.jar");
         }
         if (!agentJar.exists()) {
             System.out.println(agentJar.getAbsolutePath() + " not exists");

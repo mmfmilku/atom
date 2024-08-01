@@ -124,7 +124,7 @@ h3 {
                     `
                     <div class="vm-field-button">
                         <span onclick="readOrd('${appName}', '${e}')">${e}</span>
-                        <button onclick="deleteOrd('${appName}', '${e}')">删除</button>
+                        <button onclick="deleteOrd('${vmId}', '${appName}', '${e}')">删除</button>
                     </div>
                     `
                 ).join('')
@@ -151,10 +151,10 @@ h3 {
             })
     }
     
-    let deleteOrd = (appName, ordFileName) => {
+    let deleteOrd = (vmId, appName, ordFileName) => {
         post(`/deleteOrd?appName=${appName}&ordFileName=${ordFileName}`)
             .then(res => {
-                configPage(appName)
+                configPage(vmId, appName)
             })
     }
 
