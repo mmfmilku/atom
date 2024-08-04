@@ -5,9 +5,14 @@ import com.sun.tools.attach.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -66,8 +71,17 @@ public class AgentClient {
         return list;
     }
     
+    public static List<Map<String, String>> listVMMap() {
+        return listVM().stream().map(vm -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("vmId", vm.id());
+            map.put("displayName", vm.displayName());
+            return map;
+        }).collect(Collectors.toList());
+    }
+
     public static void loadAgent(String id) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
-        loadAgent(id, 
+        loadAgent(id,
                 "base-path=E:/project/atom/atom-agent/src/main/resources/config/;to-string-method=com.alibaba.fastjson.JSON.toJSONString");
     }
 
@@ -77,7 +91,7 @@ public class AgentClient {
         File agentJar = new File(userDir, "atom-agent-jar-with-dependencies.jar");
         if (!agentJar.exists()) {
             System.out.println(agentJar.getAbsolutePath() + " not exists");
-            agentJar = new File(userDir, "atom-agent/atom-agent-core/target/atom-agent-core-jar-with-dependencies.jar");
+            agentJar = new File(userDir, "atom-agent/target/atom-agent-jar-with-dependencies.jar");
         }
         if (!agentJar.exists()) {
             System.out.println(agentJar.getAbsolutePath() + " not exists");
@@ -161,6 +175,26 @@ public class AgentClient {
 
         System.out.println("Found tools.jar: " + toolsJar.getAbsolutePath());
         return toolsJar;
+    }
+
+    static {
+        System.out.println(AgentClient.class.getClassLoader());
+        System.out.println(Thread.currentThread().getContextClassLoader());
+        System.out.println(Thread.currentThread().getContextClassLoader());
+        System.out.println(findJavaHome());
+        System.out.println(findToolsJar(findJavaHome()));
+
+        File toolsJar = findToolsJar(findJavaHome());
+        try {
+            ClassLoader classLoader = AgentClient.class.getClassLoader();
+            Class<?> loaderClass = Class.forName("java.net.URLClassLoader");
+            Method method = loaderClass.getDeclaredMethod("addURL", URL.class);
+            URL url = toolsJar.toURI().toURL();
+            method.setAccessible(true);
+            method.invoke(classLoader, url);
+        } catch (MalformedURLException | NoSuchMethodException | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 }

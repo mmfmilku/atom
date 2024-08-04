@@ -14,11 +14,11 @@
  *********************************************/
 package org.mmfmilku.atom.agent.config;
 
+import org.mmfmilku.atom.agent.util.StringUtils;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * ORDParser
@@ -28,12 +28,21 @@ import java.util.stream.Stream;
  */
 public class ORDParser {
 
-    private static String methodReg = "(\\s*" + Keywords.toRegStr() + "\\s+\\w+\\s*([\\s\\S]*?)\\s*\\{[\\s\\S]*?\\}\\s*)";
+    public static final String importReg = "\\s*import\\s+[\\w.]+;";
+    // import (any words);
+    private static final Pattern importPattern = Pattern.compile(importReg + "[\\s\\S]*");
+
+    private static final String methodReg = "(\\s*" + Keywords.toRegStr() + "\\s+\\w+\\s*([\\s\\S]*?)\\s*\\{[\\s\\S]*?\\}\\s*)";
     // method (any) { any code }
-    private static Pattern methodPattern = Pattern.compile(methodReg);
+    private static final Pattern methodPattern = Pattern.compile(methodReg);
 
     // class  {  any code  }
-    private static Pattern classPattern = Pattern.compile("(\\s*class\\s+[\\w.]+\\s*\\{" + methodReg + "\\}\\s*)");
+    private static final Pattern classPattern = Pattern.compile("(" +
+            "(" + importReg + ")*" +
+            "\\s*class\\s+[\\w.]+\\s*\\{" + 
+                methodReg + 
+            "\\}\\s*" +
+            ")");
 
     public static Map<String, ClassORDDefine> parse(String classORDText) {
         // 通过正则获取单个类的覆写部分
@@ -41,9 +50,49 @@ public class ORDParser {
         if (!matcher.matches()) {
             throw new RuntimeException("can not load invalid ord file");
         }
+        Set<String> importSet = new HashSet<>();
+        String ordTestAfterImport = parseImport(classORDText, importSet);
+        System.out.println(importSet);
         Map<String, ClassORDDefine> overrideClassMap = new HashMap<>();
-        parse(classORDText, overrideClassMap);
+        parse(ordTestAfterImport, overrideClassMap);
+        dealImport(overrideClassMap, importSet);
         return overrideClassMap;
+    }
+
+    private static void dealImport(Map<String, ClassORDDefine> overrideClassMap, Set<String> importSet) {
+        if (importSet.size() < 1) {
+            return;
+        }
+        overrideClassMap.forEach((s, classORDDefine) -> {
+            classORDDefine.getMethodORDMap().forEach((s1, methodORDDefine) -> {
+                Map<Keywords, String> srcMap = methodORDDefine.getSrcMap();
+                Map<Keywords, String> importedMap = new HashMap<>(srcMap.size());
+                srcMap.forEach((s2, src) -> {
+                    String result = src;
+                    if (!StringUtils.isEmpty(result) && !isEmptyBlock(result)) {
+                        for (String importClass : importSet) {
+                            // TODO @chenxp 2024/8/2 防重复替换
+                            // TODO @chenxp 2024/8/2 import xxx.xxx.* 的处理
+                            // TODO @chenxp 2024/8/2 某些不能替换的qingk
+                            String classShortName = StringUtils.rightmost(importClass, ".");
+                            result = StringUtils.replaceNoRepeat(result, classShortName, importClass);
+                        }
+                    }
+                    importedMap.put(s2, result);
+                });
+                methodORDDefine.setSrcMap(importedMap);
+            });
+        });
+    }
+
+    private static String parseImport(String classORDText, Set<String> importSet) {
+        Matcher matcher = importPattern.matcher(classORDText);
+        if (!matcher.matches()) {
+            return classORDText;
+        }
+        String anImport = classORDText.substring(classORDText.indexOf("import") + 6, classORDText.indexOf(";")).trim();
+        importSet.add(anImport);
+        return parseImport(classORDText.substring(classORDText.indexOf(";") + 1).trim(), importSet);
     }
 
     private static void parse(String classORDText, Map<String, ClassORDDefine> overrideClassMap) {

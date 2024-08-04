@@ -14,12 +14,6 @@
  *********************************************/
 package org.mmfmilku.atom.web.console.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.sun.tools.attach.AgentInitializationException;
-import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.AttachNotSupportedException;
-import com.sun.tools.attach.VirtualMachineDescriptor;
 import org.mmfmilku.atom.agent.client.AgentClient;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.interfaces.IOrdConfigService;
@@ -27,11 +21,8 @@ import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * MainController
@@ -51,13 +42,7 @@ public class AgentController {
     @RequestMapping("listVm")
     @ResponseBody
     public List<Map<String, String>> listVm() {
-        List<VirtualMachineDescriptor> listVM = AgentClient.listVM();
-        return listVM.stream().map(vm -> {
-            Map<String, String> map = new HashMap<>();
-            map.put("vmId", vm.id());
-            map.put("displayName", vm.displayName());
-            return map;
-        }).collect(Collectors.toList());
+        return AgentClient.listVMMap();
     }
 
     @RequestMapping("loadAgent")
