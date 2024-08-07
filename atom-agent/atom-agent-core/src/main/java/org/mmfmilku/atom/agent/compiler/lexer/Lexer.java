@@ -29,7 +29,7 @@ public class Lexer {
     private static Pattern words = Pattern.compile("[\\w\\$\\.]");
     
     // 符号
-    private static Pattern symbol = Pattern.compile("[\\+\\-\\*/=<>;\\$:,\\.]");
+    private static Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;\\$:,\\.\\[\\]]");
     
     // 换行符 通过系统属性获取？ line.separator
     private static Pattern lineSymbol = Pattern.compile("[\\r\\n]");
@@ -116,8 +116,19 @@ public class Lexer {
                 
                 if (dealChar == '\"') {
                     // 字符串
-                    String value = readMatchEnd('\"');
+                    String value = String.valueOf(dealChar);
+                    curr++;
+                    value += readMatchEnd('\"');
                     tokens.add(new Token(TokenType.String, value));
+                    continue;
+                }
+
+                if (dealChar == '\'') {
+                    // 字符串
+                    String value = String.valueOf(dealChar);
+                    curr++;
+                    value += readMatchEnd('\'');
+                    tokens.add(new Token(TokenType.Character, value));
                     continue;
                 }
 
@@ -126,12 +137,16 @@ public class Lexer {
                         char next = peekNext();
                         if (next == '*') {
                             // 多行注释 -> /*内容...*/
-                            String value = readMatchEnd('/');
+                            String value = "/*";
+                            curr += 2;
+                            value += readMatchEnd("*/");
                             tokens.add(new Token(TokenType.BlockComment, value));
                             continue;
                         } else if (next == '/') {
                             // 单行注释 -> //内容...[换行符]
-                            String value = readMatchEnd(lineSymbol);
+                            String value = "//";
+                            curr += 2;
+                            value += readMatchEnd(lineSymbol);
                             tokens.add(new Token(TokenType.Comment, value));
                             continue;
                         } else {
@@ -183,19 +198,20 @@ public class Lexer {
         /**
          * 获取直到匹配结束符
          * */
-//        private String readMatchEnd(String matchStr) {
-//            char[] matchChars = matchStr.toCharArray();
-//            StringBuilder peek = new StringBuilder().append(this.chars[curr++]);
-//            while (curr < this.chars.length) {
-//                char peekChar = this.chars[curr];
-//                peek.append(peekChar);
-//                curr++;
-//                if (predicate.test(peekChar)) {
-//                    break;
-//                }
-//            }
-//            return peek.toString();
-//        }
+        private String readMatchEnd(String matchStr) {
+            StringBuilder peek = new StringBuilder();
+            while (curr < this.chars.length) {
+                char peekChar = this.chars[curr];
+                peek.append(peekChar);
+                curr++;
+                if (peek.length() >= matchStr.length()
+                        && peekChar == matchStr.charAt(matchStr.length() - 1)
+                        && peek.toString().endsWith(matchStr)) {
+                    break;
+                }
+            }
+            return peek.toString();
+        }
 
         /**
          * 获取直到匹配结束符
@@ -213,7 +229,7 @@ public class Lexer {
 
         private String readMatchEnd(Predicate<Character> predicate) {
             // TODO 第一个字符直接添加
-            StringBuilder peek = new StringBuilder().append(chars[curr++]);
+            StringBuilder peek = new StringBuilder();
             while (curr < chars.length) {
                 char peekChar = chars[curr];
                 peek.append(peekChar);
@@ -228,6 +244,14 @@ public class Lexer {
     
     private boolean match(Pattern regex, char ch) {
         return regex.matcher(String.valueOf(ch)).matches();
+    }
+
+    public String showCode() {
+        StringBuilder result = new StringBuilder();
+        for (Token token : tokens) {
+            result.append(token.showCode());
+        }
+        return result.toString();
     }
 
     @Override

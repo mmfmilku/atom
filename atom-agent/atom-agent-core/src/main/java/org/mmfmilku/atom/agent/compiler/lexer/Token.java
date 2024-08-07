@@ -32,11 +32,15 @@ public class Token {
         this.value = value;
     }
 
-    @Override
-    public String toString() {
+    public String showCode() {
         if (type == TokenType.BlockComment || type == TokenType.Comment) {
             return "";
         }
+        return type.getShowPrefix() + value + type.getShowSuffix();
+    }
+
+    @Override
+    public String toString() {
         return type.getShowPrefix() + value + type.getShowSuffix();
     }
 }

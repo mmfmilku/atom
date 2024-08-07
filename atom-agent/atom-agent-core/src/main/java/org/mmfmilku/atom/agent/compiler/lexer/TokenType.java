@@ -17,6 +17,10 @@ public enum TokenType {
      * */
     String(""),
     /**
+     * 字符
+     * */
+    Character(""),
+    /**
      * 数字
      * */
     Number(" "),
@@ -31,7 +35,7 @@ public enum TokenType {
     /**
      * 符号
      * */
-    Symbol(" "),
+    Symbol(""),
     /**
      * 换行符
      * */
