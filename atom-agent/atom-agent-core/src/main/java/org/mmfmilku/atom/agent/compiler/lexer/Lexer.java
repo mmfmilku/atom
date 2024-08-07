@@ -2,6 +2,7 @@ package org.mmfmilku.atom.agent.compiler.lexer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -21,90 +22,220 @@ public class Lexer {
     // 数字
     private static Pattern number = Pattern.compile("\\d");
 
-    // 字母、下划线
+    // 标识符首字母
     private static Pattern letterLine = Pattern.compile("[A-Za-z_]");
     
-    // 数字、字母、下划线 => 标识符
-    private static Pattern words = Pattern.compile("\\w");
-
-    // 数字、字母、下划线、点 =>
-    private static Pattern idWords = Pattern.compile("[\\w\\.]");
-
-    // 运算符
-    private static Pattern operator = Pattern.compile("[\\+\\-\\*/]");
-
-    // 括号
-    private static Pattern paren = Pattern.compile("[\\(\\)]");
-
-    // 大括号
-    private static Pattern braces = Pattern.compile("[{}]");
-
-    // 符号
-    private static Pattern symbol = Pattern.compile("[;,=\"'\\+\\-\\*/.\\S]");
-
-
-    List<Token> tokens;
+    // 标识符字母体
+    private static Pattern words = Pattern.compile("[\\w\\$\\.]");
     
-    String input;
+    // 符号
+    private static Pattern symbol = Pattern.compile("[\\+\\-\\*/=<>;\\$:,\\.]");
+    
+    // 换行符 通过系统属性获取？ line.separator
+    private static Pattern lineSymbol = Pattern.compile("[\\r\\n]");
+
+
+    private List<Token> tokens;
+    
+    private String input;
 
     public Lexer(String input) {
         this.input = input;
-        tokens = new ArrayList<>();
+    }
+
+    public List<Token> getTokens() {
+        return tokens;
     }
 
     public void execute() {
-        char[] chars = input.toCharArray();
+        LexerHandle handle = new LexerHandle();
+        handle.execute();
+    }
+    
+    private class LexerHandle {
+        char[] chars;
         int curr = 0;
         int peekPoint = 0;
-        char currChar;
-        while (curr < chars.length) {
-            currChar = chars[curr];
-            
-            if (match(whiteSpace, currChar)) {
-                // 跳过空白字符
-                curr++;
-                continue;
-            }
-            
-            if (match(idWords, currChar)) {
-                // 数字字母下划线点
-                StringBuilder valueBuilder = new StringBuilder();
-                while (match(idWords, currChar)) {
-                    valueBuilder.append(currChar);
-                    currChar = chars[++curr];
+        char dealChar;
+
+        private LexerHandle() {
+            this.chars = input.toCharArray();
+            tokens = new ArrayList<>();
+        }
+        
+        private void execute() {
+            while (curr < chars.length) {
+                dealChar = chars[curr];
+                if (match(whiteSpace, dealChar)) {
+                    // 跳过空白字符
+                    curr++;
+                    continue;
                 }
-                tokens.add(new Token(TokenType.Words, valueBuilder.toString()));
-                continue;
-            }
 
-            if (match(symbol, currChar)) {
-                StringBuilder valueBuilder = new StringBuilder();
-                while (match(symbol, currChar)) {
-                    valueBuilder.append(currChar);
-                    currChar = chars[++curr];
+                if (match(number, dealChar)) {
+                    // 数字
+                    String value = readConsecutive(number);
+                    tokens.add(new Token(TokenType.Number, value));
+                    continue;
                 }
-                tokens.add(new Token(TokenType.Symbol, valueBuilder.toString()));
-                continue;
-            }
 
-            if (match(paren, currChar)) {
-                tokens.add(new Token(TokenType.Paren, String.valueOf(currChar)));
+                if (match(letterLine, dealChar)) {
+                    // 单词句子
+                    String value = readConsecutive(words);
+                    tokens.add(new Token(TokenType.Words, value));
+                    continue;
+                }
+
+                if (dealChar == '(') {
+                    // 括号
+                    tokens.add(new Token(TokenType.Paren, "("));
+                    curr++;
+                    continue;
+                }
+
+                if (dealChar == ')') {
+                    // 括号
+                    tokens.add(new Token(TokenType.Paren, ")"));
+                    curr++;
+                    continue;
+                }
+
+                if (dealChar == '{') {
+                    // 大括号
+                    tokens.add(new Token(TokenType.Brace, "{"));
+                    curr++;
+                    continue;
+                }
+
+                if (dealChar == '}') {
+                    // 大括号
+                    tokens.add(new Token(TokenType.Brace, "}"));
+                    curr++;
+                    continue;
+                }
+                
+                if (dealChar == '\"') {
+                    // 字符串
+                    String value = readMatchEnd('\"');
+                    tokens.add(new Token(TokenType.String, value));
+                    continue;
+                }
+
+                if (match(symbol, dealChar)) {
+                    if (dealChar == '/') {
+                        char next = peekNext();
+                        if (next == '*') {
+                            // 多行注释 -> /*内容...*/
+                            String value = readMatchEnd('/');
+                            tokens.add(new Token(TokenType.BlockComment, value));
+                            continue;
+                        } else if (next == '/') {
+                            // 单行注释 -> //内容...[换行符]
+                            String value = readMatchEnd(lineSymbol);
+                            tokens.add(new Token(TokenType.Comment, value));
+                            continue;
+                        } else {
+                            // 符号
+                            tokens.add(new Token(TokenType.Symbol, String.valueOf(dealChar)));
+                            curr++;
+                            continue;
+                        }
+                    } else {
+                        // 符号
+                        tokens.add(new Token(TokenType.Symbol, String.valueOf(dealChar)));
+                        curr++;
+                        continue;
+                    }
+                }
+                
+                throw new RuntimeException("非法字符 " + dealChar);
+            }
+        }
+
+        /**
+         * 
+         * */
+        private char peekNext() {
+            int peekPoint = curr + 1;
+            if (peekPoint < chars.length) {
+                return chars[peekPoint];
+            }
+            return Character.MIN_VALUE;
+        }
+        
+        /**
+         * 获取连续匹配的字符
+         * */
+        private String readConsecutive(Pattern regex) {
+            StringBuilder peek = new StringBuilder();
+            while (curr < chars.length) {
+                char peekChar = chars[curr];
+                if (match(regex, peekChar)) {
+                    peek.append(peekChar);
+                    curr++;
+                } else {
+                    break;
+                }
+            }
+            return peek.toString();
+        }
+
+        /**
+         * 获取直到匹配结束符
+         * */
+//        private String readMatchEnd(String matchStr) {
+//            char[] matchChars = matchStr.toCharArray();
+//            StringBuilder peek = new StringBuilder().append(this.chars[curr++]);
+//            while (curr < this.chars.length) {
+//                char peekChar = this.chars[curr];
+//                peek.append(peekChar);
+//                curr++;
+//                if (predicate.test(peekChar)) {
+//                    break;
+//                }
+//            }
+//            return peek.toString();
+//        }
+
+        /**
+         * 获取直到匹配结束符
+         * */
+        private String readMatchEnd(char matchChar) {
+            return readMatchEnd(ch -> ch == matchChar);
+        }
+
+        /**
+         * 获取直到匹配结束符
+         * */
+        private String readMatchEnd(Pattern regex) {
+            return readMatchEnd(ch -> match(regex, ch));
+        }
+
+        private String readMatchEnd(Predicate<Character> predicate) {
+            // TODO 第一个字符直接添加
+            StringBuilder peek = new StringBuilder().append(chars[curr++]);
+            while (curr < chars.length) {
+                char peekChar = chars[curr];
+                peek.append(peekChar);
                 curr++;
-                continue;
+                if (predicate.test(peekChar)) {
+                    break;
+                }
             }
-
-            if (match(braces, currChar)) {
-                tokens.add(new Token(TokenType.Braces, String.valueOf(currChar)));
-                curr++;
-                continue;
-            }
-
-            throw new RuntimeException("err:" + currChar);
+            return peek.toString();
         }
     }
     
     private boolean match(Pattern regex, char ch) {
         return regex.matcher(String.valueOf(ch)).matches();
     }
-    
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        for (Token token : tokens) {
+            result.append(token.toString());
+        }
+        return result.toString();
+    }
 }

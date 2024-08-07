@@ -9,7 +9,6 @@ package org.mmfmilku.atom.agent.compiler.lexer;
 public class Token {
 
     private TokenType type;
-
     private String value;
 
     public Token(TokenType type, String value) {
@@ -31,5 +30,13 @@ public class Token {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        if (type == TokenType.BlockComment || type == TokenType.Comment) {
+            return "";
+        }
+        return type.getShowPrefix() + value + type.getShowSuffix();
     }
 }
