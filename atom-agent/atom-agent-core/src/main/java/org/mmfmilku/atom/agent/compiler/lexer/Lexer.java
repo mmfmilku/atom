@@ -22,14 +22,14 @@ public class Lexer {
     // 数字
     private static Pattern number = Pattern.compile("\\d");
 
-    // 标识符首字母
-    private static Pattern letterLine = Pattern.compile("[A-Za-z_]");
+    // 标识符首字母  $开头？
+    private static Pattern letterLine = Pattern.compile("[A-Za-z_\\$]");
     
     // 标识符字母体
     private static Pattern words = Pattern.compile("[\\w\\$\\.]");
     
     // 符号
-    private static Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;\\$:,\\.\\[\\]]");
+    private static Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;:,\\.\\[\\]]");
     
     // 换行符 通过系统属性获取？ line.separator
     private static Pattern lineSymbol = Pattern.compile("[\\r\\n]");
@@ -228,7 +228,6 @@ public class Lexer {
         }
 
         private String readMatchEnd(Predicate<Character> predicate) {
-            // TODO 第一个字符直接添加
             StringBuilder peek = new StringBuilder();
             while (curr < chars.length) {
                 char peekChar = chars[curr];

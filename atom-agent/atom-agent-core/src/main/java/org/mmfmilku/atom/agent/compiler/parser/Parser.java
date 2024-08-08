@@ -3,7 +3,7 @@ package org.mmfmilku.atom.agent.compiler.parser;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
-import org.mmfmilku.atom.agent.compiler.parser.espresion.Node;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 
 import java.util.List;
 
