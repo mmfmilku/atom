@@ -38,5 +38,67 @@ public class Class implements Node {
 
     private List<Method> methods;
 
+    public String getValue() {
+        return value;
+    }
 
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public ClassType getClassType() {
+        return classType;
+    }
+
+    public void setClassType(ClassType classType) {
+        this.classType = classType;
+    }
+
+    public Modifier getModifier() {
+        return modifier;
+    }
+
+    public void setModifier(Modifier modifier) {
+        this.modifier = modifier;
+    }
+
+    public Class getSuperClass() {
+        return superClass;
+    }
+
+    public void setSuperClass(Class superClass) {
+        this.superClass = superClass;
+    }
+
+    public List<Class> getImplementClasses() {
+        return implementClasses;
+    }
+
+    public void setImplementClasses(List<Class> implementClasses) {
+        this.implementClasses = implementClasses;
+    }
+
+    public List<Class> getInnerClasses() {
+        return innerClasses;
+    }
+
+    public void setInnerClasses(List<Class> innerClasses) {
+        this.innerClasses = innerClasses;
+    }
+
+    public List<Member> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<Member> members) {
+        this.members = members;
+    }
+
+    public List<Method> getMethods() {
+        return methods;
+    }
+
+    public void setMethods(List<Method> methods) {
+        this.methods = methods;
+    }
 }
