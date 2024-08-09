@@ -27,11 +27,13 @@ public enum TokenType {
     /**
      * 括号
      * */
-    Paren(""),
+    LParen("", "", "("),
+    RParen("", "", ")"),
     /**
      * 大括号
      * */
-    Brace("\n"),
+    LBrace("", "", "{"),
+    RBrace("", "", "}"),
     /**
      * 符号
      * */
@@ -50,31 +52,47 @@ public enum TokenType {
     Comment("\n"),
     ;
 
-    TokenType(String showPrefix, String showSuffix) {
-        this.showPrefix = showPrefix;
-        this.showSuffix = showSuffix;
+    TokenType(String codeSuffix) {
+        this.codePrefix = "";
+        this.codeSuffix = codeSuffix;
+    }
+    
+    TokenType(String codePrefix, String codeSuffix) {
+        this.codePrefix = codePrefix;
+        this.codeSuffix = codeSuffix;
     }
 
-    TokenType(String showSuffix) {
-        this.showPrefix = "";
-        this.showSuffix = showSuffix;
+    TokenType(String codePrefix, String codeSuffix, String fixValue) {
+        this.fixValue = fixValue;
+        this.codePrefix = codePrefix;
+        this.codeSuffix = codeSuffix;
     }
 
     /**
-     * 代码展示前缀
+     * 类型固定值
      * */
-    private String showPrefix;
+    private String fixValue;
 
     /**
-     * 代码展示后缀
+     * 代码转换前缀
      * */
-    private String showSuffix;
+    private String codePrefix;
 
-    public java.lang.String getShowPrefix() {
-        return showPrefix;
+    /**
+     * 代码转换后缀
+     * */
+    private String codeSuffix;
+
+    public String getFixValue() {
+        return fixValue;
     }
 
-    public java.lang.String getShowSuffix() {
-        return showSuffix;
+    public String getCodePrefix() {
+        return codePrefix;
     }
+
+    public String getCodeSuffix() {
+        return codeSuffix;
+    }
+
 }

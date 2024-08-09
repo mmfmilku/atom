@@ -22,14 +22,14 @@ public class Lexer {
     // 数字
     private static Pattern number = Pattern.compile("\\d");
 
-    // 标识符首字母  $开头？
-    private static Pattern letterLine = Pattern.compile("[A-Za-z_\\$]");
+    // 标识符首字母
+    private static Pattern letterLine = Pattern.compile("[A-Za-z_\\$@]");
     
     // 标识符字母体
-    private static Pattern words = Pattern.compile("[\\w\\$\\.]");
+    private static Pattern words = Pattern.compile("[\\w\\$\\.@]");
     
     // 符号
-    private static Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;:,\\.\\[\\]]");
+    private static Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;:,\\.\\[\\]%`~\\?]");
     
     // 换行符 通过系统属性获取？ line.separator
     private static Pattern lineSymbol = Pattern.compile("[\\r\\n]");
@@ -81,35 +81,37 @@ public class Lexer {
 
                 if (match(letterLine, dealChar)) {
                     // 单词句子
-                    String value = readConsecutive(words);
+                    String value = String.valueOf(dealChar);
+                    curr++;
+                    value += readConsecutive(words);
                     tokens.add(new Token(TokenType.Words, value));
                     continue;
                 }
 
                 if (dealChar == '(') {
                     // 括号
-                    tokens.add(new Token(TokenType.Paren, "("));
+                    tokens.add(new Token(TokenType.LParen, "("));
                     curr++;
                     continue;
                 }
 
                 if (dealChar == ')') {
                     // 括号
-                    tokens.add(new Token(TokenType.Paren, ")"));
+                    tokens.add(new Token(TokenType.RParen, ")"));
                     curr++;
                     continue;
                 }
 
                 if (dealChar == '{') {
                     // 大括号
-                    tokens.add(new Token(TokenType.Brace, "{"));
+                    tokens.add(new Token(TokenType.LBrace, "{"));
                     curr++;
                     continue;
                 }
 
                 if (dealChar == '}') {
                     // 大括号
-                    tokens.add(new Token(TokenType.Brace, "}"));
+                    tokens.add(new Token(TokenType.RBrace, "}"));
                     curr++;
                     continue;
                 }
@@ -246,9 +248,13 @@ public class Lexer {
     }
 
     public String showCode() {
+        return showCode(false, false);
+    }
+
+    public String showCode(boolean beauty, boolean withComment) {
         StringBuilder result = new StringBuilder();
         for (Token token : tokens) {
-            result.append(token.showCode());
+            result.append(token.showCode(beauty, withComment));
         }
         return result.toString();
     }

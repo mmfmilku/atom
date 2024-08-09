@@ -11,6 +11,11 @@ public class Token {
     private TokenType type;
     private String value;
 
+    public Token(TokenType type) {
+        this.type = type;
+        this.value = type.getFixValue();
+    }
+
     public Token(TokenType type, String value) {
         this.type = type;
         this.value = value;
@@ -32,15 +37,21 @@ public class Token {
         this.value = value;
     }
 
-    public String showCode() {
-        if (type == TokenType.BlockComment || type == TokenType.Comment) {
+    public String showCode(boolean beauty, boolean withComment) {
+        if (!withComment &&
+                (type == TokenType.BlockComment || type == TokenType.Comment)) {
             return "";
         }
-        return type.getShowPrefix() + value + type.getShowSuffix();
+        String code = type.getCodePrefix() + value + type.getCodeSuffix();
+        return beauty ? beauty(code) : code;
+    }
+
+    private String beauty(String code) {
+        return code;
     }
 
     @Override
     public String toString() {
-        return type.getShowPrefix() + value + type.getShowSuffix();
+        return value;
     }
 }
