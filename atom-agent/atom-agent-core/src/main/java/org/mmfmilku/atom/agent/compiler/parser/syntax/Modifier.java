@@ -1,25 +1,29 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
-public class Modifier implements Node {
+public enum Modifier implements Node {
 
-    private ModifierType modifierType;
+    PUBLIC("public"),
+    PROTECT("protect"),
+    DEFAULT(""),
+    PRIVATE("private");
 
-    enum ModifierType {
+    private String keyword;
 
-        PUBLIC("public"),
-        PROTECT("protect"),
-        DEFAULT("default_access"),
-        PRIVATE("private");
+    Modifier(String keyword) {
+        this.keyword = keyword;
+    }
 
-        private String keyword;
+    public String getKeyword() {
+        return keyword;
+    }
 
-        ModifierType(String keyword) {
-            this.keyword = keyword;
+    public static Modifier of(String keyword) {
+        for (Modifier type : values()) {
+            if (type.getKeyword().equals(keyword)) {
+                return type;
+            }
         }
-
-        public String getKeyword() {
-            return keyword;
-        }
+        return null;
     }
 
 }
