@@ -3,13 +3,13 @@ package org.mmfmilku.atom.agent.compiler.parser;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaFile;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Method;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -19,13 +19,17 @@ import java.util.stream.Collectors;
  * @date 2024/8/8:16:34
  */
 public class Parser {
-    
+
+    public static final String SEMICOLONS = ";";
+
+    public static final String COMMA = ",";
+
     private Lexer lexer;
-    
+
     public Parser(Lexer lexer) {
         this.lexer = lexer;
     }
-    
+
     public void execute() {
         ParserHandle handle = new ParserHandle();
         handle.execute();
@@ -53,30 +57,133 @@ public class Parser {
                 parseProgram();
             }
         }
-        
+
         private void parseProgram() {
+            JavaFile javaFile = new JavaFile();
             while (curr < tokens.size()) {
                 dealToken = tokens.get(curr);
-                if (dealToken.getType() ==  TokenType.Words) {
+                if (dealToken.getType() == TokenType.Words) {
                     String value = dealToken.getValue();
-                    if ("import".equals(value)) {
-                        Node node = parseImport();
+                    if ("package".equals(dealToken.getValue())) {
+                        Package node = parsePackage();
+                        javaFile.setPackageNode(node);
+                        curr++;
                         continue;
                     }
+                    if ("import".equals(value)) {
+                        Import node = parseImport();
+                        javaFile.getImports().add(node);
+                        curr++;
+                        continue;
+                    }
+                    List<Annotation> annotations = getAnnotations();
+                    // TODO final,abstract 关键字待支持
+                    dealToken = tokens.get(curr);
+                    value = dealToken.getValue();
+                    Modifier modifier = Modifier.DEFAULT;
+                    if (isModifier(dealToken)) {
+                        modifier = Modifier.of(dealToken.getValue());
+                        Token next = needNext(TokenType.Words, "class");
+                        value = next.getValue();
+                    }
                     if ("class".equals(value)) {
-                        Node node = parseClass();
+                        Class node = parseClass();
+                        node.setModifier(modifier);
+                        javaFile.getClassList().add(node);
+                        curr++;
                         continue;
                     }
                 }
+                printParsed();
                 throw new RuntimeException("未知字符 " + dealToken.getValue());
             }
         }
 
-        private Node parseImport() {
-            return null;
+        private List<Annotation> getAnnotations() {
+            List<Annotation> annotations = new ArrayList<>();
+            while (curr < tokens.size()) {
+                Token token = tokens.get(curr);
+                if (token.getValue().startsWith("@")) {
+                    // TODO 设置值
+                    Annotation annotation = new Annotation();
+                    String annotationName = token.getValue();
+                    if (isNext(TokenType.LParen)) {
+                        /*
+                          移动两步至param
+                          @annotation ( param )  ->  @annotation ( param )
+                          ^                                        ^
+                         * */
+                        curr++;
+                        curr++;
+                        parameterPassing();
+                        needNext(TokenType.RParen);
+                    }
+                    annotations.add(annotation);
+                    curr++;
+                } else {
+                    break;
+                }
+            }
+            return annotations;
         }
 
-        private Node parseClass() {
+        /**
+         * 解析方法传参
+         * */
+        private void parameterPassing() {
+            readBefore(TokenType.RParen, token -> {
+                // TODO，传参存在嵌套方法调用
+            });
+        }
+
+        /**
+         * 解析方法参数定义
+         * */
+        private void parameterDefine() {
+            readBefore(TokenType.RParen, token -> {
+                // TODO
+            });
+        }
+
+        private Modifier getModifierAndNext() {
+            Modifier modifier = Modifier.of(tokens.get(curr));
+            if (modifier == null) {
+                modifier = Modifier.DEFAULT;
+            } else {
+                curr++;
+            }
+            return modifier;
+        }
+
+        private boolean isModifier(Token dealToken) {
+            Modifier modifier = Modifier.of(dealToken.getValue());
+            return modifier != null;
+        }
+
+        private Package parsePackage() {
+            Token token = needNext(TokenType.Words);
+            Package aPackage = new Package();
+            aPackage.setValue(token.getValue());
+            needNext(TokenType.Symbol, SEMICOLONS);
+            return aPackage;
+        }
+
+        private Import parseImport() {
+            // TODO 添加 import static xxx
+            Token token = needNext(TokenType.Words);
+            Token symbol = needNext(TokenType.Symbol);
+            Import anImport = new Import();
+            if (SEMICOLONS.equals(symbol.getValue())) {
+                // import xx.xx.*;
+                anImport.setValue(token.getValue() + symbol.getValue());
+            } else {
+                anImport.setValue(token.getValue());
+                needNext(TokenType.Symbol, SEMICOLONS);
+            }
+            return anImport;
+        }
+
+        private Class parseClass() {
             Class clazz = new Class();
 
             Token className = needNext(TokenType.Words);
@@ -88,10 +195,11 @@ public class Parser {
             clazz.setMethods(methods);
             Token token;
             while ((token = readNext()) != null && token.getType() != TokenType.RBrace) {
+                List<Annotation> annotations = getAnnotations();
+                // TODO 解析成员变量
                 // 先解析方法
                 methods.add(parseMethod());
                 // TODO 解析成构造器
-                // TODO 解析成员变量
                 // TODO 解析静态代码块
             }
             if (token == null) {
@@ -102,15 +210,35 @@ public class Parser {
         }
 
         private Method parseMethod() {
-            Token methodNameToken = tokens.get(curr);
+            Modifier modifier = getModifierAndNext();
+            // todo 添加 static,final
+            Token returnToken = tokens.get(curr);
+            curr++;
+            Token methodName = tokens.get(curr);
             needNext(TokenType.LParen);
             // TODO 方法参数
-            
+            parameterDefine();
             needNext(TokenType.RParen);
+            if (isNext(TokenType.Words, "throws")) {
+                curr++;
+                // TODO 处理方法异常抛出
+                readBefore(TokenType.LBrace, token -> {});
+            }
             needNext(TokenType.LBrace);
-            Token token = readNext();
-            // TODO 代码体
+            if (!isNext(TokenType.RBrace)) {
+                curr++;
+                // TODO 代码体
+                CodeBlock codeBlock = parseCodeBlock();
+            }
             needNext(TokenType.RBrace);
+
+            Method method = new Method();
+            return null;
+        }
+
+        private CodeBlock parseCodeBlock() {
+            // TODO
+            readBefore(TokenType.RBrace, token -> {});
             return null;
         }
 
@@ -143,8 +271,24 @@ public class Parser {
         }
 
         /**
+         * 判断下一个token，不移动指针
+         */
+        private boolean isNext(TokenType type) {
+            Token next = peekNext();
+            return next != null && next.getType() == type;
+        }
+
+        /**
+         * 判断下一个token，不移动指针
+         */
+        private boolean isNext(TokenType type, String value) {
+            Token next = peekNext();
+            return next != null && next.getType() == type && value.equals(next.getValue());
+        }
+
+        /**
          * 窥探下一个token，不移动指针
-         * */
+         */
         private Token peekNext() {
             int peekPoint = curr + 1;
             if (peekPoint < tokens.size()) {
@@ -154,8 +298,21 @@ public class Parser {
         }
 
         /**
+         * 读取至某个类型前，移动指针
+         */
+        private void readBefore(TokenType type, Consumer<Token> consumer) {
+            while (true) {
+                consumer.accept(tokens.get(curr));
+                if (curr == tokens.size() - 1 || isNext(type)) {
+                    break;
+                }
+                curr++;
+            }
+        }
+
+        /**
          * 读取下一个token，移动指针
-         * */
+         */
         private Token readNext() {
             curr++;
             if (curr < tokens.size()) {
@@ -166,13 +323,15 @@ public class Parser {
 
         /**
          * 需要的下一个token，移动指针，判断类型
-         * */
+         */
         private Token needNext(TokenType type) {
             Token token = readNext();
             if (token == null) {
+                printParsed();
                 throw new RuntimeException("缺少" + type + "值 " + type.getFixValue());
             }
             if (token.getType() != type) {
+                printParsed();
                 throw new RuntimeException("缺少" + type + "值 " + type.getFixValue() + " 输入" + token.getType() + "值 " + token.getValue());
             }
             return token;
@@ -180,16 +339,49 @@ public class Parser {
 
         /**
          * 需要的下一个token，移动指针，判断类型
-         * */
+         */
         private Token needNext(TokenType type, String value) {
             Token token = readNext();
             if (token == null) {
-                throw new RuntimeException("缺少" + type + "值 " + value);
+                throwParserErr(type, value);
             }
             if (token.getType() != type) {
-                throw new RuntimeException("缺少" + type + "值 " + value + " 输入" + token.getType() + "值 " + token.getValue());
+                throwParserErr(type, token.getType(), value, token.getValue());
+            }
+            if (!token.getValue().equals(value)) {
+                throwParserErr(type, token.getType(), value, token.getValue());
             }
             return token;
+        }
+
+        private void throwParserErr(TokenType needType, String needValue) {
+            printParsed();
+            throw new RuntimeException("缺少" + needType + "值 " + needValue);
+        }
+
+        private void throwParserErr(TokenType needType, TokenType inputType) {
+            throwParserErr(needType, inputType, needType.getFixValue(), inputType.getFixValue());
+        }
+
+        private void throwParserErr(TokenType needType, TokenType inputType,
+                                    String needValue) {
+            throwParserErr(needType, inputType, needValue, inputType.getFixValue());
+        }
+
+        private void throwParserErr(TokenType needType, TokenType inputType,
+                                    String needValue, String inputValue) {
+            printParsed();
+            throw new RuntimeException("缺少" + needType + "值 " + needValue
+                    + " 输入" + inputType + "值 " + inputValue);
+        }
+
+        private void printParsed() {
+            StringBuilder parsed = new StringBuilder();
+            for (int i = 0; i < curr; i++) {
+                parsed.append(tokens.get(i).showCode() + "\n");
+            }
+            System.out.println("当前已解析语法");
+            System.out.println(parsed.toString());
         }
 
     }

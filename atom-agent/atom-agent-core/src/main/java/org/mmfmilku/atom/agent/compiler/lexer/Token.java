@@ -37,6 +37,10 @@ public class Token {
         this.value = value;
     }
 
+    public String showCode() {
+        return showCode(false, false);
+    }
+
     public String showCode(boolean beauty, boolean withComment) {
         if (!withComment &&
                 (type == TokenType.BlockComment || type == TokenType.Comment)) {

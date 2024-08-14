@@ -34,7 +34,7 @@ public class Test1 {
     @Test
     public void testLoadOr() {
 
-        OverrideBodyHolder.load("E:/project/atom/atom-agent/src/main/resources/config/");
+        OverrideBodyHolder.load(System.getProperty("user.dir") + "/src/main/resources/config/");
         Map<String, ClassORDDefine> a = OverrideBodyHolder.getORClassMap();
         
         System.out.println(a);

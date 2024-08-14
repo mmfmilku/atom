@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
+import org.mmfmilku.atom.agent.compiler.lexer.Token;
+
 public enum Modifier implements Node {
 
     PUBLIC("public"),
@@ -24,6 +26,10 @@ public enum Modifier implements Node {
             }
         }
         return null;
+    }
+
+    public static Modifier of(Token token) {
+        return of(token.getValue());
     }
 
 }
