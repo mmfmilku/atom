@@ -237,9 +237,57 @@ public class Parser {
         }
 
         private CodeBlock parseCodeBlock() {
-            // TODO
-            readBefore(TokenType.RBrace, token -> {});
-            return null;
+            CodeBlock codeBlock = new CodeBlock();
+            while (curr < tokens.size()) {
+                Token token = tokens.get(curr);
+                if (token.getType() == TokenType.Words) {
+                    String value = token.getValue();
+                    // TODO
+                    if ("if".equals(value)) {
+                        parseIf();
+                        curr++;
+                        continue;
+                    }
+                    if ("for".equals(value)) {
+                        parseFor();
+                        curr++;
+                        continue;
+                    }
+                    if ("while".equals(value)) {
+                        parseWhile();
+                        curr++;
+                        continue;
+                    }
+                    if (isNext(TokenType.Words)) {
+                        // 变量定义
+                        continue;
+                    }
+                    if (isNext(TokenType.Symbol)) {
+                        // TODO 泛形处理
+                        // 变量赋值
+                        continue;
+                    }
+                    if (isNext(TokenType.LParen)) {
+                        // 方法调用
+                        continue;
+                    }
+                    // if is keyword
+                    // if is Class
+                    // if is variable
+                    // if is methodCall
+                } else if (token.getType() == TokenType.Symbol) {
+                    curr++;
+                    // ; skip
+                    // ++,-- operator
+                    // others throw
+                } else if (token.getType() == TokenType.LBrace) {
+                    curr++;
+                    CodeBlock innerBlock = parseCodeBlock();
+                } else {
+                    // throw
+                }
+            }
+            return codeBlock;
         }
 
         private Node parseStatement() {
