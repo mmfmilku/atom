@@ -94,8 +94,7 @@ public class Parser {
                         continue;
                     }
                 }
-                printParsed();
-                throw new RuntimeException("未知字符 " + dealToken.getValue());
+                throwIllegalToken(dealToken.getValue());
             }
         }
 
@@ -243,18 +242,8 @@ public class Parser {
                 if (token.getType() == TokenType.Words) {
                     String value = token.getValue();
                     // TODO
-                    if ("if".equals(value)) {
-                        parseIf();
-                        curr++;
-                        continue;
-                    }
-                    if ("for".equals(value)) {
-                        parseFor();
-                        curr++;
-                        continue;
-                    }
-                    if ("while".equals(value)) {
-                        parseWhile();
+                    if (isKeywords(token)) {
+                        parseKeyword();
                         curr++;
                         continue;
                     }
@@ -290,6 +279,30 @@ public class Parser {
             return codeBlock;
         }
 
+        private Node parseKeyword() {
+            Token token = tokens.get(curr);
+            String value = token.getValue();
+            if ("if".equals(value)) {
+                return parseIf();
+            }
+            if ("for".equals(value)) {
+                return parseFor();
+            }
+            if ("while".equals(value)) {
+                return parseWhile();
+            }
+            return null;
+        }
+
+
+        private boolean isKeywords(Token token) {
+            String value = token.getValue();
+            // TODO  do {} while() , synchronized, return
+            return "for".equals(value) ||
+                    "while".equals(value) ||
+                    "if".equals(value);
+        }
+
         private Node parseStatement() {
             if (true) {
 
@@ -298,9 +311,76 @@ public class Parser {
         }
 
         private Node parseIf() {
-            if (true) {
-
+            Token token = needNext();
+            if (token.getType() == TokenType.LParen) {
+                readNext();
+                parseExpression();
+                needNext(TokenType.RParen);
+            } else {
+                parseExpression();
             }
+            // TODO
+            return null;
+        }
+
+        /**
+         * 解析表达式
+         * */
+        private void parseExpression() {
+            Token token = tokens.get(curr);
+            if (token.getType() == TokenType.Words) {
+                // todo
+                return;
+            }
+            if (token.getType() == TokenType.Symbol) {
+                parseUnaryOperator();
+                Token next = needNext(TokenType.Words);
+                if (isNext(TokenType.LParen)) {
+                    // TODO 方法调用
+                }
+                if (isNext(TokenType.RParen)) {
+                    // TODO 单目表达式，直接返回
+                    return;
+                }
+                if (isNext(TokenType.Symbol)) {
+                    // TODO, 操作符 后跟表达式
+                    // 包含 +,-,*,/,&,|,&&,||,...
+                    return;
+                }
+                return;
+            }
+            // TODO
+
+            printParsed();
+            throw new RuntimeException("非法字符 " + dealToken.getValue());
+        }
+
+        /**
+         * 单目运算符 --,++,!
+         * */
+        private Node parseUnaryOperator () {
+            Token token = tokens.get(curr);
+            String value = token.getValue();
+            if ("!".equals(value)) {
+                return null;
+            }
+            if ("-".equals(value)) {
+                needNext(TokenType.Symbol, "-");
+                return null;
+            }
+            if ("+".equals(value)) {
+                needNext(TokenType.Symbol, "+");
+                return null;
+            }
+            throwIllegalToken(value);
+            return null;
+        }
+
+        /**
+         * 双目运算符 =,+=,-=,*=,/=
+         * */
+        private Node parseBinaryOperator () {
+            // TODO
             return null;
         }
 
@@ -348,6 +428,21 @@ public class Parser {
         /**
          * 读取至某个类型前，移动指针
          */
+        private List<Token> readBefore(TokenType type) {
+            List<Token> beforeTokens = new ArrayList<>();
+            while (true) {
+                beforeTokens.add(this.tokens.get(curr));
+                if (curr == tokens.size() - 1 || isNext(type)) {
+                    break;
+                }
+                curr++;
+            }
+            return beforeTokens;
+        }
+
+        /**
+         * 读取至某个类型前，移动指针
+         */
         private void readBefore(TokenType type, Consumer<Token> consumer) {
             while (true) {
                 consumer.accept(tokens.get(curr));
@@ -367,6 +462,18 @@ public class Parser {
                 return tokens.get(curr);
             }
             return null;
+        }
+
+        /**
+         * 需要的下一个token，移动指针
+         */
+        private Token needNext() {
+            Token token = readNext();
+            if (token == null) {
+                printParsed();
+                throw new RuntimeException("字符不完整");
+            }
+            return token;
         }
 
         /**
@@ -400,6 +507,11 @@ public class Parser {
                 throwParserErr(type, token.getType(), value, token.getValue());
             }
             return token;
+        }
+
+        private void throwIllegalToken(String value) {
+            printParsed();
+            throw new RuntimeException("非法字符 " + value);
         }
 
         private void throwParserErr(TokenType needType, String needValue) {
