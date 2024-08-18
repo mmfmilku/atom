@@ -223,13 +223,10 @@ public class Parser {
                 // TODO 处理方法异常抛出
                 readBefore(TokenType.LBrace, token -> {});
             }
+            // TODO 抽象方法无代码体
             needNext(TokenType.LBrace);
-            if (!isNext(TokenType.RBrace)) {
-                curr++;
-                // TODO 代码体
-                CodeBlock codeBlock = parseCodeBlock();
-            }
-            needNext(TokenType.RBrace);
+            // TODO 代码体
+            CodeBlock codeBlock = parseCodeBlock();
 
             Method method = new Method();
             return null;
@@ -237,46 +234,77 @@ public class Parser {
 
         private CodeBlock parseCodeBlock() {
             CodeBlock codeBlock = new CodeBlock();
-            while (curr < tokens.size()) {
-                Token token = tokens.get(curr);
-                if (token.getType() == TokenType.Words) {
-                    String value = token.getValue();
-                    // TODO
-                    if (isKeywords(token)) {
-                        parseKeyword();
-                        curr++;
-                        continue;
-                    }
-                    if (isNext(TokenType.Words)) {
-                        // 变量定义
-                        continue;
-                    }
-                    if (isNext(TokenType.Symbol)) {
-                        // TODO 泛形处理
-                        // 变量赋值
-                        continue;
-                    }
-                    if (isNext(TokenType.LParen)) {
-                        // 方法调用
-                        continue;
-                    }
-                    // if is keyword
-                    // if is Class
-                    // if is variable
-                    // if is methodCall
-                } else if (token.getType() == TokenType.Symbol) {
-                    curr++;
-                    // ; skip
-                    // ++,-- operator
-                    // others throw
-                } else if (token.getType() == TokenType.LBrace) {
-                    curr++;
-                    CodeBlock innerBlock = parseCodeBlock();
-                } else {
-                    // throw
-                }
+            Token token = tokens.get(curr);
+            if (token.getType() != TokenType.LBrace) {
+                // TODO 单行代码
+                parseStatement();
+                return codeBlock;
             }
+            // 跳过 {
+            curr++;
+            while (curr < tokens.size()) {
+                parseStatement();
+                curr++;
+            }
+            needNext(TokenType.RBrace);
             return codeBlock;
+        }
+
+        private Statement parseStatement() {
+            Token token = tokens.get(curr);
+            Statement statement = new Statement();
+            if (token.getType() == TokenType.Words) {
+                String value = token.getValue();
+                // TODO
+                if (isKeywords(token)) {
+                    parseKeyword();
+                    return statement;
+                }
+                if (isNext(TokenType.Words)) {
+                    parseVarDefine();
+                    if (isNext(TokenType.Symbol, ";")) {
+                        return statement;
+                    } else {
+                        // 变量赋值 =,+=....
+                    } 
+                    // 变量定义
+                    return statement;
+                }
+                if (isNext(TokenType.Symbol)) {
+                    // TODO 泛形处理
+                    // 变量赋值
+                    return statement;
+                }
+                if (isNext(TokenType.LParen)) {
+                    // 方法调用
+                    return statement;
+                }
+                // if is keyword
+                // if is Class
+                // if is variable
+                // if is methodCall
+            } else if (token.getType() == TokenType.Symbol) {
+                // ; skip
+                // ++,-- operator
+                // others throw
+            } else if (token.getType() == TokenType.LBrace) {
+                CodeBlock innerBlock = parseCodeBlock();
+            } else if (token.getType() == TokenType.RBrace) {
+                // 代码块结束
+                return statement;
+            } else if () {
+
+            } else {
+                throwIllegalToken(token.getValue());
+            }
+            // TODO
+            return statement;
+        }
+
+        private void parseVarDefine() {
+            Token classType = tokens.get(curr);
+            Token varName = needNext(TokenType.Words);
+            // todo
         }
 
         private Node parseKeyword() {
@@ -303,23 +331,44 @@ public class Parser {
                     "if".equals(value);
         }
 
-        private Node parseStatement() {
-            if (true) {
-
+        private Node parseIf() {
+            needNext(TokenType.LParen);
+            parseExpression();
+            needNext(TokenType.RParen);
+            parseCodeBlock();
+            while (isNext(TokenType.Words, "else")) {
+                readNext();
+                if (isNext(TokenType.Words, "if")) {
+                    readNext();
+                    parseIf();
+                } else {
+                    parseCodeBlock();
+                    break;
+                }
             }
+            // TODO
             return null;
         }
 
-        private Node parseIf() {
-            Token token = needNext();
-            if (token.getType() == TokenType.LParen) {
-                readNext();
-                parseExpression();
-                needNext(TokenType.RParen);
-            } else {
-                parseExpression();
-            }
-            // TODO
+        private Node parseWhile() {
+            needNext(TokenType.LParen);
+            parseExpression();
+            needNext(TokenType.RParen);
+            parseCodeBlock();
+            return null;
+        }
+
+        private Node parseFor() {
+            needNext(TokenType.LParen);
+            needNext();
+            parseStatement();
+            needNext(TokenType.Symbol, SEMICOLONS);
+            // TODO 布尔表达式
+            parseExpression();
+            needNext(TokenType.Symbol, SEMICOLONS);
+            parseStatement();
+            needNext(TokenType.RParen);
+            parseCodeBlock();
             return null;
         }
 
@@ -350,7 +399,6 @@ public class Parser {
                 return;
             }
             // TODO
-
             printParsed();
             throw new RuntimeException("非法字符 " + dealToken.getValue());
         }
@@ -381,20 +429,6 @@ public class Parser {
          * */
         private Node parseBinaryOperator () {
             // TODO
-            return null;
-        }
-
-        private Node parseWhile() {
-            if (true) {
-
-            }
-            return null;
-        }
-
-        private Node parseFor() {
-            if (true) {
-
-            }
             return null;
         }
 
