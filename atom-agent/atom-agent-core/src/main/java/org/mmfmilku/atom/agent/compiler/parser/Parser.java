@@ -24,6 +24,8 @@ public class Parser {
 
     public static final String COMMA = ",";
 
+    public static final String EQUAL = "=";
+
     private Lexer lexer;
 
     public Parser(Lexer lexer) {
@@ -254,7 +256,6 @@ public class Parser {
             Token token = tokens.get(curr);
             Statement statement = new Statement();
             if (token.getType() == TokenType.Words) {
-                String value = token.getValue();
                 // TODO
                 if (isKeywords(token)) {
                     parseKeyword();
@@ -262,21 +263,32 @@ public class Parser {
                 }
                 if (isNext(TokenType.Words)) {
                     parseVarDefine();
-                    if (isNext(TokenType.Symbol, ";")) {
+                    token = needNext(TokenType.Symbol);
+                    if (SEMICOLONS.equals(token.getValue())) {
                         return statement;
+                    } else if (EQUAL.equals(token.getValue())) {
+                        // 变量赋值 =
+                    } else if (isOperator(token)) {
+                        String operator = token.getValue();
+                        needNext(TokenType.Symbol, EQUAL);
+                        parseExpression();
+                        needNext(TokenType.Symbol, SEMICOLONS);
                     } else {
-                        // 变量赋值 =,+=....
-                    } 
+                        // todo 多变量定义 int a,b;
+                        throwIllegalToken(token.getValue());
+                    }
                     // 变量定义
                     return statement;
                 }
                 if (isNext(TokenType.Symbol)) {
                     // TODO 泛形处理
+                    Generic generic;
                     // 变量赋值
                     return statement;
                 }
                 if (isNext(TokenType.LParen)) {
-                    // 方法调用
+                    parseExpression();
+                    needNext(TokenType.Symbol, SEMICOLONS);
                     return statement;
                 }
                 // if is keyword
@@ -284,21 +296,45 @@ public class Parser {
                 // if is variable
                 // if is methodCall
             } else if (token.getType() == TokenType.Symbol) {
-                // ; skip
+                if (EQUAL.equals(token.getValue())) {
+                    // ; skip
+                    return statement;
+                }
                 // ++,-- operator
                 // others throw
+                parseExpression();
+                needNext(TokenType.Symbol, SEMICOLONS);
+                return statement;
             } else if (token.getType() == TokenType.LBrace) {
                 CodeBlock innerBlock = parseCodeBlock();
+                return statement;
             } else if (token.getType() == TokenType.RBrace) {
                 // 代码块结束
                 return statement;
-            } else if () {
-
+            } else if (token.getType() == TokenType.Number
+                    || token.getType() == TokenType.String
+                    || token.getType() == TokenType.Character) {
+                parseExpression();
+                needNext(TokenType.Symbol, SEMICOLONS);
+                return statement;
             } else {
+                // TODO lambda表达式
                 throwIllegalToken(token.getValue());
             }
             // TODO
             return statement;
+        }
+
+        private boolean isOperator(Token token) {
+            String value = token.getValue();
+            return "+".equals(value) ||
+                    "-".equals(value) ||
+                    "*".equals(value) ||
+                    "/".equals(value) ||
+                    "&".equals(value) ||
+                    "|".equals(value) ||
+                    "^".equals(value)
+                    ;
         }
 
         private void parseVarDefine() {
@@ -375,32 +411,58 @@ public class Parser {
         /**
          * 解析表达式
          * */
-        private void parseExpression() {
+        private Expression parseExpression() {
+            // TODO 支持 括号包裹的表达式
             Token token = tokens.get(curr);
             if (token.getType() == TokenType.Words) {
+                if (isExpressionEnd()) {
+                    return null;
+                }
+                if (isNext(TokenType.LParen)) {
+                    // 方法调用
+                    Expression methodCall= parseMethodCall();
+                    if (isExpressionEnd()) {
+                        return null;
+                    }
+                    parseOperator();
+                    parseExpression();
+                    return null;
+                }
+                Token next = needNext();
+                if (isOperator(next)) {
+                    parseOperator();
+                    parseExpression();
+                    return null;
+                }
+                throwIllegalToken(next.getValue());
                 // todo
-                return;
+                return null;
             }
             if (token.getType() == TokenType.Symbol) {
                 parseUnaryOperator();
-                Token next = needNext(TokenType.Words);
-                if (isNext(TokenType.LParen)) {
-                    // TODO 方法调用
+                if (isExpressionEnd()) {
+                    return null;
                 }
-                if (isNext(TokenType.RParen)) {
-                    // TODO 单目表达式，直接返回
-                    return;
+                Token next = needNext();
+                if (isOperator(next)) {
+                    parseOperator();
+                    parseExpression();
+                    return null;
                 }
-                if (isNext(TokenType.Symbol)) {
-                    // TODO, 操作符 后跟表达式
-                    // 包含 +,-,*,/,&,|,&&,||,...
-                    return;
-                }
-                return;
+                throwIllegalToken(next.getValue());
+                return null;
             }
             // TODO
-            printParsed();
-            throw new RuntimeException("非法字符 " + dealToken.getValue());
+            throwIllegalToken(dealToken.getValue());
+            return null;
+        }
+
+        private void parseOperator() {
+        }
+
+        private Expression parseMethodCall() {
+            // TODO
+            return null;
         }
 
         /**
@@ -430,6 +492,10 @@ public class Parser {
         private Node parseBinaryOperator () {
             // TODO
             return null;
+        }
+
+        private boolean isExpressionEnd() {
+            return isNext(TokenType.RParen) || isNext(TokenType.RBrace);
         }
 
         /**
