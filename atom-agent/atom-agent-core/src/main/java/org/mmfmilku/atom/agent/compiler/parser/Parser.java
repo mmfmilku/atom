@@ -6,6 +6,8 @@ import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Operator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -243,12 +245,9 @@ public class Parser {
                 return codeBlock;
             }
             // 跳过 {
-            curr++;
-            while (curr < tokens.size()) {
+            while (needNext().getType() != TokenType.RBrace) {
                 parseStatement();
-                curr++;
             }
-            needNext(TokenType.RBrace);
             return codeBlock;
         }
 
@@ -268,6 +267,9 @@ public class Parser {
                         return statement;
                     } else if (EQUAL.equals(token.getValue())) {
                         // 变量赋值 =
+                        needNext();
+                        parseExpression();
+                        needNext(TokenType.Symbol, SEMICOLONS);
                     } else if (isOperator(token)) {
                         String operator = token.getValue();
                         needNext(TokenType.Symbol, EQUAL);
@@ -355,16 +357,19 @@ public class Parser {
             if ("while".equals(value)) {
                 return parseWhile();
             }
+            if ("new".equals(value)) {
+                return parseObjectNew();
+            }
             return null;
         }
-
 
         private boolean isKeywords(Token token) {
             String value = token.getValue();
             // TODO  do {} while() , synchronized, return
-            return "for".equals(value) ||
-                    "while".equals(value) ||
-                    "if".equals(value);
+            return "for".equals(value)
+                    || "while".equals(value)
+                    || "if".equals(value)
+                    || "new".equals(value);
         }
 
         private Node parseIf() {
@@ -408,6 +413,14 @@ public class Parser {
             return null;
         }
 
+        private Node parseObjectNew() {
+            Token className = needNext(TokenType.Words);
+            needNext(TokenType.LParen);
+            parameterPassing();
+            needNext(TokenType.RParen);
+            return null;
+        }
+
         /**
          * 解析表达式
          * */
@@ -415,7 +428,18 @@ public class Parser {
             // TODO 支持 括号包裹的表达式
             Token token = tokens.get(curr);
             if (token.getType() == TokenType.Words) {
+                if ("new".equals(token.getValue())) {
+                    parseObjectNew();
+                    if (isExpressionEnd()) {
+                        return null;
+                    }
+                    parseOperator();
+                    curr++;
+                    parseExpression();
+                    return null;
+                }
                 if (isExpressionEnd()) {
+                    // 标识符
                     return null;
                 }
                 if (isNext(TokenType.LParen)) {
@@ -425,12 +449,14 @@ public class Parser {
                         return null;
                     }
                     parseOperator();
+                    curr++;
                     parseExpression();
                     return null;
                 }
                 Token next = needNext();
                 if (isOperator(next)) {
                     parseOperator();
+                    curr++;
                     parseExpression();
                     return null;
                 }
@@ -457,11 +483,33 @@ public class Parser {
             return null;
         }
 
-        private void parseOperator() {
+        /**
+         * 解析表达式中的操作符
+         * +,-,*,/,&,|,^
+         * &&,||
+         * */
+        private Operator parseOperator() {
+            Token token = needNext(TokenType.Symbol);
+            String operator = token.getValue();
+            if (!isOperator(token)) {
+                throwIllegalToken(token.getValue());
+            }
+            if ("&".equals(operator) || "|".equals(operator)) {
+                if (isNext(TokenType.Symbol, operator)) {
+                    curr++;
+                    operator += operator;
+                    return new Operator(operator + operator);
+                }
+            }
+            return new Operator(operator);
         }
 
         private Expression parseMethodCall() {
-            // TODO
+            Token token = tokens.get(curr);
+            String calledMethod = token.getValue();
+            needNext(TokenType.LParen);
+            parameterPassing();
+            needNext(TokenType.RParen);
             return null;
         }
 
@@ -495,7 +543,9 @@ public class Parser {
         }
 
         private boolean isExpressionEnd() {
-            return isNext(TokenType.RParen) || isNext(TokenType.RBrace);
+            return isNext(TokenType.RParen)
+                    || isNext(TokenType.RBrace)
+                    || isNext(TokenType.Symbol, SEMICOLONS);
         }
 
         /**
@@ -637,7 +687,7 @@ public class Parser {
 
         private void printParsed() {
             StringBuilder parsed = new StringBuilder();
-            for (int i = 0; i < curr; i++) {
+            for (int i = 0; i < curr && i < tokens.size(); i++) {
                 parsed.append(tokens.get(i).showCode() + "\n");
             }
             System.out.println("当前已解析语法");
