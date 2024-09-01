@@ -1,11 +1,13 @@
 package org.mmfmilku.atom.agent.compiler.parser;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.ConstructorCall;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Operator;
 
@@ -112,11 +114,10 @@ public class Parser {
                     String annotationName = token.getValue();
                     if (isNext(TokenType.LParen)) {
                         /*
-                          移动两步至param
+                          移动至param
                           @annotation ( param )  ->  @annotation ( param )
-                          ^                                        ^
+                          ^                                      ^
                          * */
-                        curr++;
                         curr++;
                         parameterPassing();
                         needNext(TokenType.RParen);
@@ -133,10 +134,24 @@ public class Parser {
         /**
          * 解析方法传参
          * */
-        private void parameterPassing() {
-            readBefore(TokenType.RParen, token -> {
-                // TODO，传参存在嵌套方法调用
-            });
+        private List<Expression> parameterPassing() {
+
+            List<Expression> expressions = new ArrayList<>();
+            if (isNext(TokenType.RParen)) {
+                curr++;
+                return expressions;
+            }
+            while (true) {
+                needNext();
+                Expression expression = parseExpression();
+                expressions.add(expression);
+                if (!isNext(TokenType.Symbol, COMMA)) {
+                    break;
+                }
+                needNext();
+            }
+            needNext(TokenType.RParen);
+            return expressions;
         }
 
         /**
@@ -329,14 +344,7 @@ public class Parser {
 
         private boolean isOperator(Token token) {
             String value = token.getValue();
-            return "+".equals(value) ||
-                    "-".equals(value) ||
-                    "*".equals(value) ||
-                    "/".equals(value) ||
-                    "&".equals(value) ||
-                    "|".equals(value) ||
-                    "^".equals(value)
-                    ;
+            return GrammarUtil.isOperator(value);
         }
 
         private void parseVarDefine() {
@@ -365,11 +373,7 @@ public class Parser {
 
         private boolean isKeywords(Token token) {
             String value = token.getValue();
-            // TODO  do {} while() , synchronized, return
-            return "for".equals(value)
-                    || "while".equals(value)
-                    || "if".equals(value)
-                    || "new".equals(value);
+            return GrammarUtil.isCodeKeywords(value);
         }
 
         private Node parseIf() {
@@ -413,12 +417,13 @@ public class Parser {
             return null;
         }
 
-        private Node parseObjectNew() {
+        private Expression parseObjectNew() {
             Token className = needNext(TokenType.Words);
+            ConstructorCall constructorCall = new ConstructorCall(className.getValue());
             needNext(TokenType.LParen);
-            parameterPassing();
-            needNext(TokenType.RParen);
-            return null;
+            List<Expression> expressions = parameterPassing();
+            constructorCall.setPassedParams(expressions);
+            return constructorCall;
         }
 
         /**
@@ -429,9 +434,9 @@ public class Parser {
             Token token = tokens.get(curr);
             if (token.getType() == TokenType.Words) {
                 if ("new".equals(token.getValue())) {
-                    parseObjectNew();
+                    Expression expression = parseObjectNew();
                     if (isExpressionEnd()) {
-                        return null;
+                        return expression;
                     }
                     parseOperator();
                     curr++;
@@ -509,7 +514,6 @@ public class Parser {
             String calledMethod = token.getValue();
             needNext(TokenType.LParen);
             parameterPassing();
-            needNext(TokenType.RParen);
             return null;
         }
 

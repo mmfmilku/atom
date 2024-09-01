@@ -1,12 +1,9 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
+public class Operator implements Expression {
 
-public class Operator implements Node {
+    Expression left;
+    Expression right;
+    StringLiteral operator;
 
-    String value;
-
-    public Operator(String value) {
-        this.value = value;
-    }
 }
