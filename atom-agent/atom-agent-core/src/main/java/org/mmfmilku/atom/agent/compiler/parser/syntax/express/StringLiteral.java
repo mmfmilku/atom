@@ -1,7 +1,8 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
-public class StringLiteral implements Expression {
+public class StringLiteral extends BaseLiteral {
 
-    String value;
-
+    public StringLiteral(String value) {
+        super(value);
+    }
 }

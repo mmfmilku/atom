@@ -7,9 +7,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.ConstructorCall;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Operator;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +55,6 @@ public class Parser {
         }
 
         private void execute() {
-            parseProgram();
             while (curr < tokens.size()) {
                 dealToken = tokens.get(curr);
                 parseProgram();
@@ -65,7 +62,6 @@ public class Parser {
         }
 
         private void parseProgram() {
-            JavaFile javaFile = new JavaFile();
             while (curr < tokens.size()) {
                 dealToken = tokens.get(curr);
                 if (dealToken.getType() == TokenType.Words) {
@@ -120,7 +116,6 @@ public class Parser {
                          * */
                         curr++;
                         parameterPassing();
-                        needNext(TokenType.RParen);
                     }
                     annotations.add(annotation);
                     curr++;
@@ -132,7 +127,7 @@ public class Parser {
         }
 
         /**
-         * 解析方法传参
+         * 解析方法传参 (e1,e2)
          * */
         private List<Expression> parameterPassing() {
 
@@ -434,57 +429,72 @@ public class Parser {
             Token token = tokens.get(curr);
             if (token.getType() == TokenType.Words) {
                 if ("new".equals(token.getValue())) {
+                    // 创建对象
                     Expression expression = parseObjectNew();
                     if (isExpressionEnd()) {
                         return expression;
                     }
-                    parseOperator();
-                    curr++;
-                    parseExpression();
-                    return null;
-                }
-                if (isExpressionEnd()) {
-                    // 标识符
-                    return null;
+                    // 双目
+                    return parseBinary(expression);
                 }
                 if (isNext(TokenType.LParen)) {
                     // 方法调用
-                    Expression methodCall= parseMethodCall();
+                    Expression expression = parseMethodCall();
                     if (isExpressionEnd()) {
-                        return null;
+                        return expression;
                     }
-                    parseOperator();
-                    curr++;
-                    parseExpression();
-                    return null;
+                    // 双目
+                    return parseBinary(expression);
+                }
+                Identifier identifier = new Identifier(token.getValue());
+                if (isExpressionEnd()) {
+                    // 标识符
+                    return identifier;
                 }
                 Token next = needNext();
+                String value = next.getValue();
                 if (isOperator(next)) {
-                    parseOperator();
-                    curr++;
-                    parseExpression();
-                    return null;
+                    if (isNext(TokenType.Symbol, value)) {
+                        if ("+".equals(value) || "-".equals(value)) {
+                            // TODO support like: i ++ + ++ j
+                            // 单目 i++
+                            curr++;
+                            return new UnaryOperate(value + value, identifier);
+                        }
+                    }
+                    // 双目
+                    curr--;
+                    return parseBinary(identifier);
                 }
+                // todo 数组、泛形 待支持
                 throwIllegalToken(next.getValue());
-                // todo
                 return null;
             }
             if (token.getType() == TokenType.Symbol) {
-                parseUnaryOperator();
+                Expression expression = parseUnaryOperate();
                 if (isExpressionEnd()) {
-                    return null;
+                    return expression;
                 }
-                Token next = needNext();
-                if (isOperator(next)) {
-                    parseOperator();
-                    parseExpression();
-                    return null;
-                }
-                throwIllegalToken(next.getValue());
-                return null;
+                // 双目
+                return parseBinary(expression);
             }
-            // TODO
-            throwIllegalToken(dealToken.getValue());
+            if (token.getType() == TokenType.String) {
+                Expression expression = new StringLiteral(token.getValue());
+                if (isExpressionEnd()) {
+                    return expression;
+                }
+                // 双目
+                return parseBinary(expression);
+            }
+            if (token.getType() == TokenType.Number) {
+                Expression expression = new NumberLiteral(token.getValue());
+                if (isExpressionEnd()) {
+                    return expression;
+                }
+                // 双目
+                return parseBinary(expression);
+            }
+            throwIllegalToken(token.getValue());
             return null;
         }
 
@@ -493,8 +503,8 @@ public class Parser {
          * +,-,*,/,&,|,^
          * &&,||
          * */
-        private Operator parseOperator() {
-            Token token = needNext(TokenType.Symbol);
+        private String parseOperator() {
+            Token token = tokens.get(curr);
             String operator = token.getValue();
             if (!isOperator(token)) {
                 throwIllegalToken(token.getValue());
@@ -503,47 +513,49 @@ public class Parser {
                 if (isNext(TokenType.Symbol, operator)) {
                     curr++;
                     operator += operator;
-                    return new Operator(operator + operator);
                 }
             }
-            return new Operator(operator);
+            return operator;
         }
 
         private Expression parseMethodCall() {
             Token token = tokens.get(curr);
             String calledMethod = token.getValue();
             needNext(TokenType.LParen);
-            parameterPassing();
-            return null;
+            List<Expression> expressions = parameterPassing();
+            return new MethodCall(calledMethod, expressions);
         }
 
         /**
          * 单目运算符 --,++,!
          * */
-        private Node parseUnaryOperator () {
+        private Expression parseUnaryOperate() {
             Token token = tokens.get(curr);
             String value = token.getValue();
             if ("!".equals(value)) {
-                return null;
+                needNext();
+                Expression expression = parseExpression();
+                return new UnaryOperate(value, expression);
             }
-            if ("-".equals(value)) {
-                needNext(TokenType.Symbol, "-");
-                return null;
-            }
-            if ("+".equals(value)) {
-                needNext(TokenType.Symbol, "+");
-                return null;
+            if ("-".equals(value) || "+".equals(value)) {
+                needNext(TokenType.Symbol, value);
+                Token next = needNext(TokenType.Words);
+                return new UnaryOperate(value + value,
+                        new Identifier(next.getValue()));
             }
             throwIllegalToken(value);
             return null;
         }
 
         /**
-         * 双目运算符 =,+=,-=,*=,/=
+         * 双目运算符
          * */
-        private Node parseBinaryOperator () {
-            // TODO
-            return null;
+        private Expression parseBinary(Expression expression) {
+            needNext();
+            String operator = parseOperator();
+            curr++;
+            Expression right = parseExpression();
+            return new BinaryOperate(expression, operator, right);
         }
 
         private boolean isExpressionEnd() {

@@ -1,10 +1,10 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
-public class Identifier implements Expression {
+public class BaseLiteral implements Expression {
 
     private String value;
 
-    public Identifier(String value) {
+    public BaseLiteral(String value) {
         this.value = value;
     }
 
