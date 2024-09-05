@@ -8,8 +8,10 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -89,9 +91,10 @@ public class Parser {
                         value = next.getValue();
                     }
                     if ("class".equals(value)) {
-                        Class node = parseClass();
-                        node.setModifier(modifier);
-                        javaFile.getClassList().add(node);
+                        Class clazz = parseClass();
+                        clazz.setModifier(modifier);
+                        clazz.setAnnotations(annotations);
+                        javaFile.getClassList().add(clazz);
                         curr++;
                         continue;
                     }
@@ -105,9 +108,8 @@ public class Parser {
             while (curr < tokens.size()) {
                 Token token = tokens.get(curr);
                 if (token.getValue().startsWith("@")) {
-                    // TODO 设置值
-                    Annotation annotation = new Annotation();
                     String annotationName = token.getValue();
+                    List<Expression> expressions = Collections.emptyList();
                     if (isNext(TokenType.LParen)) {
                         /*
                           移动至param
@@ -115,8 +117,9 @@ public class Parser {
                           ^                                      ^
                          * */
                         curr++;
-                        parameterPassing();
+                        expressions = parameterPassing();
                     }
+                    Annotation annotation = new Annotation(annotationName, expressions);
                     annotations.add(annotation);
                     curr++;
                 } else {
@@ -223,11 +226,11 @@ public class Parser {
         }
 
         private Method parseMethod() {
+            // 目前解析 public void getValue(...) {...}
             Modifier modifier = getModifierAndNext();
             // todo 添加 static,final
-            Token returnToken = tokens.get(curr);
-            curr++;
-            Token methodName = tokens.get(curr);
+            Token returnToken = needNext(TokenType.Words);
+            Token methodName = needNext(TokenType.Words);
             needNext(TokenType.LParen);
             // TODO 方法参数
             parameterDefine();
@@ -243,20 +246,24 @@ public class Parser {
             CodeBlock codeBlock = parseCodeBlock();
 
             Method method = new Method();
-            return null;
+            method.setMethodName(methodName.getValue());
+            method.setModifier(modifier);
+            method.setCodeBlock(codeBlock);
+            return method;
         }
 
         private CodeBlock parseCodeBlock() {
             CodeBlock codeBlock = new CodeBlock();
             Token token = tokens.get(curr);
             if (token.getType() != TokenType.LBrace) {
-                // TODO 单行代码
-                parseStatement();
+                Statement statement = parseStatement();
+                codeBlock.getStatements().add(statement);
                 return codeBlock;
             }
             // 跳过 {
             while (needNext().getType() != TokenType.RBrace) {
-                parseStatement();
+                Statement statement = parseStatement();
+                codeBlock.getStatements().add(statement);
             }
             return codeBlock;
         }
@@ -373,7 +380,7 @@ public class Parser {
 
         private Node parseIf() {
             needNext(TokenType.LParen);
-            parseExpression();
+            Expression expression = parseExpression();
             needNext(TokenType.RParen);
             parseCodeBlock();
             while (isNext(TokenType.Words, "else")) {

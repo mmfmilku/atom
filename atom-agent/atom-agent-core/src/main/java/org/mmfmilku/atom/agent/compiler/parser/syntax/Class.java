@@ -5,6 +5,11 @@ import java.util.List;
 public class Class implements Node {
 
     /**
+     * 注解
+     * */
+    private List<Annotation> annotations;
+
+    /**
      * 类名
      * */
     private String value;
@@ -37,6 +42,14 @@ public class Class implements Node {
     private List<Member> members;
 
     private List<Method> methods;
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = annotations;
+    }
 
     public String getValue() {
         return value;
