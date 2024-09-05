@@ -22,15 +22,18 @@ public class Lexer {
     // 数字
     private static Pattern number = Pattern.compile("\\d");
 
-    // 标识符首字母
+    // 标识符首字母,[字母_$@]
     private static Pattern letterLine = Pattern.compile("[A-Za-z_\\$@]");
     
-    // 标识符字母体
+    // 标识符字母体,[数字字母.$@]
     private static Pattern words = Pattern.compile("[\\w\\$\\.@]");
-    
-    // 符号
+
+    // 运算符 加 减 乘 除 与 或 非 异或 取余,[+-*/&|^%]
+    private static Pattern operator = Pattern.compile("[\\+\\-\\*/&\\|\\^%]");
+
+    // 符号,[+-*/&|!^=<>;;,.[]%`~?]
     private static Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;:,\\.\\[\\]%`~\\?]");
-    
+
     // 换行符 通过系统属性获取？ line.separator
     private static Pattern lineSymbol = Pattern.compile("[\\r\\n]");
 

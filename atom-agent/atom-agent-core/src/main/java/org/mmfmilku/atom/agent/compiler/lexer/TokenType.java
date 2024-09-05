@@ -30,10 +30,20 @@ public enum TokenType {
     LParen("", "", "("),
     RParen("", "", ")"),
     /**
+     * 中括号
+     * */
+    LBracket("", "", "["),
+    RBracket("", "", "]"),
+    /**
      * 大括号
      * */
     LBrace("", "", "{"),
     RBrace("", "", "}"),
+    /**
+     * 尖括号
+     * */
+    LAngle("", "", "<"),
+    RAngle("", "", ">"),
     /**
      * 符号
      * */
