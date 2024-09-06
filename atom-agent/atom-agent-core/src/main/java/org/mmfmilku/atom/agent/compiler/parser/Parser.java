@@ -8,7 +8,10 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarAssignStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,11 +27,11 @@ import java.util.stream.Collectors;
  */
 public class Parser {
 
-    public static final String SEMICOLONS = ";";
+    private static final String SEMICOLONS = ";";
 
-    public static final String COMMA = ",";
+    private static final String COMMA = ",";
 
-    public static final String EQUAL = "=";
+    private static final String EQUAL = "=";
 
     private Lexer lexer;
 
@@ -229,7 +232,7 @@ public class Parser {
             // 目前解析 public void getValue(...) {...}
             Modifier modifier = getModifierAndNext();
             // todo 添加 static,final
-            Token returnToken = needNext(TokenType.Words);
+            Token returnType = tokens.get(curr);
             Token methodName = needNext(TokenType.Words);
             needNext(TokenType.LParen);
             // TODO 方法参数
@@ -248,6 +251,7 @@ public class Parser {
             Method method = new Method();
             method.setMethodName(methodName.getValue());
             method.setModifier(modifier);
+            method.setReturnType(returnType.getValue());
             method.setCodeBlock(codeBlock);
             return method;
         }
@@ -270,40 +274,61 @@ public class Parser {
 
         private Statement parseStatement() {
             Token token = tokens.get(curr);
-            Statement statement = new Statement();
+            Statement statement = null;
             if (token.getType() == TokenType.Words) {
-                // TODO
                 if (isKeywords(token)) {
-                    parseKeyword();
-                    return statement;
+                    return parseKeyword();
                 }
                 if (isNext(TokenType.Words)) {
-                    parseVarDefine();
+                    // 变量定义
+                    VarDefineStatement varDefine = parseVarDefine();
                     token = needNext(TokenType.Symbol);
                     if (SEMICOLONS.equals(token.getValue())) {
-                        return statement;
+                        // 仅定义变量
+                        // nop
                     } else if (EQUAL.equals(token.getValue())) {
-                        // 变量赋值 =
+                        // 变量定义并且赋值 =
                         needNext();
-                        parseExpression();
-                        needNext(TokenType.Symbol, SEMICOLONS);
-                    } else if (isOperator(token)) {
-                        String operator = token.getValue();
-                        needNext(TokenType.Symbol, EQUAL);
-                        parseExpression();
+                        Expression expression = parseExpression();
+                        varDefine.setAssignExpression(expression);
                         needNext(TokenType.Symbol, SEMICOLONS);
                     } else {
                         // todo 多变量定义 int a,b;
                         throwIllegalToken(token.getValue());
                     }
                     // 变量定义
-                    return statement;
+                    return varDefine;
                 }
                 if (isNext(TokenType.Symbol)) {
-                    // TODO 泛形处理
-                    Generic generic;
+                    String varName = token.getValue();
+                    if (isNext(TokenType.Symbol, EQUAL)) {
+                        // 变量赋值
+                        // 指向等于号后面的字符
+                        needNext();
+                        needNext();
+                        Expression expression = parseExpression();
+                        needNext(TokenType.Symbol, SEMICOLONS);
+                        return new VarAssignStatement(varName, expression);
+                    } else {
+                        Token next = readNext();
+                        if (isOperator(next)) {
+                            String operator = next.getValue();
+                            // 变量赋值 a += exp
+                            needNext(TokenType.Symbol, EQUAL);
+                            // 指向等于号后面的字符
+                            needNext();
+                            Expression expression = parseExpression();
+                            needNext(TokenType.Symbol, SEMICOLONS);
+                            BinaryOperate binaryOperate = new BinaryOperate(new Identifier(varName), operator, expression);
+                            return new VarAssignStatement(varName, binaryOperate);
+                        } else {
+                            // TODO 泛形处理
+                            throwIllegalToken(token.getValue());
+                        }
+
+                    }
                     // 变量赋值
-                    return statement;
+                    return null;
                 }
                 if (isNext(TokenType.LParen)) {
                     parseExpression();
@@ -349,13 +374,13 @@ public class Parser {
             return GrammarUtil.isOperator(value);
         }
 
-        private void parseVarDefine() {
-            Token classType = tokens.get(curr);
+        private VarDefineStatement parseVarDefine() {
+            Token varType = tokens.get(curr);
             Token varName = needNext(TokenType.Words);
-            // todo
+            return new VarDefineStatement(varType.getValue(), varName.getValue());
         }
 
-        private Node parseKeyword() {
+        private Statement parseKeyword() {
             Token token = tokens.get(curr);
             String value = token.getValue();
             if ("if".equals(value)) {
@@ -368,7 +393,8 @@ public class Parser {
                 return parseWhile();
             }
             if ("new".equals(value)) {
-                return parseObjectNew();
+                Expression expression = parseObjectNew();
+                return new ExpStatement(expression);
             }
             return null;
         }
@@ -378,7 +404,7 @@ public class Parser {
             return GrammarUtil.isCodeKeywords(value);
         }
 
-        private Node parseIf() {
+        private Statement parseIf() {
             needNext(TokenType.LParen);
             Expression expression = parseExpression();
             needNext(TokenType.RParen);
@@ -397,7 +423,7 @@ public class Parser {
             return null;
         }
 
-        private Node parseWhile() {
+        private Statement parseWhile() {
             needNext(TokenType.LParen);
             parseExpression();
             needNext(TokenType.RParen);
@@ -405,7 +431,7 @@ public class Parser {
             return null;
         }
 
-        private Node parseFor() {
+        private Statement parseFor() {
             needNext(TokenType.LParen);
             needNext();
             parseStatement();
