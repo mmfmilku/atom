@@ -2,6 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser;
 
 import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 import org.mmfmilku.atom.agent.util.FileUtils;
 
 import javax.annotation.Resource;
@@ -19,8 +20,17 @@ public class ParserTest {
         Lexer lexer = new Lexer(s);
         lexer.execute();
         Parser parser = new Parser(lexer);
-        parser.execute();
-        System.out.println(parser);
+        Node execute = parser.execute();
+        System.out.println(execute);
+        int a = 1;
+        int b = 3;
+        a++;
+        --b;
+        int c = a++ + b;
+        System.out.println(a + b - c);
+        if (c > 0) {
+            System.out.println("c大于0");
+        }
     }
 
 }

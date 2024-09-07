@@ -5,7 +5,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 /**
  * 变量赋值语句
  * */
-public class VarAssignStatement extends Statement {
+public class VarAssignStatement implements Statement {
 
     private String varName;
     private Expression assignExpression;

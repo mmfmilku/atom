@@ -8,10 +8,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.ExpStatement;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarAssignStatement;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,20 +30,24 @@ public class Parser {
 
     private static final String EQUAL = "=";
 
+    private static Statement EMPTY = new CodeBlock();
+
     private Lexer lexer;
+
+    private JavaFile javaFile;
 
     public Parser(Lexer lexer) {
         this.lexer = lexer;
     }
 
-    public void execute() {
+    public Node execute() {
         ParserHandle handle = new ParserHandle();
         handle.execute();
+        return javaFile;
     }
 
     private class ParserHandle {
         List<Token> tokens;
-        JavaFile javaFile;
         int curr = 0;
         int peekPoint = 0;
         Token dealToken;
@@ -274,7 +275,6 @@ public class Parser {
 
         private Statement parseStatement() {
             Token token = tokens.get(curr);
-            Statement statement = null;
             if (token.getType() == TokenType.Words) {
                 if (isKeywords(token)) {
                     return parseKeyword();
@@ -310,63 +310,65 @@ public class Parser {
                         needNext(TokenType.Symbol, SEMICOLONS);
                         return new VarAssignStatement(varName, expression);
                     } else {
-                        Token next = readNext();
+                        Token next = needNext();
                         if (isOperator(next)) {
                             String operator = next.getValue();
                             // 变量赋值 a += exp
-                            needNext(TokenType.Symbol, EQUAL);
-                            // 指向等于号后面的字符
-                            needNext();
-                            Expression expression = parseExpression();
+                            if (isNext(TokenType.Symbol, EQUAL)) {
+                                needNext();
+                                needNext();
+                                Expression expression = parseExpression();
+                                needNext(TokenType.Symbol, SEMICOLONS);
+                                BinaryOperate binaryOperate = new BinaryOperate(new Identifier(varName), operator, expression);
+                                return new VarAssignStatement(varName, binaryOperate);
+                            }
+                            // a++,a--
+                            if (!isPlusMinus(operator)) {
+                                throwIllegalToken(operator);
+                            }
+                            needNext(TokenType.Symbol, operator);
                             needNext(TokenType.Symbol, SEMICOLONS);
-                            BinaryOperate binaryOperate = new BinaryOperate(new Identifier(varName), operator, expression);
-                            return new VarAssignStatement(varName, binaryOperate);
+                            UnaryOperate unaryOperate = new UnaryOperate(
+                                    operator, new Identifier(varName), false);
+                            return new ExpStatement(unaryOperate);
                         } else {
-                            // TODO 泛形处理
+                            // TODO 其他符号
                             throwIllegalToken(token.getValue());
                         }
 
                     }
-                    // 变量赋值
-                    return null;
                 }
                 if (isNext(TokenType.LParen)) {
-                    parseExpression();
+                    // 表达式，方法调用开头
+                    Expression expression = parseExpression();
                     needNext(TokenType.Symbol, SEMICOLONS);
-                    return statement;
+                    return new ExpStatement(expression);
                 }
-                // if is keyword
-                // if is Class
-                // if is variable
-                // if is methodCall
+                // TODO 数组、泛形解析
+                throwIllegalToken(token.getValue());
             } else if (token.getType() == TokenType.Symbol) {
-                if (EQUAL.equals(token.getValue())) {
+                if (SEMICOLONS.equals(token.getValue())) {
                     // ; skip
-                    return statement;
+                    return EMPTY;
                 }
                 // ++,-- operator
                 // others throw
-                parseExpression();
+                Expression expression = parseExpression();
                 needNext(TokenType.Symbol, SEMICOLONS);
-                return statement;
+                return new ExpStatement(expression);
             } else if (token.getType() == TokenType.LBrace) {
-                CodeBlock innerBlock = parseCodeBlock();
-                return statement;
-            } else if (token.getType() == TokenType.RBrace) {
-                // 代码块结束
-                return statement;
+                return parseCodeBlock();
             } else if (token.getType() == TokenType.Number
                     || token.getType() == TokenType.String
                     || token.getType() == TokenType.Character) {
-                parseExpression();
+                Expression expression = parseExpression();
                 needNext(TokenType.Symbol, SEMICOLONS);
-                return statement;
+                return new ExpStatement(expression);
             } else {
                 // TODO lambda表达式
                 throwIllegalToken(token.getValue());
             }
-            // TODO
-            return statement;
+            return EMPTY;
         }
 
         private boolean isOperator(Token token) {
@@ -406,21 +408,25 @@ public class Parser {
 
         private Statement parseIf() {
             needNext(TokenType.LParen);
-            Expression expression = parseExpression();
+            needNext();
+            Expression condition = parseExpression();
             needNext(TokenType.RParen);
-            parseCodeBlock();
+            needNext();
+            Statement trueStatement = parseCodeBlock();
+            Statement falseStatement = null;
             while (isNext(TokenType.Words, "else")) {
                 readNext();
                 if (isNext(TokenType.Words, "if")) {
                     readNext();
-                    parseIf();
+                    falseStatement = parseIf();
                 } else {
-                    parseCodeBlock();
+                    falseStatement = parseCodeBlock();
                     break;
                 }
             }
-            // TODO
-            return null;
+            IfStatement ifStatement = new IfStatement(condition, trueStatement);
+            ifStatement.setFalseStatement(falseStatement);
+            return ifStatement;
         }
 
         private Statement parseWhile() {
@@ -488,16 +494,27 @@ public class Parser {
                 String value = next.getValue();
                 if (isOperator(next)) {
                     if (isNext(TokenType.Symbol, value)) {
-                        if ("+".equals(value) || "-".equals(value)) {
+                        if (isPlusMinus(value)) {
                             // TODO support like: i ++ + ++ j
                             // 单目 i++
                             curr++;
-                            return new UnaryOperate(value + value, identifier);
+                            Expression expression = new UnaryOperate(value + value, identifier, false);
+                            if (isExpressionEnd()) {
+                                return expression;
+                            }
+                            // 双目
+                            return parseBinary(expression);
                         }
                     }
                     // 双目
                     curr--;
                     return parseBinary(identifier);
+                }
+                if (isCompare(value) || EQUAL.equals(value)) {
+                    String compare = getCompare();
+                    needNext();
+                    Expression expression = parseExpression();
+                    return new BinaryOperate(identifier, compare, expression);
                 }
                 // todo 数组、泛形 待支持
                 throwIllegalToken(next.getValue());
@@ -529,6 +546,40 @@ public class Parser {
             }
             throwIllegalToken(token.getValue());
             return null;
+        }
+
+        private boolean isCompare(String value) {
+            return ">".equals(value)
+                    || "<".equals(value)
+                    || EQUAL.equals(value)
+                    ;
+        }
+
+        private String getCompare() {
+            Token token = tokens.get(curr);
+            if (token == null) {
+                throwIllegalToken("");
+            }
+            String value = token.getValue();
+            if (!isCompare(value)) {
+                throwIllegalToken(value);
+            }
+            if (EQUAL.equals(value)) {
+                needNext(TokenType.Symbol, EQUAL);
+                // ==
+                return EQUAL + EQUAL;
+            }
+            if (isNext(TokenType.Symbol, EQUAL)) {
+                // >=,<=
+                needNext();
+                return value + EQUAL;
+            }
+            // >,<
+            return value;
+        }
+
+        private boolean isPlusMinus(String value) {
+            return "+".equals(value) || "-".equals(value);
         }
 
         /**
@@ -568,7 +619,7 @@ public class Parser {
             if ("!".equals(value)) {
                 needNext();
                 Expression expression = parseExpression();
-                return new UnaryOperate(value, expression);
+                return new NotOperate(expression);
             }
             if ("-".equals(value) || "+".equals(value)) {
                 needNext(TokenType.Symbol, value);

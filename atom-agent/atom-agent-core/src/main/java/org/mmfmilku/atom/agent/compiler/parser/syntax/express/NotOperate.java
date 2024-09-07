@@ -1,12 +1,13 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
+package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-
-public class ExpStatement implements Statement {
+/**
+ * 取反表达式
+ * */
+public class NotOperate implements Expression {
 
     private Expression expression;
 
-    public ExpStatement(Expression expression) {
+    public NotOperate(Expression expression) {
         this.expression = expression;
     }
 

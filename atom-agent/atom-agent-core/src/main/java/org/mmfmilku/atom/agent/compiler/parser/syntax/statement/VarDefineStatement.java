@@ -5,7 +5,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 /***
  * 变量定义语句
  */
-public class VarDefineStatement extends Statement {
+public class VarDefineStatement implements Statement {
 
     private String varType;
     private String varName;

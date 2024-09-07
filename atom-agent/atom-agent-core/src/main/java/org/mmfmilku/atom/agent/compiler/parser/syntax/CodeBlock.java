@@ -5,7 +5,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CodeBlock implements Node {
+public class CodeBlock implements Statement {
 
     private List<Statement> statements = new ArrayList<>();
 

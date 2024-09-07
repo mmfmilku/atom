@@ -6,11 +6,19 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 public class UnaryOperate implements Expression {
 
     private String operator;
-    private Expression expression;
+    private Identifier identifier;
+    private boolean preOperate;
 
-    public UnaryOperate(String operator, Expression expression) {
+    public UnaryOperate(String operator, Identifier identifier) {
         this.operator = operator;
-        this.expression = expression;
+        this.identifier = identifier;
+        this.preOperate = true;
+    }
+
+    public UnaryOperate(String operator, Identifier identifier, boolean preOperate) {
+        this.operator = operator;
+        this.identifier = identifier;
+        this.preOperate = preOperate;
     }
 
     public String getOperator() {
@@ -21,11 +29,19 @@ public class UnaryOperate implements Expression {
         this.operator = operator;
     }
 
-    public Expression getExpression() {
-        return expression;
+    public Identifier getIdentifier() {
+        return identifier;
     }
 
-    public void setExpression(Expression expression) {
-        this.expression = expression;
+    public void setIdentifier(Identifier identifier) {
+        this.identifier = identifier;
+    }
+
+    public boolean isPreOperate() {
+        return preOperate;
+    }
+
+    public void setPreOperate(boolean preOperate) {
+        this.preOperate = preOperate;
     }
 }
