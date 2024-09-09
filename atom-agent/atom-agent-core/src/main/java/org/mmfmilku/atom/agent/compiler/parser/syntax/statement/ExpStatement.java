@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 public class ExpStatement implements Statement {
@@ -16,5 +17,10 @@ public class ExpStatement implements Statement {
 
     public void setExpression(Expression expression) {
         this.expression = expression;
+    }
+
+    @Override
+    public String getStatementSource() {
+        return expression.getSourceCode();
     }
 }

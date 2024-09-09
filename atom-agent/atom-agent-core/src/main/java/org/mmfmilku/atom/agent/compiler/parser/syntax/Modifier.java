@@ -32,4 +32,8 @@ public enum Modifier implements Node {
         return of(token.getValue());
     }
 
+    @Override
+    public String getSourceCode() {
+        return getKeyword();
+    }
 }

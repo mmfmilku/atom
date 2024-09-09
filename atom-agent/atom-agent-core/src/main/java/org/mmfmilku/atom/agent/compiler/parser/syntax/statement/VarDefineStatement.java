@@ -39,4 +39,13 @@ public class VarDefineStatement implements Statement {
     public void setAssignExpression(Expression assignExpression) {
         this.assignExpression = assignExpression;
     }
+
+    @Override
+    public String getStatementSource() {
+        String assignValueStr = "";
+        if (assignExpression != null) {
+            assignValueStr = " = " + assignExpression.getSourceCode();
+        }
+        return varType + " " + varName + assignValueStr;
+    }
 }

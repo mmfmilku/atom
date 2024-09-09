@@ -31,6 +31,7 @@ public class ParserTest {
         if (c > 0) {
             System.out.println("c大于0");
         }
+        System.out.println(execute.getSourceCode());
     }
 
 }

@@ -30,4 +30,9 @@ public class VarAssignStatement implements Statement {
     public void setAssignExpression(Expression assignExpression) {
         this.assignExpression = assignExpression;
     }
+
+    @Override
+    public String getStatementSource() {
+        return varName + " = " + assignExpression.getSourceCode();
+    }
 }

@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+
 /**
  * 双目表达式
  * */
@@ -37,5 +39,10 @@ public class BinaryOperate implements Expression {
 
     public void setOperator(String operator) {
         this.operator = operator;
+    }
+
+    @Override
+    public String getSourceCode() {
+        return left.getSourceCode() + GrammarUtil.surroundBlank(operator) + right.getSourceCode();
     }
 }

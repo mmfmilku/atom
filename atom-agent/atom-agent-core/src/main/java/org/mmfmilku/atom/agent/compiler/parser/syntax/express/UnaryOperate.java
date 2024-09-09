@@ -44,4 +44,11 @@ public class UnaryOperate implements Expression {
     public void setPreOperate(boolean preOperate) {
         this.preOperate = preOperate;
     }
+
+    @Override
+    public String getSourceCode() {
+        return preOperate ?
+                operator + identifier.getSourceCode()
+                : identifier.getSourceCode() + operator;
+    }
 }

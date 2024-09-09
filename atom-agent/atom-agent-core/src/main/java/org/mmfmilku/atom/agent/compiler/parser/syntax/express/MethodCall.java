@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+
 import java.util.List;
 
 public class MethodCall implements Expression {
@@ -26,5 +28,10 @@ public class MethodCall implements Expression {
 
     public void setPassedParams(List<Expression> passedParams) {
         this.passedParams = passedParams;
+    }
+
+    @Override
+    public String getSourceCode() {
+        return GrammarUtil.toCallSourceCode(calledMethod, passedParams);
     }
 }

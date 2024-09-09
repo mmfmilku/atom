@@ -18,4 +18,9 @@ public class NotOperate implements Expression {
     public void setExpression(Expression expression) {
         this.expression = expression;
     }
+
+    @Override
+    public String getSourceCode() {
+        return "!" + expression.getSourceCode();
+    }
 }

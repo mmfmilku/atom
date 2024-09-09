@@ -48,4 +48,17 @@ public class IfStatement implements Statement {
     public void setFalseStatement(Statement falseStatement) {
         this.falseStatement = falseStatement;
     }
+
+    @Override
+    public String getStatementSource() {
+        return "if (" + condition.getSourceCode() + ")"
+                + trueStatement.getSourceCode()
+                + (falseStatement == null ? "" : "else " + falseStatement.getSourceCode());
+    }
+
+    @Override
+    public String getSourceCode() {
+        return getStatementSource();
+    }
+
 }

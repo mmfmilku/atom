@@ -4,5 +4,4 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 
 public interface Expression extends Node {
 
-
 }

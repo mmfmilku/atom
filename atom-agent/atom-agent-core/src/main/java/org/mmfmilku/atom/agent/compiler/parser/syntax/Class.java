@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+
 import java.util.List;
 
 public class Class implements Node {
@@ -12,7 +14,7 @@ public class Class implements Node {
     /**
      * 类名
      * */
-    private String value;
+    private String className;
 
     /**
      * 类类型
@@ -51,12 +53,12 @@ public class Class implements Node {
         this.annotations = annotations;
     }
 
-    public String getValue() {
-        return value;
+    public String getClassName() {
+        return className;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setClassName(String className) {
+        this.className = className;
     }
 
     public ClassType getClassType() {
@@ -113,5 +115,15 @@ public class Class implements Node {
 
     public void setMethods(List<Method> methods) {
         this.methods = methods;
+    }
+
+    @Override
+    public String getSourceCode() {
+        return GrammarUtil.getLinesCode(annotations)
+                + "\n"
+                + modifier.getSourceCode() + " class " + getClassName() + " {"
+                + GrammarUtil.getLinesCode(methods)
+                + "}"
+                ;
     }
 }

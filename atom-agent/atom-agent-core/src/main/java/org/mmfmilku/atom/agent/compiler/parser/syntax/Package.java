@@ -11,4 +11,9 @@ public class Package implements Node {
     public void setValue(String value) {
         this.value = value;
     }
+
+    @Override
+    public String getSourceCode() {
+        return "package" + getValue() + ";";
+    }
 }

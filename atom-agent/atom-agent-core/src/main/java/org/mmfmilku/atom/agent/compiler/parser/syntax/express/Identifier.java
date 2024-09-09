@@ -15,4 +15,9 @@ public class Identifier implements Expression {
     public void setValue(String value) {
         this.value = value;
     }
+
+    @Override
+    public String getSourceCode() {
+        return getValue();
+    }
 }

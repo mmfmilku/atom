@@ -1,11 +1,16 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
+
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class ConstructorCall implements Expression {
 
-    String calledMethod;
-    List<Expression> passedParams;
+    private String calledMethod;
+    private List<Expression> passedParams;
 
     public ConstructorCall(String calledMethod) {
         this.calledMethod = calledMethod;
@@ -25,5 +30,10 @@ public class ConstructorCall implements Expression {
 
     public void setPassedParams(List<Expression> passedParams) {
         this.passedParams = passedParams;
+    }
+
+    @Override
+    public String getSourceCode() {
+        return "new " + GrammarUtil.toCallSourceCode(calledMethod, passedParams);
     }
 }

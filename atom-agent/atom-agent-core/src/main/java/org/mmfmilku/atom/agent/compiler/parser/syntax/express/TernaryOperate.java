@@ -6,4 +6,9 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 public class TernaryOperate implements Expression {
 
 
+    @Override
+    public String getSourceCode() {
+        // TODO
+        return null;
+    }
 }

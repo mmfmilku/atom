@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
 import java.util.ArrayList;
@@ -15,5 +16,10 @@ public class CodeBlock implements Statement {
 
     public void setStatements(List<Statement> statements) {
         this.statements = statements;
+    }
+
+    @Override
+    public String getStatementSource() {
+        return "{" + GrammarUtil.getLinesCode(statements) + "}";
     }
 }

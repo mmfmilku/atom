@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+
 import java.util.List;
 
 public class Method implements Node {
@@ -10,6 +12,12 @@ public class Method implements Node {
     private String returnType;
     private CodeBlock codeBlock;
     private String value;
+
+    @Override
+    public String getSourceCode() {
+        return GrammarUtil.getSentenceCode(modifier.getSourceCode(), returnType, methodName)
+                + GrammarUtil.getLinesCode(codeBlock);
+    }
 
     static class MethodParam {
         String paramType;

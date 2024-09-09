@@ -207,7 +207,7 @@ public class Parser {
             Class clazz = new Class();
 
             Token className = needNext(TokenType.Words);
-            clazz.setValue(className.getValue());
+            clazz.setClassName(className.getValue());
 
             needNext(TokenType.LBrace);
 

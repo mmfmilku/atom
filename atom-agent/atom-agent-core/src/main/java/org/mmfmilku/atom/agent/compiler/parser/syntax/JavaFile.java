@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,5 +35,13 @@ public class JavaFile implements Node {
 
     public void setClassList(List<Class> classList) {
         this.classList = classList;
+    }
+
+    @Override
+    public String getSourceCode() {
+        return GrammarUtil.getLinesCode(packageNode)
+                + GrammarUtil.getLinesCode(imports)
+                + GrammarUtil.getLinesCode(classList)
+                ;
     }
 }
