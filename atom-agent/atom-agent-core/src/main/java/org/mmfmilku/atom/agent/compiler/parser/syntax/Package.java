@@ -14,6 +14,6 @@ public class Package implements Node {
 
     @Override
     public String getSourceCode() {
-        return "package" + getValue() + ";";
+        return "package " + getValue() + ";";
     }
 }

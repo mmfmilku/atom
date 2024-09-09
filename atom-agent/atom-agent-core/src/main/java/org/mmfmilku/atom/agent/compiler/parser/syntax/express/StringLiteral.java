@@ -6,8 +6,4 @@ public class StringLiteral extends BaseLiteral {
         super(value);
     }
 
-    @Override
-    public String getSourceCode() {
-        return "\"" + super.getSourceCode()  + "\"";
-    }
 }

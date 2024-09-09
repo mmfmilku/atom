@@ -14,6 +14,6 @@ public class Import implements Node {
 
     @Override
     public String getSourceCode() {
-        return "import" + getValue() + ";";
+        return "import " + getValue() + ";";
     }
 }
