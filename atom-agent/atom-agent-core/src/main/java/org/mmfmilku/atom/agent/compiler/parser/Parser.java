@@ -202,10 +202,14 @@ public class Parser {
         }
 
         private Import parseImport() {
-            // TODO 添加 import static xxx
+            Import anImport = new Import();
+            if (isNext(TokenType.Words, "static")) {
+                // 处理 import static xxx
+                anImport.setStaticImp(true);
+                needNext();
+            }
             Token token = needNext(TokenType.Words);
             Token symbol = needNext(TokenType.Symbol);
-            Import anImport = new Import();
             if ("*".equals(symbol.getValue())) {
                 // import xx.xx.*;
                 anImport.setValue(token.getValue() + symbol.getValue());
@@ -488,6 +492,7 @@ public class Parser {
          * */
         private Expression parseExpression() {
             // TODO 支持 括号包裹的表达式
+            // TODO 支持表达式后继续调用方法
             Token token = tokens.get(curr);
             if (token.getType() == TokenType.Words) {
                 if ("new".equals(token.getValue())) {
@@ -668,7 +673,9 @@ public class Parser {
         private boolean isExpressionEnd() {
             return isNext(TokenType.RParen)
                     || isNext(TokenType.RBrace)
-                    || isNext(TokenType.Symbol, SEMICOLONS);
+                    || isNext(TokenType.Symbol, SEMICOLONS)
+                    || isNext(TokenType.Symbol, COMMA)
+                    ;
         }
 
         /**
