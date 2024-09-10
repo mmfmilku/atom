@@ -159,10 +159,23 @@ public class Parser {
         /**
          * 解析方法参数定义
          * */
-        private void parameterDefine() {
-            readBefore(TokenType.RParen, token -> {
-                // TODO
-            });
+        private List<VarDefineStatement> parameterDefine() {
+            List<VarDefineStatement> paramDefines = new ArrayList<>();
+            if (isNext(TokenType.RParen)) {
+                curr++;
+                return paramDefines;
+            }
+            while (true) {
+                needNext();
+                VarDefineStatement varDefine = parseVarDefine();
+                paramDefines.add(varDefine);
+                if (!isNext(TokenType.Symbol, COMMA)) {
+                    break;
+                }
+                needNext();
+            }
+            needNext(TokenType.RParen);
+            return paramDefines;
         }
 
         private Modifier getModifierAndNext() {
@@ -237,8 +250,7 @@ public class Parser {
             Token methodName = needNext(TokenType.Words);
             needNext(TokenType.LParen);
             // TODO 方法参数
-            parameterDefine();
-            needNext(TokenType.RParen);
+            List<VarDefineStatement> varDefineStatements = parameterDefine();
             if (isNext(TokenType.Words, "throws")) {
                 curr++;
                 // TODO 处理方法异常抛出
@@ -253,6 +265,7 @@ public class Parser {
             method.setMethodName(methodName.getValue());
             method.setModifier(modifier);
             method.setReturnType(returnType.getValue());
+            method.setMethodParams(varDefineStatements);
             method.setCodeBlock(codeBlock);
             return method;
         }

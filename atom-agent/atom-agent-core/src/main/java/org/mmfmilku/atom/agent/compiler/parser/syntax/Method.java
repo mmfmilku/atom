@@ -1,14 +1,17 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Method implements Node {
 
     private String methodName;
     private Modifier modifier;
-    private List<MethodParam> methodParams;
+    private List<VarDefineStatement> methodParams;
     private String returnType;
     private CodeBlock codeBlock;
     private String value;
@@ -16,12 +19,20 @@ public class Method implements Node {
     @Override
     public String getSourceCode() {
         return GrammarUtil.getSentenceCode(modifier.getSourceCode(), returnType, methodName)
+                + "("
+                + methodParams.stream()
+                    .map(Statement::getStatementSource)
+                    .collect(Collectors.joining(", "))
+                + ")"
                 + GrammarUtil.getLinesCode(codeBlock);
     }
 
-    static class MethodParam {
-        String paramType;
-        String paramName;
+    public List<VarDefineStatement> getMethodParams() {
+        return methodParams;
+    }
+
+    public void setMethodParams(List<VarDefineStatement> methodParams) {
+        this.methodParams = methodParams;
     }
 
     public CodeBlock getCodeBlock() {
@@ -46,14 +57,6 @@ public class Method implements Node {
 
     public void setMethodName(String methodName) {
         this.methodName = methodName;
-    }
-
-    public List<MethodParam> getMethodParams() {
-        return methodParams;
-    }
-
-    public void setMethodParams(List<MethodParam> methodParams) {
-        this.methodParams = methodParams;
     }
 
     public String getReturnType() {
