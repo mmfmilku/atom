@@ -129,7 +129,7 @@ public class Lexer {
                 }
 
                 if (dealChar == '\'') {
-                    // 字符串
+                    // 字符
                     String value = String.valueOf(dealChar);
                     curr++;
                     value += readMatchEnd('\'');

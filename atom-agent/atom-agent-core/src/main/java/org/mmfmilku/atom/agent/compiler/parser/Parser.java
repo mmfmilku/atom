@@ -329,7 +329,10 @@ public class Parser {
                             needNext(TokenType.Symbol, operator);
                             needNext(TokenType.Symbol, SEMICOLONS);
                             UnaryOperate unaryOperate = new UnaryOperate(
-                                    operator, new Identifier(varName), false);
+                                    operator + operator,
+                                    new Identifier(varName),
+                                    false
+                            );
                             return new ExpStatement(unaryOperate);
                         } else {
                             // TODO 其他符号
