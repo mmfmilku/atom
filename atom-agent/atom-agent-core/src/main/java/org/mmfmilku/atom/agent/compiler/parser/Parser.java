@@ -229,9 +229,11 @@ public class Parser {
             Token token;
             while ((token = readNext()) != null && token.getType() != TokenType.RBrace) {
                 List<Annotation> annotations = getAnnotations();
+                // 解析方法
+                Method method = parseMethod();
+                method.setAnnotations(annotations);
+                methods.add(method);
                 // TODO 解析成员变量
-                // 先解析方法
-                methods.add(parseMethod());
                 // TODO 解析成构造器
                 // TODO 解析静态代码块
             }
@@ -243,6 +245,8 @@ public class Parser {
         }
 
         private Method parseMethod() {
+            Method method = new Method();
+
             // 目前解析 public void getValue(...) {...}
             Modifier modifier = getModifierAndNext();
             // todo 添加 static,final
@@ -252,16 +256,19 @@ public class Parser {
             // TODO 方法参数
             List<VarDefineStatement> varDefineStatements = parameterDefine();
             if (isNext(TokenType.Words, "throws")) {
-                curr++;
-                // TODO 处理方法异常抛出
-                readBefore(TokenType.LBrace, token -> {});
+                // 处理方法异常抛出
+                method.setThrowList(new ArrayList<>());
+                do {
+                    needNext();
+                    Token throwE = needNext(TokenType.Words);
+                    method.getThrowList().add(throwE.getValue());
+                } while (isNext(TokenType.Symbol, COMMA));
             }
             // TODO 抽象方法无代码体
             needNext(TokenType.LBrace);
             // TODO 代码体
             CodeBlock codeBlock = parseCodeBlock();
 
-            Method method = new Method();
             method.setMethodName(methodName.getValue());
             method.setModifier(modifier);
             method.setReturnType(returnType.getValue());

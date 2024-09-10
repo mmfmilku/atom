@@ -9,22 +9,45 @@ import java.util.stream.Collectors;
 
 public class Method implements Node {
 
+    private List<Annotation> annotations;
     private String methodName;
     private Modifier modifier;
     private List<VarDefineStatement> methodParams;
+    private List<String> throwList;
     private String returnType;
     private CodeBlock codeBlock;
     private String value;
 
     @Override
     public String getSourceCode() {
-        return GrammarUtil.getSentenceCode(modifier.getSourceCode(), returnType, methodName)
+        return GrammarUtil.getLinesCode(annotations)
+                + "\n"
+                + GrammarUtil.getSentenceCode(modifier.getSourceCode(), returnType, methodName)
                 + "("
                 + methodParams.stream()
                     .map(Statement::getStatementSource)
                     .collect(Collectors.joining(", "))
                 + ")"
+                + (throwList == null || throwList.size() == 0 ? ""
+                    : "throws " + String.join(", ", throwList)
+                    )
                 + GrammarUtil.getLinesCode(codeBlock);
+    }
+
+    public List<String> getThrowList() {
+        return throwList;
+    }
+
+    public void setThrowList(List<String> throwList) {
+        this.throwList = throwList;
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = annotations;
     }
 
     public List<VarDefineStatement> getMethodParams() {
