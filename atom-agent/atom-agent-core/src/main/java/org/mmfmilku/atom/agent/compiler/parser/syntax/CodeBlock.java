@@ -22,4 +22,9 @@ public class CodeBlock implements Statement {
     public String getStatementSource() {
         return "{" + GrammarUtil.getLinesCode(statements) + "}";
     }
+
+    @Override
+    public String getSourceCode() {
+        return getStatementSource();
+    }
 }

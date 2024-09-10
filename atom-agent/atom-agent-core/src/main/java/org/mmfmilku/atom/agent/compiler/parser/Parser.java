@@ -206,12 +206,12 @@ public class Parser {
             Token token = needNext(TokenType.Words);
             Token symbol = needNext(TokenType.Symbol);
             Import anImport = new Import();
-            if (SEMICOLONS.equals(symbol.getValue())) {
+            if ("*".equals(symbol.getValue())) {
                 // import xx.xx.*;
                 anImport.setValue(token.getValue() + symbol.getValue());
+                needNext(TokenType.Symbol, SEMICOLONS);
             } else {
                 anImport.setValue(token.getValue());
-                needNext(TokenType.Symbol, SEMICOLONS);
             }
             return anImport;
         }
