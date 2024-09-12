@@ -30,9 +30,10 @@ System.out.println(a + b - c);
 if (c > 0){System.out.println("c大于0");
 }
 {}
+System.out.println(ParserSelfCheckTest.class.getName());
 System.out.println("-----------------源码开始----------------");
 System.out.println(execute.getSourceCode());
-assertEquals(s.trim(), execute.getSourceCode().trim());
+assertEquals(s.trim(), execute.getSourceCode().trim().concat("").trim().trim().concat(""));
 }
 
 }
