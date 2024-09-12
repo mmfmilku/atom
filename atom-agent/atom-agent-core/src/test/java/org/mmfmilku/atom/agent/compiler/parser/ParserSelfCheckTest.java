@@ -19,7 +19,7 @@ public void selfCheck1 ()throws IOException{String s = FileUtils.readText("F:\\d
 Lexer lexer = new Lexer(s);
 lexer.execute();
 Parser parser = new Parser(lexer);
-Node execute = parser.execute();
+Node execute = new Parser(lexer).execute();
 System.out.println(execute);
 int a = 1;
 int b = 3;
@@ -32,8 +32,7 @@ if (c > 0){System.out.println("c大于0");
 {}
 System.out.println("-----------------源码开始----------------");
 System.out.println(execute.getSourceCode());
-String sourceCode = execute.getSourceCode();
-assertEquals(s.trim(), sourceCode.trim());
+assertEquals(s.trim(), execute.getSourceCode().trim());
 }
 
 }

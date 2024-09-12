@@ -23,8 +23,7 @@ public class ParserTest {
         String s = FileUtils.readText("F:\\dev\\project\\atom\\atom-agent\\atom-agent-core\\src\\test\\java\\org\\mmfmilku\\atom\\agent\\compiler\\parser\\ParserTest.java");
         Lexer lexer = new Lexer(s);
         lexer.execute();
-        Parser parser = new Parser(lexer);
-        Node execute = parser.execute();
+        Node execute = new Parser(lexer).execute();
         System.out.println(execute);
         int a = 1;
         int b = 3;
@@ -36,7 +35,7 @@ public class ParserTest {
             System.out.println("c大于0");
         }
         System.out.println("-----------------源码开始----------------");
-        System.out.println(execute.getSourceCode());
+        System.out.println(execute.getSourceCode().trim());
     }
 
 }

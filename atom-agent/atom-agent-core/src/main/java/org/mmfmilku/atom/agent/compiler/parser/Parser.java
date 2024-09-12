@@ -498,20 +498,12 @@ public class Parser {
                 if ("new".equals(token.getValue())) {
                     // 创建对象
                     Expression expression = parseObjectNew();
-                    if (isExpressionEnd()) {
-                        return expression;
-                    }
-                    // 双目
-                    return parseBinary(expression);
+                    return parseToEnd(expression);
                 }
                 if (isNext(TokenType.LParen)) {
                     // 方法调用
                     Expression expression = parseMethodCall();
-                    if (isExpressionEnd()) {
-                        return expression;
-                    }
-                    // 双目
-                    return parseBinary(expression);
+                    return parseToEnd(expression);
                 }
                 Identifier identifier = new Identifier(token.getValue());
                 if (isExpressionEnd()) {
@@ -527,11 +519,7 @@ public class Parser {
                             // 单目 i++
                             curr++;
                             Expression expression = new UnaryOperate(value + value, identifier, false);
-                            if (isExpressionEnd()) {
-                                return expression;
-                            }
-                            // 双目
-                            return parseBinary(expression);
+                            return parseToEnd(expression);
                         }
                     }
                     // 双目
@@ -550,30 +538,42 @@ public class Parser {
             }
             if (token.getType() == TokenType.Symbol) {
                 Expression expression = parseUnaryOperate();
-                if (isExpressionEnd()) {
-                    return expression;
-                }
-                // 双目
-                return parseBinary(expression);
+                return parseToEnd(expression);
             }
             if (token.getType() == TokenType.String) {
                 Expression expression = new StringLiteral(token.getValue());
-                if (isExpressionEnd()) {
-                    return expression;
-                }
-                // 双目
-                return parseBinary(expression);
+                return parseToEnd(expression);
             }
             if (token.getType() == TokenType.Number) {
                 Expression expression = new NumberLiteral(token.getValue());
-                if (isExpressionEnd()) {
-                    return expression;
-                }
-                // 双目
-                return parseBinary(expression);
+                return parseToEnd(expression);
             }
             throwIllegalToken(token.getValue());
             return null;
+        }
+
+        private Expression parseToEnd(Expression expression) {
+            if (isExpressionEnd()) {
+                return expression;
+            }
+            if (isNext(TokenType.Symbol, ".")) {
+                return parseCallChain(expression);
+            }
+            // 双目
+            return parseBinary(expression);
+        }
+
+        private Expression parseCallChain(Expression first) {
+            needNext(TokenType.Symbol, ".");
+            Token token = needNext(TokenType.Words);
+            if (isNext(TokenType.LParen)) {
+                Expression next = parseMethodCall();
+                CallChain callChain = new CallChain(first, next);
+                return parseToEnd(callChain);
+            }
+            Identifier next = new Identifier(token.getValue());
+            CallChain callChain = new CallChain(first, next);
+            return parseToEnd(callChain);
         }
 
         private boolean isCompare(String value) {
