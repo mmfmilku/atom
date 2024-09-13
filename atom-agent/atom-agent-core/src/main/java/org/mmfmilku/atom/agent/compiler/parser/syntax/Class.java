@@ -17,6 +17,11 @@ public class Class implements Node {
     private String className;
 
     /**
+     * 类全名
+     * */
+    private String classFullName;
+
+    /**
      * 类类型
      * */
     private ClassType classType;
@@ -44,6 +49,18 @@ public class Class implements Node {
     private List<Member> members;
 
     private List<Method> methods;
+
+    public Class(String className) {
+        this.className = className;
+    }
+
+    public String getClassFullName() {
+        return classFullName;
+    }
+
+    public void setClassFullName(String classFullName) {
+        this.classFullName = classFullName;
+    }
 
     public List<Annotation> getAnnotations() {
         return annotations;

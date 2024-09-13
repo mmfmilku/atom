@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser;
 import org.junit.Test;
+import org.mmfmilku.atom.agent.compiler.CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
@@ -16,10 +17,7 @@ public void testNo (){}
 @Test()
 
 public void selfCheck1 ()throws IOException{String s = FileUtils.readText("F:\\dev\\project\\atom\\atom-agent\\atom-agent-core\\src\\test\\java\\org\\mmfmilku\\atom\\agent\\compiler\\parser\\ParserSelfCheckTest.java");
-Lexer lexer = new Lexer(s);
-lexer.execute();
-Parser parser = new Parser(lexer);
-Node execute = new Parser(lexer).execute();
+Node execute = CompilerUtil.parseAST(s);
 System.out.println(execute);
 int a = 1;
 int b = 3;

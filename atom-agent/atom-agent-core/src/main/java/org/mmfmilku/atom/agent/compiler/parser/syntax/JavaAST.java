@@ -5,7 +5,7 @@ import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JavaFile implements Node {
+public class JavaAST implements Node {
 
     private Package packageNode;
 

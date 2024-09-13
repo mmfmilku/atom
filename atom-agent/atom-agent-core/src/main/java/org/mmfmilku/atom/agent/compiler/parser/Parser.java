@@ -34,53 +34,60 @@ public class Parser {
 
     private Lexer lexer;
 
-    private JavaFile javaFile;
-
     public Parser(Lexer lexer) {
         this.lexer = lexer;
     }
 
-    public Node execute() {
+    public JavaAST execute() {
         ParserHandle handle = new ParserHandle();
-        handle.execute();
-        return javaFile;
+        return handle.execute();
+    }
+
+    public Expression getExpression() {
+        ParserHandle handle = new ParserHandle();
+        return handle.getExpression();
     }
 
     private class ParserHandle {
         List<Token> tokens;
         int curr = 0;
-        int peekPoint = 0;
-        Token dealToken;
+        JavaAST javaAST;
 
         private ParserHandle() {
             tokens = lexer.getTokens()
                     .stream()
                     .filter(token -> token.getType() != TokenType.BlockComment && token.getType() != TokenType.Comment)
                     .collect(Collectors.toList());
-            javaFile = new JavaFile();
         }
 
-        private void execute() {
+        private JavaAST execute() {
+            javaAST = new JavaAST();
+            curr = 0;
             while (curr < tokens.size()) {
-                dealToken = tokens.get(curr);
                 parseProgram();
             }
+            return javaAST;
+        }
+
+        private Expression getExpression() {
+            curr = 0;
+            return parseExpression();
         }
 
         private void parseProgram() {
             while (curr < tokens.size()) {
-                dealToken = tokens.get(curr);
+                Token dealToken = tokens.get(curr);
                 if (dealToken.getType() == TokenType.Words) {
                     String value = dealToken.getValue();
                     if ("package".equals(dealToken.getValue())) {
                         Package node = parsePackage();
-                        javaFile.setPackageNode(node);
+                        javaAST.setPackageNode(node);
                         curr++;
                         continue;
                     }
                     if ("import".equals(value)) {
                         Import node = parseImport();
-                        javaFile.getImports().add(node);
+                        javaAST.getImports().add(node);
                         curr++;
                         continue;
                     }
@@ -98,7 +105,7 @@ public class Parser {
                         Class clazz = parseClass();
                         clazz.setModifier(modifier);
                         clazz.setAnnotations(annotations);
-                        javaFile.getClassList().add(clazz);
+                        javaAST.getClassList().add(clazz);
                         curr++;
                         continue;
                     }
@@ -221,10 +228,9 @@ public class Parser {
         }
 
         private Class parseClass() {
-            Class clazz = new Class();
 
             Token className = needNext(TokenType.Words);
-            clazz.setClassName(className.getValue());
+            Class clazz = new Class(className.getValue());
 
             needNext(TokenType.LBrace);
 
@@ -675,6 +681,7 @@ public class Parser {
                     || isNext(TokenType.RBrace)
                     || isNext(TokenType.Symbol, SEMICOLONS)
                     || isNext(TokenType.Symbol, COMMA)
+                    || curr == tokens.size() - 1
                     ;
         }
 
