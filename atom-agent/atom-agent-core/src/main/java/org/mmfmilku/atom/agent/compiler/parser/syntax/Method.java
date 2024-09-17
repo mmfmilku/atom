@@ -1,13 +1,15 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Method implements Node {
+public class Method implements Node, ImportUse {
 
     private List<Annotation> annotations;
     private String methodName;
@@ -96,5 +98,11 @@ public class Method implements Node {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public void useImports(HashMap<String, String> importsMap) {
+        setReturnType(importsMap.getOrDefault(returnType, returnType));
+        codeBlock.useImports(importsMap);
     }
 }

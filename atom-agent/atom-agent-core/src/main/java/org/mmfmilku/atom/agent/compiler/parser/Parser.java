@@ -28,6 +28,8 @@ public class Parser {
 
     private static final String COMMA = ",";
 
+    private static final String POINT = ".";
+
     private static final String EQUAL = "=";
 
     private static Statement EMPTY = new CodeBlock();
@@ -203,9 +205,27 @@ public class Parser {
         private Package parsePackage() {
             Token token = needNext(TokenType.Words);
             Package aPackage = new Package();
-            aPackage.setValue(token.getValue());
+            String value = parseWordsPoint();
             needNext(TokenType.Symbol, SEMICOLONS);
+            aPackage.setValue(value);
             return aPackage;
+        }
+
+        /**
+         * 获取如 xx.xx.xx 的字符
+         * */
+        private String parseWordsPoint() {
+            Token token = tokens.get(curr);
+            if (token.getType() != TokenType.Words) {
+                throwParserErr(TokenType.Words, token.getType());
+            }
+            StringBuilder value = new StringBuilder(token.getValue());
+            while (isNext(TokenType.Symbol, POINT)) {
+                needNext(TokenType.Symbol, POINT);
+                Token next = needNext(TokenType.Words);
+                value.append(POINT).append(next.getValue());
+            }
+            return value.toString();
         }
 
         private Import parseImport() {
@@ -216,14 +236,22 @@ public class Parser {
                 needNext();
             }
             Token token = needNext(TokenType.Words);
-            Token symbol = needNext(TokenType.Symbol);
-            if ("*".equals(symbol.getValue())) {
-                // import xx.xx.*;
-                anImport.setValue(token.getValue() + symbol.getValue());
-                needNext(TokenType.Symbol, SEMICOLONS);
-            } else {
-                anImport.setValue(token.getValue());
+            StringBuilder value = new StringBuilder(token.getValue());
+            while (!isNext(TokenType.Symbol, SEMICOLONS)) {
+                needNext(TokenType.Symbol, POINT);
+                Token next = needNext();
+                value.append(POINT).append(next.getValue());
+                if (next.getType() != TokenType.Words) {
+                    if ("*".equals(next.getValue())) {
+                        // import xx.xx.* 最后一个为*
+                        break;
+                    } else {
+                        throwIllegalToken(next.getValue());
+                    }
+                }
             }
+            needNext(TokenType.Symbol, SEMICOLONS);
+            anImport.setValue(value.toString());
             return anImport;
         }
 
@@ -260,7 +288,7 @@ public class Parser {
             // 目前解析 public void getValue(...) {...}
             Modifier modifier = getModifierAndNext();
             // todo 添加 static,final
-            Token returnType = tokens.get(curr);
+            String returnType = parseWordsPoint();
             Token methodName = needNext(TokenType.Words);
             needNext(TokenType.LParen);
             // TODO 方法参数
@@ -281,7 +309,7 @@ public class Parser {
 
             method.setMethodName(methodName.getValue());
             method.setModifier(modifier);
-            method.setReturnType(returnType.getValue());
+            method.setReturnType(returnType);
             method.setMethodParams(varDefineStatements);
             method.setCodeBlock(codeBlock);
             return method;
@@ -311,23 +339,7 @@ public class Parser {
                 }
                 if (isNext(TokenType.Words)) {
                     // 变量定义
-                    VarDefineStatement varDefine = parseVarDefine();
-                    token = needNext(TokenType.Symbol);
-                    if (SEMICOLONS.equals(token.getValue())) {
-                        // 仅定义变量
-                        // nop
-                    } else if (EQUAL.equals(token.getValue())) {
-                        // 变量定义并且赋值 =
-                        needNext();
-                        Expression expression = parseExpression();
-                        varDefine.setAssignExpression(expression);
-                        needNext(TokenType.Symbol, SEMICOLONS);
-                    } else {
-                        // todo 多变量定义 int a,b;
-                        throwIllegalToken(token.getValue());
-                    }
-                    // 变量定义
-                    return varDefine;
+                    return parseVarDefineAndAssign();
                 }
                 if (isNext(TokenType.Symbol)) {
                     String varName = token.getValue();
@@ -339,6 +351,22 @@ public class Parser {
                         Expression expression = parseExpression();
                         needNext(TokenType.Symbol, SEMICOLONS);
                         return new VarAssignStatement(varName, expression);
+                    } else if (isNext(TokenType.Symbol, POINT)) {
+                        int saveIndex = curr;
+                        parseWordsPoint();
+                        if (isNext(TokenType.Words)) {
+                            // 下标回溯
+                            curr = saveIndex;
+                            // 变量定义
+                            return parseVarDefineAndAssign();
+                        } else {
+                            // 下标回溯
+                            curr = saveIndex;
+                            // 链式调用表达式语句
+                            Expression expression = parseExpression();
+                            needNext(TokenType.Symbol, SEMICOLONS);
+                            return new ExpStatement(expression);
+                        }
                     } else {
                         Token next = needNext();
                         if (isOperator(next)) {
@@ -404,15 +432,35 @@ public class Parser {
             return EMPTY;
         }
 
+        private VarDefineStatement parseVarDefineAndAssign() {
+            Token token;
+            VarDefineStatement varDefine = parseVarDefine();
+            token = needNext(TokenType.Symbol);
+            if (SEMICOLONS.equals(token.getValue())) {
+                // 仅定义变量
+                // nop
+            } else if (EQUAL.equals(token.getValue())) {
+                // 变量定义并且赋值 =
+                needNext();
+                Expression expression = parseExpression();
+                varDefine.setAssignExpression(expression);
+                needNext(TokenType.Symbol, SEMICOLONS);
+            } else {
+                // todo 多变量定义 int a,b;
+                throwIllegalToken(token.getValue());
+            }
+            return varDefine;
+        }
+
         private boolean isOperator(Token token) {
             String value = token.getValue();
             return GrammarUtil.isOperator(value);
         }
 
         private VarDefineStatement parseVarDefine() {
-            Token varType = tokens.get(curr);
+            String varType = parseWordsPoint();
             Token varName = needNext(TokenType.Words);
-            return new VarDefineStatement(varType.getValue(), varName.getValue());
+            return new VarDefineStatement(varType, varName.getValue());
         }
 
         private Statement parseKeyword() {
@@ -539,8 +587,8 @@ public class Parser {
                     return new BinaryOperate(identifier, compare, expression);
                 }
                 // todo 数组、泛形 待支持
-                throwIllegalToken(next.getValue());
-                return null;
+                curr--;
+                return parseToEnd(identifier);
             }
             if (token.getType() == TokenType.Symbol) {
                 Expression expression = parseUnaryOperate();
@@ -625,6 +673,8 @@ public class Parser {
             Token token = tokens.get(curr);
             String operator = token.getValue();
             if (!isOperator(token)) {
+                // TODO !=,==表达式
+//                isCompare()
                 throwIllegalToken(token.getValue());
             }
             if ("&".equals(operator) || "|".equals(operator)) {
@@ -641,7 +691,9 @@ public class Parser {
             String calledMethod = token.getValue();
             needNext(TokenType.LParen);
             List<Expression> expressions = parameterPassing();
-            return new MethodCall(calledMethod, expressions);
+            MethodCall methodCall = new MethodCall(calledMethod);
+            methodCall.setPassedParams(expressions);
+            return methodCall;
         }
 
         /**

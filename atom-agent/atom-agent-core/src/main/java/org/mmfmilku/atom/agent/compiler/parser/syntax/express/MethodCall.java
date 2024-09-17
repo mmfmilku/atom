@@ -2,16 +2,17 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 public class MethodCall implements Expression {
 
     private String calledMethod;
     private List<Expression> passedParams;
 
-    public MethodCall(String calledMethod, List<Expression> passedParams) {
+    public MethodCall(String calledMethod) {
         this.calledMethod = calledMethod;
-        this.passedParams = passedParams;
     }
 
     public String getCalledMethod() {
@@ -33,5 +34,14 @@ public class MethodCall implements Expression {
     @Override
     public String getSourceCode() {
         return GrammarUtil.toCallSourceCode(calledMethod, passedParams);
+    }
+
+    @Override
+    public void useImports(HashMap<String, String> importsMap) {
+        setCalledMethod(importsMap.getOrDefault(calledMethod, calledMethod));
+        Optional.of(passedParams)
+                .ifPresent(expressions -> expressions.forEach(
+                        expression ->
+                                expression.useImports(importsMap)));
     }
 }

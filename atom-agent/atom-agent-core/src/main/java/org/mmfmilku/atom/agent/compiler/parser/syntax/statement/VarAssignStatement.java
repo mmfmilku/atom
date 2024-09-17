@@ -2,6 +2,8 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
+import java.util.HashMap;
+
 /**
  * 变量赋值语句
  * */
@@ -34,5 +36,10 @@ public class VarAssignStatement implements Statement {
     @Override
     public String getStatementSource() {
         return varName + " = " + assignExpression.getSourceCode();
+    }
+
+    @Override
+    public void useImports(HashMap<String, String> importsMap) {
+        assignExpression.useImports(importsMap);
     }
 }

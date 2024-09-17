@@ -1,7 +1,8 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
-import org.mmfmilku.atom.agent.compiler.parser.syntax.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
+
+import java.util.HashMap;
 
 public class IfStatement implements Statement {
 
@@ -61,4 +62,12 @@ public class IfStatement implements Statement {
         return getStatementSource();
     }
 
+    @Override
+    public void useImports(HashMap<String, String> importsMap) {
+        condition.useImports(importsMap);
+        trueStatement.useImports(importsMap);
+        if (falseStatement != null) {
+            falseStatement.useImports(importsMap);
+        }
+    }
 }

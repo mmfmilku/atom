@@ -12,34 +12,34 @@ import java.util.regex.Pattern;
  * @date 2024/8/6:14:18
  */
 public class Lexer {
-    
+
     // 空白字符
-    private static Pattern whiteSpace = Pattern.compile("\\s");
-    
+    private static final Pattern whiteSpace = Pattern.compile("\\s");
+
     // 字母
-    private static Pattern letter = Pattern.compile("[A-Za-z]");
-    
+    private static final Pattern letter = Pattern.compile("[A-Za-z]");
+
     // 数字
-    private static Pattern number = Pattern.compile("\\d");
+    private static final Pattern number = Pattern.compile("\\d");
 
     // 标识符首字母,[字母_$@]
-    private static Pattern letterLine = Pattern.compile("[A-Za-z_\\$@]");
-    
-    // 标识符字母体,[数字字母.$@]
-    private static Pattern words = Pattern.compile("[\\w\\$\\.@]");
+    private static final Pattern letterLine = Pattern.compile("[A-Za-z_\\$@]");
+
+    // 标识符字母体,[数字字母$@]
+    private static final Pattern words = Pattern.compile("[\\w\\$@]");
 
     // 运算符 加 减 乘 除 与 或 非 异或 取余,[+-*/&|^%]
-    private static Pattern operator = Pattern.compile("[\\+\\-\\*/&\\|\\^%]");
+    private static final Pattern operator = Pattern.compile("[\\+\\-\\*/&\\|\\^%]");
 
     // 符号,[+-*/&|!^=<>;;,.[]%`~?]
-    private static Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;:,\\.\\[\\]%`~\\?]");
+    private static final Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;:,\\.\\[\\]%`~\\?]");
 
     // 换行符 通过系统属性获取？ line.separator
-    private static Pattern lineSymbol = Pattern.compile("[\\r\\n]");
+    private static final Pattern lineSymbol = Pattern.compile("[\\r\\n]");
 
 
     private List<Token> tokens;
-    
+
     private String input;
 
     public Lexer(String input) {
@@ -54,7 +54,7 @@ public class Lexer {
         LexerHandle handle = new LexerHandle();
         handle.execute();
     }
-    
+
     private class LexerHandle {
         char[] chars;
         int curr = 0;
@@ -65,7 +65,7 @@ public class Lexer {
             this.chars = input.toCharArray();
             tokens = new ArrayList<>();
         }
-        
+
         private void execute() {
             while (curr < chars.length) {
                 dealChar = chars[curr];
@@ -118,7 +118,7 @@ public class Lexer {
                     curr++;
                     continue;
                 }
-                
+
                 if (dealChar == '\"') {
                     // 字符串
                     String value = String.valueOf(dealChar);
@@ -167,14 +167,16 @@ public class Lexer {
                         continue;
                     }
                 }
-                
+
+                System.out.println("已解析:");
+                System.out.println(Lexer.this.showCode(true, true));
                 throw new RuntimeException("非法字符 " + dealChar);
             }
         }
 
         /**
-         * 
-         * */
+         *
+         */
         private char peekNext() {
             int peekPoint = curr + 1;
             if (peekPoint < chars.length) {
@@ -182,10 +184,10 @@ public class Lexer {
             }
             return Character.MIN_VALUE;
         }
-        
+
         /**
          * 获取连续匹配的字符
-         * */
+         */
         private String readConsecutive(Pattern regex) {
             StringBuilder peek = new StringBuilder();
             while (curr < chars.length) {
@@ -202,7 +204,7 @@ public class Lexer {
 
         /**
          * 获取直到匹配结束符
-         * */
+         */
         private String readMatchEnd(String matchStr) {
             StringBuilder peek = new StringBuilder();
             while (curr < this.chars.length) {
@@ -220,14 +222,14 @@ public class Lexer {
 
         /**
          * 获取直到匹配结束符
-         * */
+         */
         private String readMatchEnd(char matchChar) {
             return readMatchEnd(ch -> ch == matchChar);
         }
 
         /**
          * 获取直到匹配结束符
-         * */
+         */
         private String readMatchEnd(Pattern regex) {
             return readMatchEnd(ch -> match(regex, ch));
         }
@@ -236,6 +238,23 @@ public class Lexer {
             StringBuilder peek = new StringBuilder();
             while (curr < chars.length) {
                 char peekChar = chars[curr];
+                if (peekChar == '\\') {
+                    if (curr >= chars.length - 1) {
+                        throw new RuntimeException("非法字符 " + peekChar);
+                    }
+                    char transferFlag = chars[curr + 1];
+                    peekChar = getTransferTarget(transferFlag);
+                    curr++;
+
+                    if (peekChar == '"' || peekChar == '\'') {
+                        // 转义的引号，不经过判断
+                        peek.append(peekChar);
+                        curr++;
+                        continue;
+                    }
+                    // 转义字符依然添加反斜杠
+                    peek.append('\\');
+                }
                 peek.append(peekChar);
                 curr++;
                 if (predicate.test(peekChar)) {
@@ -244,8 +263,27 @@ public class Lexer {
             }
             return peek.toString();
         }
+
+        private char getTransferTarget(char transferFlag) {
+            switch (transferFlag) {
+                case 't':
+                    return '\t';
+                case 'n':
+                    return '\n';
+                case 'r':
+                    return '\r';
+                case '"':
+                    return '"';
+                case '\'':
+                    return '\'';
+                case '\\':
+                    return '\\';
+                default:
+                    throw new RuntimeException("非法的转义字符");
+            }
+        }
     }
-    
+
     private boolean match(Pattern regex, char ch) {
         return regex.matcher(String.valueOf(ch)).matches();
     }

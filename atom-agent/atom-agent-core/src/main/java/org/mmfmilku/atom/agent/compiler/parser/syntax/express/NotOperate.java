@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import java.util.HashMap;
+
 /**
  * 取反表达式
  * */
@@ -22,5 +24,10 @@ public class NotOperate implements Expression {
     @Override
     public String getSourceCode() {
         return "!" + expression.getSourceCode();
+    }
+
+    @Override
+    public void useImports(HashMap<String, String> importsMap) {
+        expression.useImports(importsMap);
     }
 }

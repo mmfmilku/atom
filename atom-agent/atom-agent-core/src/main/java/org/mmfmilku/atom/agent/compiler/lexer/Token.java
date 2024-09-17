@@ -51,7 +51,7 @@ public class Token {
     }
 
     private String beauty(String code) {
-        return code;
+        return code + "\n";
     }
 
     @Override

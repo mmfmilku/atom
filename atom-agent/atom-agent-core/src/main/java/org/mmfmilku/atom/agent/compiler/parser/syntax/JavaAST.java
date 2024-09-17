@@ -3,6 +3,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax;
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class JavaAST implements Node {
@@ -43,5 +44,31 @@ public class JavaAST implements Node {
                 + GrammarUtil.getLinesCode(imports)
                 + GrammarUtil.getLinesCode(classList)
                 ;
+    }
+
+    public void useImport() {
+        if (imports == null || imports.isEmpty()) {
+            return;
+        }
+        HashMap<String, String> importsMap = imports.stream().reduce(new HashMap<>(),
+                (map, data) -> {
+                    String value = data.getValue();
+                    String substring = value.substring(value.lastIndexOf(".") + 1);
+                    map.put(substring, value);
+                    return map;
+                },
+                (a, b) -> {
+                    a.putAll(b);
+                    return a;
+                });
+        String packageName = getPackageNode().getValue();
+        List<Class> classList = getClassList();
+        for (Class clazz : classList) {
+            clazz.setClassFullName(packageName + "." + clazz.getClassName());
+            List<Method> methods = clazz.getMethods();
+            for (Method method : methods) {
+                method.useImports(importsMap);
+            }
+        }
     }
 }

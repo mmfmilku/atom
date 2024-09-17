@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import java.util.HashMap;
+
 /**
  * 调用链表达式 o1.m1().o2.m2()
  * */
@@ -33,5 +35,12 @@ public class CallChain implements Expression {
 
     public void setNext(Expression next) {
         this.next = next;
+    }
+
+    @Override
+    public void useImports(HashMap<String, String> importsMap) {
+        first.useImports(importsMap);
+        // 链式调用，仅替换首个调用
+//        next.useImports(importsMap);
     }
 }

@@ -2,6 +2,8 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 
+import java.util.HashMap;
+
 /**
  * 双目表达式
  * */
@@ -44,5 +46,11 @@ public class BinaryOperate implements Expression {
     @Override
     public String getSourceCode() {
         return left.getSourceCode() + GrammarUtil.surroundBlank(operator) + right.getSourceCode();
+    }
+
+    @Override
+    public void useImports(HashMap<String, String> importsMap) {
+        left.useImports(importsMap);
+        right.useImports(importsMap);
     }
 }

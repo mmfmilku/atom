@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import java.util.HashMap;
+
 /**
  * 单目表达式
  * */
@@ -50,5 +52,10 @@ public class UnaryOperate implements Expression {
         return preOperate ?
                 operator + identifier.getSourceCode()
                 : identifier.getSourceCode() + operator;
+    }
+
+    @Override
+    public void useImports(HashMap<String, String> importsMap) {
+        identifier.useImports(importsMap);
     }
 }
