@@ -39,6 +39,8 @@ public String ifTestCase (Integer integer){int a = 1;
 int b = 2;
 int c = 3;
 if (c > 0){System.out.println("c大于0");
+new Integer(3).byteValue();
+new String().trim();
 }
 if (c != 0){if (c == 0){if (c <= 0){System.out.println("c大于0");
 }

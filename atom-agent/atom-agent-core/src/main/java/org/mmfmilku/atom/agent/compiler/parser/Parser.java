@@ -476,7 +476,8 @@ public class Parser {
                 return parseWhile();
             }
             if ("new".equals(value)) {
-                Expression expression = parseObjectNew();
+                Expression expression = parseExpression();
+                needNext(TokenType.Symbol, SEMICOLONS);
                 return new ExpStatement(expression);
             }
             if ("return".equals(value)) {
