@@ -44,6 +44,24 @@ public class ParserTest {
         if (c > 0) {
             System.out.println("c大于0");
         }
+        if (c != 0) {
+            if (c == 0) {
+                if (c <= 0) {
+                    System.out.println("c大于0");
+                }
+            }
+        }
+        if (1 == 1) {
+            if (2 >= 1) {
+                if (3 != 2) {
+
+                }
+            } else if (a + b > 1) {
+                if (1 + 3 >= 2) {}
+            } else {
+                System.out.println(3);
+            }
+        }
         System.out.println("ttt");
         System.out.println("ttt'a");
         System.out.println("ttt\\b");

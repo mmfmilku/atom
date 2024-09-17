@@ -501,6 +501,7 @@ public class Parser {
                     readNext();
                     falseStatement = parseIf();
                 } else {
+                    needNext();
                     falseStatement = parseCodeBlock();
                     break;
                 }
@@ -634,6 +635,7 @@ public class Parser {
             return ">".equals(value)
                     || "<".equals(value)
                     || EQUAL.equals(value)
+                    || ("!".equals(value) && isNext(TokenType.Symbol, EQUAL))
                     ;
         }
 
@@ -652,7 +654,7 @@ public class Parser {
                 return EQUAL + EQUAL;
             }
             if (isNext(TokenType.Symbol, EQUAL)) {
-                // >=,<=
+                // >=,<=,!=
                 needNext();
                 return value + EQUAL;
             }
@@ -668,13 +670,15 @@ public class Parser {
          * 解析表达式中的操作符
          * +,-,*,/,&,|,^
          * &&,||
+         * >=, <=, ==, !=
          * */
         private String parseOperator() {
             Token token = tokens.get(curr);
             String operator = token.getValue();
             if (!isOperator(token)) {
-                // TODO !=,==表达式
-//                isCompare()
+                if (isCompare(operator)) {
+                    return getCompare();
+                }
                 throwIllegalToken(token.getValue());
             }
             if ("&".equals(operator) || "|".equals(operator)) {

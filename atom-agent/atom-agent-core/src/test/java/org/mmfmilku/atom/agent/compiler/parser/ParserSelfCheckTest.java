@@ -34,7 +34,34 @@ System.out.println(execute.getSourceCode());
 assertEquals(s.trim(), execute.getSourceCode().trim().concat("").trim().trim().concat(""));
 }
 
-public String getString(Integer integer) {
+public String ifTestCase(Integer integer) {
+    int a = 1;
+    int b = 2;
+    int c = 3;
+    if (c > 0) {
+        System.out.println("c大于0");
+    }
+    if (c != 0) {
+        if (c == 0) {
+            if (c <= 0) {
+                System.out.println("c大于0");
+            }
+        }
+    }
+    if (1 == 1) {
+        if (2 >= 1) {
+            if (3 != 2) {
+
+            }
+        } else if (a + b > 1) {
+            if (1 + 3 >= 2) {}
+        } else {
+            System.out.println(3);
+        }
+    }
+    if (a != 1) {
+        return "2!=3";
+    }
     if (1 == 1) {
         return "1";
     }
