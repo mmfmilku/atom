@@ -479,6 +479,12 @@ public class Parser {
                 Expression expression = parseObjectNew();
                 return new ExpStatement(expression);
             }
+            if ("return".equals(value)) {
+                needNext();
+                Expression expression = parseExpression();
+                needNext(TokenType.Symbol, SEMICOLONS);
+                return new ReturnStatement(expression);
+            }
             return null;
         }
 

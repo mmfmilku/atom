@@ -34,7 +34,9 @@ public class GrammarUtil {
         return "for".equals(value)
                 || "while".equals(value)
                 || "if".equals(value)
-                || "new".equals(value);
+                || "new".equals(value)
+                || "return".equals(value)
+                ;
     }
 
     public static String surroundBlank(String code) {
