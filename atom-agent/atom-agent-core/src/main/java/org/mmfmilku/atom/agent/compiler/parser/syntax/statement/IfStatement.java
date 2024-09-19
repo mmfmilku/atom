@@ -2,7 +2,9 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class IfStatement implements Statement {
 
@@ -55,6 +57,17 @@ public class IfStatement implements Statement {
         return "if (" + condition.getSourceCode() + ")"
                 + trueStatement.getSourceCode()
                 + (falseStatement == null ? "" : "else " + falseStatement.getSourceCode());
+    }
+
+    @Override
+    public List<Expression> getAllExpression() {
+        List<Expression> all = new ArrayList<>();
+        all.add(condition);
+        all.addAll(trueStatement.getAllExpression());
+        if (falseStatement != null) {
+            all.addAll(falseStatement.getAllExpression());
+        }
+        return all;
     }
 
     @Override

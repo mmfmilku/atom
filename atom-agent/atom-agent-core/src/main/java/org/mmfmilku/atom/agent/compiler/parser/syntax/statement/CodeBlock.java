@@ -1,11 +1,14 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CodeBlock implements Statement {
 
@@ -22,6 +25,14 @@ public class CodeBlock implements Statement {
     @Override
     public String getStatementSource() {
         return "{" + GrammarUtil.getLinesCode(statements) + "}";
+    }
+
+    @Override
+    public List<Expression> getAllExpression() {
+        return statements.stream()
+                .map(Statement::getAllExpression)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     @Override

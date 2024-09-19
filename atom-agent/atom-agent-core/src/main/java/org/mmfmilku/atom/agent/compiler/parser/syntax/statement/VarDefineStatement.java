@@ -2,7 +2,9 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 /***
  * 变量定义语句
@@ -49,6 +51,12 @@ public class VarDefineStatement implements Statement {
             assignValueStr = " = " + assignExpression.getSourceCode();
         }
         return varType + " " + varName + assignValueStr;
+    }
+
+    @Override
+    public List<Expression> getAllExpression() {
+        return assignExpression == null ?
+                Collections.emptyList() : Collections.singletonList(assignExpression);
     }
 
     @Override

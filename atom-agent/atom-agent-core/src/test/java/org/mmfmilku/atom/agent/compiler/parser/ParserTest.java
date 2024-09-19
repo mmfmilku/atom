@@ -20,6 +20,13 @@ import static org.junit.Assert.*;
 @Resource
 public class ParserTest {
 
+    private void m1(String a, int b) {
+        System.out.println(a);
+        if (b == 0) {
+            System.out.println("b等于零");
+        }
+    }
+
     @Test
     public void testNo() {
 
@@ -31,9 +38,11 @@ public class ParserTest {
         String s = FileUtils.readText(System.getProperty("user.dir") + "\\src\\test\\java\\org\\mmfmilku\\atom\\agent\\compiler\\parser\\ParserTest.java");
         Lexer lexer = new Lexer(s);
         lexer.execute();
-        System.out
-                .println(lexer.showCode(true, true));
-        org.mmfmilku.atom.agent.compiler.parser.syntax.Node execute = new Parser(lexer).execute();
+//        System.out
+//                .println(lexer.showCode(true, true));
+        org.mmfmilku.atom.agent.compiler
+                .parser.syntax.Node execute = new Parser(lexer)
+                .execute();
         System.out.println(execute);
         int a = 1;
         int b = 3;
