@@ -104,6 +104,9 @@ public class Method implements Node, ImportUse {
     @Override
     public void useImports(Map<String, String> importsMap) {
         setReturnType(importsMap.getOrDefault(returnType, returnType));
+        if (methodParams != null) {
+            methodParams.forEach(statement -> statement.useImports(importsMap));
+        }
         codeBlock.useImports(importsMap);
     }
 }

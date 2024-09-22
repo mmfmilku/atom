@@ -43,8 +43,37 @@ public class CallChain implements Expression {
 
     @Override
     public void useImports(Map<String, String> importsMap) {
-        first.useImports(importsMap);
-        next.useImports(importsMap);
+        if (next instanceof MethodCall) {
+            // TODO 内部类的情况
+            first.useImports(importsMap);
+            next.useImports(importsMap);
+        } else if (next instanceof CallChain) {
+            // TODO 内部类的情况
+            if (!(first instanceof Identifier)) {
+                first.useImports(importsMap);
+            }
+            CallChain callChain = (CallChain) next;
+            importNoneIdentifier(callChain, importsMap);
+        } else {
+            first.useImports(importsMap);
+        }
+        // TODO fix 对于全类名的调用，会导致重复包名
+        // com.xxx.Class -> com.xxx.com.xxx.Class
+    }
+
+    private static void importNoneIdentifier(CallChain callChain,
+                                             Map<String, String> importsMap) {
+        // import所有非标识符的表达式
+        Expression first = callChain.first;
+        Expression next = callChain.next;
+        if (!(first instanceof Identifier)) {
+            first.useImports(importsMap);
+        }
+        if (next instanceof CallChain) {
+            importNoneIdentifier((CallChain) next, importsMap);
+        } else if (!(first instanceof Identifier)) {
+            next.useImports(importsMap);
+        }
     }
 
     @Override
