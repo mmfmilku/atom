@@ -278,7 +278,6 @@ public class Parser {
             if (token == null) {
                 throw new RuntimeException("缺少" + TokenType.RBrace + "值 " + TokenType.RBrace.getFixValue());
             }
-            curr++;
             return clazz;
         }
 
