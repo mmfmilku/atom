@@ -618,24 +618,27 @@ public class Parser {
             if (isExpressionEnd()) {
                 return expression;
             }
-            if (isNext(TokenType.Symbol, ".")) {
-                return parseCallChain(expression);
+            if (isNext(TokenType.Symbol, POINT)) {
+                Expression callChain = parseCallChain(expression);
+                return parseToEnd(callChain);
             }
             // 双目
             return parseBinary(expression);
         }
 
         private Expression parseCallChain(Expression first) {
-            needNext(TokenType.Symbol, ".");
+            if (!isNext(TokenType.Symbol, POINT)) {
+                return first;
+            }
+            needNext(TokenType.Symbol, POINT);
             Token token = needNext(TokenType.Words);
             if (isNext(TokenType.LParen)) {
                 Expression next = parseMethodCall();
-                CallChain callChain = new CallChain(first, next);
-                return parseToEnd(callChain);
+                return new CallChain(first, next);
             }
             Identifier next = new Identifier(token.getValue());
-            CallChain callChain = new CallChain(first, next);
-            return parseToEnd(callChain);
+            Expression nextChain = parseCallChain(next);
+            return new CallChain(first, nextChain);
         }
 
         private boolean isCompare(String value) {
