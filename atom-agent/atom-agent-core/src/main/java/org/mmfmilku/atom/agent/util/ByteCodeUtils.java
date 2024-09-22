@@ -17,6 +17,9 @@ package org.mmfmilku.atom.agent.util;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.LoaderClassPath;
+import org.mmfmilku.atom.agent.compiler.parser.Parser;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Method;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
@@ -28,9 +31,12 @@ import org.mmfmilku.atom.agent.context.InstrumentationContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * ByteCodeUtils
@@ -50,10 +56,28 @@ public class ByteCodeUtils {
             throw e;
         }
     }
-    
+
     public static void appendClassPath(ClassLoader classLoader) {
         ClassPool classPool = ClassPool.getDefault();
         classPool.appendClassPath(new LoaderClassPath(classLoader));
+    }
+
+    public static Map<String, Map<String, Method>> toJavassistCode(JavaAST ...javaASTArr) {
+        Map<String, Map<String, Method>> classMap = new HashMap<>();
+        Stream.of(javaASTArr)
+                .map(javaAST -> {
+                    javaAST.useImport();
+                    return javaAST.getClassList();
+                })
+                .flatMap(Collection::stream)
+                .forEach(clazz -> {
+                    Map<String, Method> collect = clazz.getMethods()
+                            .stream()
+                            .peek(ByteCodeUtils::toJavassistCode)
+                            .collect(Collectors.toMap(Method::getMethodName, v -> v));
+                    classMap.put(clazz.getClassFullName(), collect);
+                });
+        return classMap;
     }
 
     /**
@@ -61,8 +85,9 @@ public class ByteCodeUtils {
      * this -> $0
      * var1 -> $1
      * var2 -> $2
-     * */
-    public static void replaceMethodVar(Method method) {
+     * ...
+     */
+    public static void toJavassistCode(Method method) {
         CodeBlock codeBlock = method.getCodeBlock();
         List<VarDefineStatement> methodParams = method.getMethodParams();
         if (methodParams == null || methodParams.size() == 0) {
@@ -77,15 +102,16 @@ public class ByteCodeUtils {
         List<Statement> statements = codeBlock.getStatements();
         for (Statement statement : statements) {
             List<Expression> allExpression = statement.getAllExpression();
-            allExpression.forEach(expression -> {
-                if (expression instanceof Identifier) {
-                    Identifier identifier = (Identifier) expression;
-                    String value = identifier.getValue();
-                    identifier.setValue(paramMap.getOrDefault(value, value));
-                    System.out.println(expression);
-                    // TODO
-                }
-            });
+            allExpression.stream()
+                    .map(Expression::getBaseExpression)
+                    .flatMap(Collection::stream)
+                    .forEach(expression -> {
+                        if (expression instanceof Identifier) {
+                            Identifier identifier = (Identifier) expression;
+                            String value = identifier.getValue();
+                            identifier.setValue(paramMap.getOrDefault(value, value));
+                        }
+                    });
         }
     }
 

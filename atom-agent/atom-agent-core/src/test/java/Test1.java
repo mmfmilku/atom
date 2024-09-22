@@ -23,7 +23,7 @@ public class Test1 {
 
         String s = null;
         try {
-            s = FileUtils.readText("E:/project/atom/atom-agent/src/main/resources/config/agent.conf");
+            s = FileUtils.readText(System.getProperty("user.dir") + "/src/main/resources/config/agent.conf");
         } catch (IOException e) {
             e.printStackTrace();
         }

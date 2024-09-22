@@ -1,16 +1,12 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.ExpressionOperate;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.ImportUse;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
-import java.util.List;
-
-public interface Statement extends Node, ImportUse {
+public interface Statement extends Node, ImportUse, ExpressionOperate {
 
     String getStatementSource();
-
-    List<Expression> getAllExpression();
 
     @Override
     default String getSourceCode() {

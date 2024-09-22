@@ -25,6 +25,7 @@ public class ParserTest {
         if (b == 0) {
             System.out.println("b等于零");
         }
+        this.testNo();
     }
 
     @Test

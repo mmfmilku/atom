@@ -2,9 +2,8 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MethodCall implements Expression {
 
@@ -37,11 +36,22 @@ public class MethodCall implements Expression {
     }
 
     @Override
-    public void useImports(HashMap<String, String> importsMap) {
+    public void useImports(Map<String, String> importsMap) {
         setCalledMethod(importsMap.getOrDefault(calledMethod, calledMethod));
         Optional.of(passedParams)
                 .ifPresent(expressions -> expressions.forEach(
                         expression ->
                                 expression.useImports(importsMap)));
+    }
+
+    @Override
+    public List<Expression> getBaseExpression() {
+        if (passedParams == null) {
+            return Collections.emptyList();
+        }
+        return passedParams.stream()
+                .map(Expression::getBaseExpression)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 }

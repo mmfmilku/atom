@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class BaseLiteral implements Expression {
 
@@ -24,7 +25,7 @@ public class BaseLiteral implements Expression {
     }
 
     @Override
-    public void useImports(HashMap<String, String> importsMap) {
+    public void useImports(Map<String, String> importsMap) {
 
     }
 }

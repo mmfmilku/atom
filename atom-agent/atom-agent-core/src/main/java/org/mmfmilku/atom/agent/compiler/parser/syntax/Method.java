@@ -7,6 +7,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStateme
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Method implements Node, ImportUse {
@@ -101,7 +102,7 @@ public class Method implements Node, ImportUse {
     }
 
     @Override
-    public void useImports(HashMap<String, String> importsMap) {
+    public void useImports(Map<String, String> importsMap) {
         setReturnType(importsMap.getOrDefault(returnType, returnType));
         codeBlock.useImports(importsMap);
     }

@@ -4,10 +4,7 @@ import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CodeBlock implements Statement {
@@ -41,7 +38,7 @@ public class CodeBlock implements Statement {
     }
 
     @Override
-    public void useImports(HashMap<String, String> importsMap) {
+    public void useImports(Map<String, String> importsMap) {
         statements.forEach(statement -> statement.useImports(importsMap));
     }
 }

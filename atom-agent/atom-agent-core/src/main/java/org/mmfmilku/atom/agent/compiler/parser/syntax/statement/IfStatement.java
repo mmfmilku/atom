@@ -5,6 +5,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class IfStatement implements Statement {
 
@@ -76,7 +77,7 @@ public class IfStatement implements Statement {
     }
 
     @Override
-    public void useImports(HashMap<String, String> importsMap) {
+    public void useImports(Map<String, String> importsMap) {
         condition.useImports(importsMap);
         trueStatement.useImports(importsMap);
         if (falseStatement != null) {

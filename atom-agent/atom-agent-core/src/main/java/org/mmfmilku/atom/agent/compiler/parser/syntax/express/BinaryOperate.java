@@ -2,7 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * 双目表达式
@@ -49,8 +49,18 @@ public class BinaryOperate implements Expression {
     }
 
     @Override
-    public void useImports(HashMap<String, String> importsMap) {
+    public void useImports(Map<String, String> importsMap) {
         left.useImports(importsMap);
         right.useImports(importsMap);
+    }
+
+    @Override
+    public List<Expression> getBaseExpression() {
+        List<Expression> leftExpression = left.getBaseExpression();
+        List<Expression> rightExpression = right.getBaseExpression();
+        List<Expression> expressions = new ArrayList<>();
+        expressions.addAll(leftExpression);
+        expressions.addAll(rightExpression);
+        return expressions;
     }
 }

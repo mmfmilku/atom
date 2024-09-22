@@ -5,6 +5,8 @@ import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class JavaAST implements Node {
 
@@ -50,17 +52,11 @@ public class JavaAST implements Node {
         if (imports == null || imports.isEmpty()) {
             return;
         }
-        HashMap<String, String> importsMap = imports.stream().reduce(new HashMap<>(),
-                (map, data) -> {
+        Map<String, String> importsMap = imports.stream()
+                .collect(Collectors.toMap(data -> {
                     String value = data.getValue();
-                    String substring = value.substring(value.lastIndexOf(".") + 1);
-                    map.put(substring, value);
-                    return map;
-                },
-                (a, b) -> {
-                    a.putAll(b);
-                    return a;
-                });
+                    return value.substring(value.lastIndexOf(".") + 1);
+                }, Import::getValue));
         String packageName = getPackageNode().getValue();
         List<Class> classList = getClassList();
         for (Class clazz : classList) {

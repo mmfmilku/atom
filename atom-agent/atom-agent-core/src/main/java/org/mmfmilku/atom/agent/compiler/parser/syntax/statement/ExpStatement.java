@@ -5,6 +5,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ExpStatement implements Statement {
 
@@ -33,7 +34,7 @@ public class ExpStatement implements Statement {
     }
 
     @Override
-    public void useImports(HashMap<String, String> importsMap) {
+    public void useImports(Map<String, String> importsMap) {
         expression.useImports(importsMap);
     }
 }

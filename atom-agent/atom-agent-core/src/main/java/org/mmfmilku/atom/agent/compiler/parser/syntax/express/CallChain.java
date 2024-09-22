@@ -1,10 +1,14 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 调用链表达式 o1.m1().o2.m2()
- * */
+ */
 public class CallChain implements Expression {
 
     private Expression first;
@@ -38,9 +42,15 @@ public class CallChain implements Expression {
     }
 
     @Override
-    public void useImports(HashMap<String, String> importsMap) {
+    public void useImports(Map<String, String> importsMap) {
         first.useImports(importsMap);
-        // 链式调用，仅替换首个调用
-//        next.useImports(importsMap);
+        next.useImports(importsMap);
+    }
+
+    @Override
+    public List<Expression> getBaseExpression() {
+        return Stream.concat(first.getBaseExpression().stream(),
+                next.getBaseExpression().stream())
+                .collect(Collectors.toList());
     }
 }
