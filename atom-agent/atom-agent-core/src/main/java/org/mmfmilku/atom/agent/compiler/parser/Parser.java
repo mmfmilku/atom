@@ -107,6 +107,8 @@ public class Parser {
                         Class clazz = parseClass();
                         clazz.setModifier(modifier);
                         clazz.setAnnotations(annotations);
+                        clazz.setClassFullName(javaAST.getPackageNode().getValue()
+                                + "." + clazz.getClassName());
                         javaAST.getClassList().add(clazz);
                         curr++;
                         continue;

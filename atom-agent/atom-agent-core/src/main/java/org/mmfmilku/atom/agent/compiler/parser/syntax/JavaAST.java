@@ -57,10 +57,8 @@ public class JavaAST implements Node {
                     String value = data.getValue();
                     return value.substring(value.lastIndexOf(".") + 1);
                 }, Import::getValue));
-        String packageName = getPackageNode().getValue();
         List<Class> classList = getClassList();
         for (Class clazz : classList) {
-            clazz.setClassFullName(packageName + "." + clazz.getClassName());
             List<Method> methods = clazz.getMethods();
             for (Method method : methods) {
                 method.useImports(importsMap);

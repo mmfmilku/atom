@@ -14,11 +14,15 @@
  *********************************************/
 package org.mmfmilku.atom.agent.config;
 
+import org.mmfmilku.atom.agent.compiler.CompilerUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
+import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 import org.mmfmilku.atom.agent.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * OverrideBodyHolder
@@ -72,18 +76,45 @@ public class OverrideBodyHolder {
 
     private static void loadOverrideFile(String file) {
         // 将文件定义的方法覆写体，读取到map中
-        if (!file.endsWith(".ord")) {
-            return;
+        if (file.endsWith(".ord")) {
+            System.out.println("--------------load .ord file:" + file);
+            try {
+                String text = FileUtils.readText(file).trim();
+
+                Map<String, ClassORDDefine> parse = ORDParser.parse(text);
+                overrideClassMap.putAll(parse);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (file.endsWith(".java")) {
+            System.out.println("--------------load .java file:" + file);
+            try {
+                String text = FileUtils.readText(file).trim();
+                JavaAST javaAST = CompilerUtil.parseAST(text);
+                ByteCodeUtils.toJavassistCode(javaAST);
+                Map<String, ClassORDDefine> defineMap = javaAST.getClassList()
+                        .stream()
+                        .map(clazz -> {
+                            Map<String, MethodORDDefine> methodORDMap = clazz.getMethods()
+                                    .stream()
+                                    .map(method -> {
+                                        MethodORDDefine methodORDDefine = new MethodORDDefine(method.getMethodName());
+                                        methodORDDefine.setSrcMap(Collections.singletonMap(
+                                                Keywords.METHOD,
+                                                method.getCodeBlock().getSourceCode()));
+                                        return methodORDDefine;
+                                    }).collect(Collectors.toMap(MethodORDDefine::getMethodName, v -> v));
+                            ClassORDDefine ordDefine = new ClassORDDefine();
+                            ordDefine.setName(clazz.getClassFullName());
+                            ordDefine.setMethodORDMap(methodORDMap);
+                            return ordDefine;
+                        }).collect(Collectors.toMap(ClassORDDefine::getName, v -> v));
+                overrideClassMap.putAll(defineMap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        System.out.println("--------------load ord file:" + file);
-        try {
-            String text = FileUtils.readText(file).trim();
-            
-            Map<String, ClassORDDefine> parse = ORDParser.parse(text);
-            overrideClassMap.putAll(parse);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
     }
 
 }
