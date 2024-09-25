@@ -15,8 +15,8 @@ public class PreMainTest {
     @Test
     public void testCase1() {
         int num = getNum();
+        System.out.println(num);
         assertEquals(3, num);
-        System.out.println(getNum());
     }
 
 }
