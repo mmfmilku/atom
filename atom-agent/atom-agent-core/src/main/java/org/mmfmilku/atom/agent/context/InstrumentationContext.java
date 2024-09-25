@@ -88,6 +88,18 @@ public class InstrumentationContext {
         return null;
     }
 
+    public static List<Class<?>> searchClassByPackage(String packageName) {
+        checkInit();
+        Class<?>[] loadedClasses = instance.inst.getAllLoadedClasses();
+        List<Class<?>> searchList = new ArrayList<>();
+        for (Class<?> loadedClass : loadedClasses) {
+            if (loadedClass.getName().startsWith(packageName)) {
+                searchList.add(loadedClass);
+            }
+        }
+        return searchList;
+    }
+
     public static ClassLoader searchClassLoader(String searchClassLoaderName) {
         checkInit();
         Class<?>[] loadedClasses = instance.inst.getAllLoadedClasses();
