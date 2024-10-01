@@ -10,7 +10,11 @@ public class AgentLogUtils {
 
     }
 
-    public static void error() {
+    public static void error(String msg, String ...vars) {
+
+    }
+
+    public static void error(Throwable throwable, String msg, String ...vars) {
 
     }
 

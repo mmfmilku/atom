@@ -1,26 +1,15 @@
-/********************************************
- * 文件名称: Server.java
- * 系统名称: 综合理财管理平台6.0
- * 模块名称:
- * 软件版权: 恒生电子股份有限公司
- * 功能说明:
- * 系统版本: 6.0.0.1
- * 开发人员: chenxp
- * 开发时间: 2024/9/29
- * 审核人员:
- * 相关文档:
- * 修改记录:   修改日期    修改人员    修改单号       版本号                   修改说明
- * V6.0.0.1  20240929-01  chenxp   TXXXXXXXXXXXX    IFMS6.0VXXXXXXXXXXXXX   新增 
- *********************************************/
 package org.mmfmilku.atom.agent.transport.protocol.file;
 
-import org.mmfmilku.atom.agent.transport.MessageUtils;
 import org.mmfmilku.atom.agent.transport.MsgContext;
-import org.mmfmilku.atom.agent.transport.handle.Handle;
+import org.mmfmilku.atom.agent.transport.handle.ServerHandle;
+import org.mmfmilku.atom.agent.util.AgentLogUtils;
+import org.mmfmilku.atom.agent.util.IOUtils;
 
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Server
@@ -52,19 +41,20 @@ public class FServer {
         } else if (listen.isFile()) {
             throw new RuntimeException("启动失败,监听路径需为文件夹");
         }
+        listen(listen);
+    }
+
+    private void listen(File listen) {
         while (true) {
             // TODO @chenxp 2024/9/29 每行的数据完整读取
-            File[] requestFiles = listen.listFiles((dir, name) -> !accepted.contains(name) 
+            File[] requestFiles = listen.listFiles((dir, name) -> !accepted.contains(name)
                     && name.endsWith(REQUEST));
             if (requestFiles != null) {
                 for (File requestFile : requestFiles) {
                     accept(requestFile);
                 }
             }
-            // TODO 配置超时时间
-            if (true) {
-                break;
-            }
+            sleep(5000);
         }
     }
 
@@ -77,56 +67,38 @@ public class FServer {
     }
 
     public void accept(File requestFile) {
-        try (InputStream inputStream = new FileInputStream(requestFile);
-             OutputStream outputStream = new FileOutputStream(
-                     new File(requestFile.getAbsolutePath() + RESPONSE))) {
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try {
+            inputStream = new FileInputStream(requestFile);
+            outputStream = new FileOutputStream(
+                    new File(requestFile.getAbsolutePath() + RESPONSE));
             accepted.add(requestFile.getName());
-            service(inputStream, outputStream);
+            MsgContext ctx = new MsgContext(inputStream, outputStream);
+            service(ctx);
         } catch (IOException e) {
-            e.printStackTrace();
+            AgentLogUtils.error(e, "连接接收异常", requestFile.getAbsolutePath());
+            IOUtils.closeStream(inputStream);
+            IOUtils.closeStream(outputStream);
         }
     }
 
-    private Handle handle = (data, ctx) -> {
-        String input = new String((byte[]) data);
-        System.out.println("收到数据:" + input);
-        ctx.write("你好,收到你的数据了\n");
-        ctx.write("完毕\n");
+    private ServerHandle<String> handle = (ctx, data) -> {
+        System.out.println("收到客户端数据:" + data);
+        ctx.write("你好,收到你的数据:" + data);
     };
+    
+    ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-    private void service(InputStream inputStream, OutputStream outputStream) throws IOException {
-        byte[] receiveLenByte = new byte[2];
-        MsgContext ctx = new MsgContext(outputStream);
-        while (true) {
-            readToFull(inputStream, receiveLenByte);
-            // TODO 心跳处理
-            int len = MessageUtils.decodeLength(receiveLenByte);
-            if (len == 0) {
-                // TODO 标识结束
-                ctx.write("");
-                return;
+    private void service(MsgContext ctx) throws IOException {
+        executorService.execute(() -> {
+            while (!ctx.isClose()) {
+                String read = ctx.read();
+                if (read != null) {
+                    handle.receive(ctx, read);
+                }
             }
-            byte[] data = new byte[len];
-            readToFull(inputStream, data);
-            handle.receive(data, ctx);
-        }
-    }
-
-    private void readToFull(InputStream inputStream, byte[] buf) throws IOException {
-        int read;
-        // 剩余读取大小，初始为数组大小
-        int left = buf.length;
-        // 读取偏移量，初始为0
-        int off = 0;
-        while (left > 0 &&
-                ((read = inputStream.read(buf, off, left)) != left)) {
-            // TODO 设置读取超时
-            if (read <= 0) {
-                continue;
-            }
-            left -= read;
-            off = buf.length - left;
-        }
+        });
     }
 
 }
