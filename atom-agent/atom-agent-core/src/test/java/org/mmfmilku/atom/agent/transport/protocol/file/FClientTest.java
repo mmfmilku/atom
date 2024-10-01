@@ -19,8 +19,8 @@ public class FClientTest {
     public void connect() {
         String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
         FClient fClient = new FClient(path);
-        ClientSession<String> connect1 = fClient.connect("7");
-        ClientSession<String> connect2 = fClient.connect("8");
+        ClientSession<String> connect1 = fClient.connect("1");
+        ClientSession<String> connect2 = fClient.connect("2");
         
         String s = connect1.sendThenRead("发送消息1");
         System.out.println("接收：" + s);
@@ -33,6 +33,10 @@ public class FClientTest {
         
         connect1.close();
 
+        ClientSession<String> connect3 = fClient.connect("3");
+        s = connect3.sendThenRead("连接3发送消息1");
+        System.out.println("接收：" + s);
+
         s = connect2.sendThenRead("连接2发送消息2");
         System.out.println("接收：" + s);
 
@@ -43,6 +47,8 @@ public class FClientTest {
         }
         
         connect2.close();
+
+
     }
     
     private String printCostTime(Function<String, String> function) {

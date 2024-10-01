@@ -62,6 +62,12 @@ public class FClient {
             outputStream = new FileOutputStream(requestFile);
             MsgContext ctx = new MsgContext(inputStream, outputStream);
             // TODO @chenxp 2024/9/30 建立连接
+            String read = ctx.read();
+            if ("PING".equals(read)) {
+                ctx.write("PONG");
+            } else {
+                throw new RuntimeException("连接失败");
+            }
             return new SRClientSession(ctx);
         } catch (IOException e) {
             e.printStackTrace();

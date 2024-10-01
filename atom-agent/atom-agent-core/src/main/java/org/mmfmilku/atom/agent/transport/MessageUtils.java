@@ -35,6 +35,9 @@ public class MessageUtils {
         while (left > 0 &&
                 ((read = inputStream.read(buf, off, left)) != left)) {
             // TODO 设置读取超时
+            if (waitCount > 10) {
+
+            }
             if (read <= 0) {
                 waitCount++;
                 continue;

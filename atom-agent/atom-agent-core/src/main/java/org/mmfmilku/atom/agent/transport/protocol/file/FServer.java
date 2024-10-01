@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.transport.protocol.file;
 
 import org.mmfmilku.atom.agent.transport.MsgContext;
+import org.mmfmilku.atom.agent.transport.handle.BaseServerHandle;
 import org.mmfmilku.atom.agent.transport.handle.ServerHandle;
 import org.mmfmilku.atom.agent.util.AgentLogUtils;
 import org.mmfmilku.atom.agent.util.IOUtils;
@@ -8,8 +9,7 @@ import org.mmfmilku.atom.agent.util.IOUtils;
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 /**
  * Server
@@ -27,8 +27,16 @@ public class FServer {
     
     private Set<String> accepted = new HashSet<>();
 
+    private ServerHandle<String> handle;
+
     public FServer(String listenPath) {
         this.listenPath = listenPath;
+        handle = new BaseServerHandle();
+    }
+
+    public FServer(String listenPath, ServerHandle<String> handle) {
+        this.listenPath = listenPath;
+        this.handle = handle;
     }
 
     public void start() {
@@ -74,8 +82,14 @@ public class FServer {
             outputStream = new FileOutputStream(
                     new File(requestFile.getAbsolutePath() + RESPONSE));
             accepted.add(requestFile.getName());
-            MsgContext ctx = new MsgContext(inputStream, outputStream);
-            service(ctx);
+            MsgContext ctx = new MsgContext(inputStream, outputStream,
+                    // TODO 删除文件
+//                    o -> accepted.remove(requestFile.getName())
+                    o -> {
+                        System.out.println("关闭" + o);
+                    }
+            );
+            dealHandle(ctx);
         } catch (IOException e) {
             AgentLogUtils.error(e, "连接接收异常", requestFile.getAbsolutePath());
             IOUtils.closeStream(inputStream);
@@ -83,21 +97,33 @@ public class FServer {
         }
     }
 
-    private ServerHandle<String> handle = (ctx, data) -> {
-        System.out.println("收到客户端数据:" + data);
-        ctx.write("你好,收到你的数据:" + data);
-    };
-    
-    ExecutorService executorService = Executors.newFixedThreadPool(2);
+    private ExecutorService executorService = new ThreadPoolExecutor(2, 2,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>() {
+                @Override
+                public boolean add(Runnable runnable) {
+                    throw new RuntimeException("连接达到上限！");
+                }
 
-    private void service(MsgContext ctx) throws IOException {
+                @Override
+                public boolean offer(Runnable runnable) {
+                    throw new RuntimeException("连接达到上限！");
+                }
+            });
+
+    private void dealHandle(MsgContext ctx) throws IOException {
         executorService.execute(() -> {
+            boolean open = handle.open(ctx);
+            if (!open) {
+                throw new RuntimeException("连接建立失败");
+            }
             while (!ctx.isClose()) {
                 String read = ctx.read();
                 if (read != null) {
                     handle.receive(ctx, read);
                 }
             }
+            System.out.println("执行结束" + ctx);
         });
     }
 
