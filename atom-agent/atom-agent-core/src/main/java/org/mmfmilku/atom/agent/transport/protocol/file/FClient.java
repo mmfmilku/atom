@@ -41,20 +41,7 @@ public class FClient {
             throw new RuntimeException("连接失败");
         }
         File responseFile = new File(connectPath, responseName);
-        int waitCount = 0;
-        while (!responseFile.exists()) {
-            if (waitCount > 10) {
-                throw new RuntimeException("等待服务器响应超时");
-            }
-            try {
-                System.out.println("等待服务器响应");
-                Thread.sleep(1000);
-                waitCount++;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            responseFile = new File(connectPath, responseName);
-        }
+        responseFile = waitCount(responseName, responseFile);
         InputStream inputStream = null;
         OutputStream outputStream = null;
         try {
@@ -75,6 +62,24 @@ public class FClient {
             IOUtils.closeStream(outputStream);
         }
         throw new RuntimeException("连接失败");
+    }
+
+    private File waitCount(String responseName, File responseFile) {
+        int waitCount = 0;
+        while (!responseFile.exists()) {
+            if (waitCount > 10) {
+                throw new RuntimeException("等待服务器响应超时");
+            }
+            try {
+                System.out.println("等待服务器响应");
+                Thread.sleep(1000);
+                waitCount++;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            responseFile = new File(connectPath, responseName);
+        }
+        return responseFile;
     }
 
 }

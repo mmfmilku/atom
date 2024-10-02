@@ -24,7 +24,7 @@ public class FServer {
     public static final String RESPONSE = ".response";
 
     private String listenPath;
-    
+
     private Set<String> accepted = new HashSet<>();
 
     private ServerHandle<String> handle;
@@ -75,57 +75,64 @@ public class FServer {
     }
 
     public void accept(File requestFile) {
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
-        try {
-            inputStream = new FileInputStream(requestFile);
-            outputStream = new FileOutputStream(
-                    new File(requestFile.getAbsolutePath() + RESPONSE));
-            accepted.add(requestFile.getName());
-            MsgContext ctx = new MsgContext(inputStream, outputStream,
-                    // TODO 删除文件
+        // 拒绝的连接认为已处理，否则将不断处理
+        accepted.add(requestFile.getName());
+        executorService.execute(() -> {
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+            try {
+                inputStream = new FileInputStream(requestFile);
+                outputStream = new FileOutputStream(
+                        new File(requestFile.getAbsolutePath() + RESPONSE));
+                MsgContext ctx = new MsgContext(inputStream, outputStream,
+                        // TODO 删除文件
 //                    o -> accepted.remove(requestFile.getName())
-                    o -> {
-                        System.out.println("关闭" + o);
+                        o -> {
+                            System.out.println("关闭" + o);
+                        }
+                );
+                boolean open = handle.open(ctx);
+                if (!open) {
+                    throw new RuntimeException("连接建立失败");
+                }
+                while (!ctx.isClose()) {
+                    if (ctx.canRead()) {
+                        String read = ctx.read();
+                        if (read != null) {
+                            handle.receive(ctx, read);
+                        }
                     }
-            );
-            dealHandle(ctx);
-        } catch (IOException e) {
-            AgentLogUtils.error(e, "连接接收异常", requestFile.getAbsolutePath());
-            IOUtils.closeStream(inputStream);
-            IOUtils.closeStream(outputStream);
-        }
+                }
+                System.out.println("执行结束" + ctx);
+            } catch (IOException e) {
+                AgentLogUtils.error(e, "连接接收异常", requestFile.getAbsolutePath());
+                IOUtils.closeStream(inputStream);
+                IOUtils.closeStream(outputStream);
+            }
+
+        });
     }
 
     private ExecutorService executorService = new ThreadPoolExecutor(2, 2,
             0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>() {
-                @Override
-                public boolean add(Runnable runnable) {
-                    throw new RuntimeException("连接达到上限！");
-                }
+//            new LinkedBlockingQueue<Runnable>() {
+//                @Override
+//                public boolean add(Runnable runnable) {
+//                    return false;
+//                }
+//
+//                @Override
+//                public boolean offer(Runnable runnable) {
+//                    return false;
+//                }
+//            },
+            // 队列大于1将入队失败
+            new ArrayBlockingQueue<>(1),
+            Executors.defaultThreadFactory(),
+            (r, executor) -> System.out.println("连接" +
+                    "拒绝")
+    );
 
-                @Override
-                public boolean offer(Runnable runnable) {
-                    throw new RuntimeException("连接达到上限！");
-                }
-            });
-
-    private void dealHandle(MsgContext ctx) throws IOException {
-        executorService.execute(() -> {
-            boolean open = handle.open(ctx);
-            if (!open) {
-                throw new RuntimeException("连接建立失败");
-            }
-            while (!ctx.isClose()) {
-                String read = ctx.read();
-                if (read != null) {
-                    handle.receive(ctx, read);
-                }
-            }
-            System.out.println("执行结束" + ctx);
-        });
-    }
 
 }
 

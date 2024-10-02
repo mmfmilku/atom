@@ -3,6 +3,7 @@ package org.mmfmilku.atom.agent.transport.protocol.file;
 import org.junit.Test;
 import org.mmfmilku.atom.agent.transport.handle.ClientSession;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Function;
 
 import static org.junit.Assert.*;
@@ -33,10 +34,6 @@ public class FClientTest {
         
         connect1.close();
 
-        ClientSession<String> connect3 = fClient.connect("3");
-        s = connect3.sendThenRead("连接3发送消息1");
-        System.out.println("接收：" + s);
-
         s = connect2.sendThenRead("连接2发送消息2");
         System.out.println("接收：" + s);
 
@@ -48,7 +45,36 @@ public class FClientTest {
         
         connect2.close();
 
+    }
 
+    @Test
+    public void testClose() {
+        String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
+        FClient fClient = new FClient(path);
+        ClientSession<String> connect1 = fClient.connect("c1");
+        ClientSession<String> connect2 = fClient.connect("c2");
+        connect1.close();
+        connect2.close();
+
+        ClientSession<String> connect3 = fClient.connect("c3");
+        ClientSession<String> connect4 = fClient.connect("c4");
+
+        connect3.close();
+
+        ClientSession<String> connect5 = fClient.connect("c5");
+
+        connect4.close();
+        connect5.close();
+    }
+
+    @Test
+    public void testCaseThree() {
+        String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
+        FClient fClient = new FClient(path);
+        ClientSession<String> connect = fClient.connect();
+        String read = connect.sendThenRead("fuck");
+        System.out.println(read);
+        connect.close();
     }
     
     private String printCostTime(Function<String, String> function) {
