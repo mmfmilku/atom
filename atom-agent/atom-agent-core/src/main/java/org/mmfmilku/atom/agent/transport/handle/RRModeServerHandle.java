@@ -1,6 +1,6 @@
 package org.mmfmilku.atom.agent.transport.handle;
 
-import org.mmfmilku.atom.agent.transport.MsgContext;
+import org.mmfmilku.atom.agent.transport.ConnectContext;
 
 public class RRModeServerHandle implements ServerHandle<String> {
 
@@ -11,17 +11,17 @@ public class RRModeServerHandle implements ServerHandle<String> {
     }
 
     @Override
-    public boolean open(MsgContext ctx) {
+    public boolean open(ConnectContext ctx) {
         return serverHandle.open(ctx);
     }
 
     @Override
-    public void close(MsgContext ctx) {
+    public void close(ConnectContext ctx) {
         serverHandle.close(ctx);
     }
 
     @Override
-    public void receive(MsgContext ctx, String data) {
+    public void receive(ConnectContext ctx, String data) {
         serverHandle.receive(ctx, data);
     }
 }

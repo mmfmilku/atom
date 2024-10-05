@@ -1,6 +1,6 @@
 package org.mmfmilku.atom.agent.transport.protocol.file;
 
-import org.mmfmilku.atom.agent.transport.MsgContext;
+import org.mmfmilku.atom.agent.transport.ConnectContext;
 import org.mmfmilku.atom.agent.transport.handle.ClientSession;
 import org.mmfmilku.atom.agent.transport.handle.SRClientSession;
 import org.mmfmilku.atom.agent.util.IOUtils;
@@ -47,7 +47,7 @@ public class FClient {
         try {
             inputStream = new FileInputStream(responseFile);
             outputStream = new FileOutputStream(requestFile);
-            MsgContext ctx = new MsgContext(inputStream, outputStream);
+            ConnectContext ctx = new ConnectContext(inputStream, outputStream);
             // TODO @chenxp 2024/9/30 建立连接
             String read = ctx.read();
             if ("PING".equals(read)) {

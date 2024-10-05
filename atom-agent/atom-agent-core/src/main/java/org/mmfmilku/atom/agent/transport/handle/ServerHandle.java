@@ -1,13 +1,13 @@
 package org.mmfmilku.atom.agent.transport.handle;
 
-import org.mmfmilku.atom.agent.transport.MsgContext;
+import org.mmfmilku.atom.agent.transport.ConnectContext;
 
 public interface ServerHandle<T> {
 
-    boolean open(MsgContext ctx);
+    boolean open(ConnectContext ctx);
 
-    void close(MsgContext ctx);
+    void close(ConnectContext ctx);
 
-    void receive(MsgContext ctx, T data);
+    void receive(ConnectContext ctx, T data);
 
 }

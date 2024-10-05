@@ -4,14 +4,14 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.function.Consumer;
 
-public class MsgContext implements Closeable {
+public class ConnectContext implements Closeable {
 
     private InputStream inputStream;
     private OutputStream outputStream;
-    private Consumer<MsgContext> closeCallback;
+    private Consumer<ConnectContext> closeCallback;
+    private long readTimeout = 1000;
     
     private boolean close = false;
 
@@ -19,12 +19,12 @@ public class MsgContext implements Closeable {
         return close;
     }
 
-    public MsgContext(InputStream inputStream, OutputStream outputStream) {
+    public ConnectContext(InputStream inputStream, OutputStream outputStream) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
     }
 
-    public MsgContext(InputStream inputStream, OutputStream outputStream, Consumer<MsgContext> closeCallback) {
+    public ConnectContext(InputStream inputStream, OutputStream outputStream, Consumer<ConnectContext> closeCallback) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
         this.closeCallback = closeCallback;
@@ -53,17 +53,18 @@ public class MsgContext implements Closeable {
     }
 
     public String read() {
+        long timeoutTimeMillis = System.currentTimeMillis() + readTimeout;
         byte[] receiveLenByte = new byte[2];
         try {
             if (preRead != null) {
                 // 读取过第一个字节
                 byte[] tmpByte = new byte[1];
-                MessageUtils.readToFull(inputStream, tmpByte);
+                readToFull(tmpByte, timeoutTimeMillis);
                 receiveLenByte[0] = preRead[0];
                 receiveLenByte[1] = tmpByte[0];
                 preRead = null;
             } else {
-                MessageUtils.readToFull(inputStream, receiveLenByte);
+                readToFull(receiveLenByte, timeoutTimeMillis);
             }
             // TODO 心跳处理
             int len = MessageUtils.decodeLength(receiveLenByte);
@@ -73,13 +74,34 @@ public class MsgContext implements Closeable {
                 return null;
             }
             byte[] data = new byte[len];
-            MessageUtils.readToFull(inputStream, data);
+            readToFull(data, timeoutTimeMillis);
             return new String(data);
         } catch (IOException e) {
             e.printStackTrace();
             close();
         }
         return "";
+    }
+
+    private void readToFull(byte[] buf, long timeoutTimeMillis) throws IOException {
+        int read;
+        // 剩余读取大小，初始为数组大小
+        int left = buf.length;
+        // 读取偏移量，初始为0
+        int off = 0;
+        while (left > 0 &&
+                ((read = inputStream.read(buf, off, left)) != left)) {
+            // TODO 设置读取超时
+            if (read <= 0) {
+                if (System.currentTimeMillis() > timeoutTimeMillis) {
+                    // 读取超时
+                    throw new RuntimeException("读取超时");
+                }
+                continue;
+            }
+            left -= read;
+            off = buf.length - left;
+        }
     }
 
     public void write(String send) {

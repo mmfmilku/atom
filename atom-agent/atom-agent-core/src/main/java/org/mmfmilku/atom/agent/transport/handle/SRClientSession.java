@@ -1,6 +1,6 @@
 package org.mmfmilku.atom.agent.transport.handle;
 
-import org.mmfmilku.atom.agent.transport.MsgContext;
+import org.mmfmilku.atom.agent.transport.ConnectContext;
 
 /**
  * SRClientHandle
@@ -10,9 +10,9 @@ import org.mmfmilku.atom.agent.transport.MsgContext;
  */
 public class SRClientSession implements ClientSession<String> {
     
-    private MsgContext ctx;
+    private ConnectContext ctx;
 
-    public SRClientSession(MsgContext ctx) {
+    public SRClientSession(ConnectContext ctx) {
         this.ctx = ctx;
     }
 

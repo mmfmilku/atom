@@ -25,27 +25,4 @@ public class MessageUtils {
         return ((((int) b1) & 0xff) << 8) + (((int) b2) & 0xff);
     }
 
-    public static void readToFull(InputStream inputStream, byte[] buf) throws IOException {
-        int read;
-        // 剩余读取大小，初始为数组大小
-        int left = buf.length;
-        // 读取偏移量，初始为0
-        int off = 0;
-        int waitCount = 0;
-        while (left > 0 &&
-                ((read = inputStream.read(buf, off, left)) != left)) {
-            // TODO 设置读取超时
-            if (waitCount > 10) {
-
-            }
-            if (read <= 0) {
-                waitCount++;
-                continue;
-            }
-            waitCount = 0;
-            left -= read;
-            off = buf.length - left;
-        }
-    }
-
 }

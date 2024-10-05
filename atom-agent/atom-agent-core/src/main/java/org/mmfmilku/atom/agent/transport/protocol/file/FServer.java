@@ -1,13 +1,15 @@
 package org.mmfmilku.atom.agent.transport.protocol.file;
 
-import org.mmfmilku.atom.agent.transport.MsgContext;
+import org.mmfmilku.atom.agent.transport.ConnectContext;
 import org.mmfmilku.atom.agent.transport.handle.BaseServerHandle;
 import org.mmfmilku.atom.agent.transport.handle.ServerHandle;
 import org.mmfmilku.atom.agent.util.AgentLogUtils;
 import org.mmfmilku.atom.agent.util.IOUtils;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -25,7 +27,7 @@ public class FServer {
 
     private String listenPath;
 
-    private Set<String> accepted = new HashSet<>();
+    private Map<String, ConnectContext> ctxMap = new HashMap<>();
 
     private ServerHandle<String> handle;
 
@@ -54,8 +56,7 @@ public class FServer {
 
     private void listen(File listen) {
         while (true) {
-            // TODO @chenxp 2024/9/29 每行的数据完整读取
-            File[] requestFiles = listen.listFiles((dir, name) -> !accepted.contains(name)
+            File[] requestFiles = listen.listFiles((dir, name) -> !ctxMap.containsKey(name)
                     && name.endsWith(REQUEST));
             if (requestFiles != null) {
                 for (File requestFile : requestFiles) {
@@ -76,7 +77,7 @@ public class FServer {
 
     public void accept(File requestFile) {
         // 拒绝的连接认为已处理，否则将不断处理
-        accepted.add(requestFile.getName());
+        ctxMap.put(requestFile.getName(), null);
         executorService.execute(() -> {
             InputStream inputStream = null;
             OutputStream outputStream = null;
@@ -84,10 +85,10 @@ public class FServer {
                 inputStream = new FileInputStream(requestFile);
                 outputStream = new FileOutputStream(
                         new File(requestFile.getAbsolutePath() + RESPONSE));
-                MsgContext ctx = new MsgContext(inputStream, outputStream,
+                ConnectContext ctx = new ConnectContext(inputStream, outputStream,
                         // TODO 删除文件
-//                    o -> accepted.remove(requestFile.getName())
                         o -> {
+                            // ctxMap.remove(requestFile.getName());
                             System.out.println("关闭" + o);
                         }
                 );
@@ -95,6 +96,7 @@ public class FServer {
                 if (!open) {
                     throw new RuntimeException("连接建立失败");
                 }
+                ctxMap.put(requestFile.getName(), ctx);
                 while (!ctx.isClose()) {
                     if (ctx.canRead()) {
                         String read = ctx.read();
@@ -115,17 +117,6 @@ public class FServer {
 
     private ExecutorService executorService = new ThreadPoolExecutor(2, 2,
             0L, TimeUnit.MILLISECONDS,
-//            new LinkedBlockingQueue<Runnable>() {
-//                @Override
-//                public boolean add(Runnable runnable) {
-//                    return false;
-//                }
-//
-//                @Override
-//                public boolean offer(Runnable runnable) {
-//                    return false;
-//                }
-//            },
             // 队列大于1将入队失败
             new ArrayBlockingQueue<>(1),
             Executors.defaultThreadFactory(),
