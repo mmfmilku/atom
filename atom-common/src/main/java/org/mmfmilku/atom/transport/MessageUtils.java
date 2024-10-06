@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.agent.transport;
+package org.mmfmilku.atom.transport;
 
 import java.io.IOException;
 import java.io.InputStream;

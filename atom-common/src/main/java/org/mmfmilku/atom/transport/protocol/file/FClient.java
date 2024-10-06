@@ -1,9 +1,9 @@
-package org.mmfmilku.atom.agent.transport.protocol.file;
+package org.mmfmilku.atom.transport.protocol.file;
 
-import org.mmfmilku.atom.agent.transport.ConnectContext;
-import org.mmfmilku.atom.agent.transport.handle.ClientSession;
-import org.mmfmilku.atom.agent.transport.handle.SRClientSession;
-import org.mmfmilku.atom.agent.util.IOUtils;
+import org.mmfmilku.atom.transport.ConnectContext;
+import org.mmfmilku.atom.transport.handle.ClientSession;
+import org.mmfmilku.atom.transport.handle.SRClientSession;
+import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.*;
 import java.util.UUID;

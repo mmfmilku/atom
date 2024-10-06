@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.agent.util;
+package org.mmfmilku.atom.util;
 
 import java.io.Closeable;
 import java.io.IOException;

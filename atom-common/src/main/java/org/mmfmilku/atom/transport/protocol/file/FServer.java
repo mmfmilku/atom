@@ -1,10 +1,9 @@
-package org.mmfmilku.atom.agent.transport.protocol.file;
+package org.mmfmilku.atom.transport.protocol.file;
 
-import org.mmfmilku.atom.agent.transport.ConnectContext;
-import org.mmfmilku.atom.agent.transport.handle.file.FHandle;
-import org.mmfmilku.atom.agent.transport.handle.ServerHandle;
-import org.mmfmilku.atom.agent.util.AgentLogUtils;
-import org.mmfmilku.atom.agent.util.IOUtils;
+import org.mmfmilku.atom.transport.ConnectContext;
+import org.mmfmilku.atom.transport.handle.file.FHandle;
+import org.mmfmilku.atom.transport.handle.ServerHandle;
+import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -117,7 +116,6 @@ public class FServer {
                 }
                 System.out.println("执行结束" + ctx);
             } catch (IOException e) {
-                AgentLogUtils.error(e, "连接接收异常", requestFile.getAbsolutePath());
                 IOUtils.closeStream(inputStream);
                 IOUtils.closeStream(outputStream);
             }

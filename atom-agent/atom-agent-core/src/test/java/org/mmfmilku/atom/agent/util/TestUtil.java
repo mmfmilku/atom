@@ -1,17 +1,7 @@
 package org.mmfmilku.atom.agent.util;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.junit.Test;
-import org.mmfmilku.atom.agent.transport.ConnectContext;
-import org.mmfmilku.atom.agent.transport.handle.ClientSession;
-import org.mmfmilku.atom.agent.transport.handle.RRModeServerHandle;
-import org.mmfmilku.atom.agent.transport.handle.SRClientSession;
-import org.mmfmilku.atom.agent.transport.handle.ServerHandle;
-import org.mmfmilku.atom.agent.transport.protocol.file.FClient;
-import org.mmfmilku.atom.agent.transport.protocol.file.FServer;
 
-import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
@@ -40,30 +30,4 @@ public class TestUtil {
         System.out.println(javaText);
     }
 
-    public static class FServerUtil {
-
-        public static void runServer(ServerHandle serverHandle) {
-            String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
-            FServer fServer = new FServer(path).addHandle(serverHandle);
-            fServer.start();
-        }
-
-        public static void runServerDaemon(ServerHandle serverHandle) {
-            Thread thread = new Thread("test-fserver") {
-                @Override
-                public void run() {
-                    FServerUtil.runServer(serverHandle);
-                }
-            };
-            thread.setDaemon(true);
-            thread.start();
-        }
-
-        public static ClientSession<String> connect() {
-            String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
-            FClient fClient = new FClient(path);
-            return fClient.connect();
-        }
-
-    }
 }

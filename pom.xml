@@ -12,6 +12,7 @@
         <module>atom-core</module>
         <module>atom-parse</module>
         <module>atom-agent</module>
+        <module>atom-common</module>
         <module>atom-web-console</module>
     </modules>
 

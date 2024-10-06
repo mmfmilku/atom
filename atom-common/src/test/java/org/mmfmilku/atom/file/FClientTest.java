@@ -1,16 +1,13 @@
-package org.mmfmilku.atom.agent.transport.protocol.file;
+package org.mmfmilku.atom.file;
 
 import com.alibaba.fastjson.JSON;
 import org.junit.Test;
-import org.mmfmilku.atom.agent.transport.handle.ClientSession;
-import org.mmfmilku.atom.agent.util.TestUtil;
+import org.mmfmilku.atom.transport.handle.ClientSession;
+import org.mmfmilku.atom.transport.protocol.file.FClient;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Function;
-
-import static org.junit.Assert.*;
 
 /**
  * FClientTest
@@ -83,7 +80,7 @@ public class FClientTest {
 
     @Test
     public void testRRModeClient() {
-        ClientSession<String> connect = TestUtil.FServerUtil.connect();
+        ClientSession<String> connect = FServerUtil.connect();
         Map<String, Object> map = new HashMap<>();
         map.put("k1", "5");
         map.put("k2", "8");

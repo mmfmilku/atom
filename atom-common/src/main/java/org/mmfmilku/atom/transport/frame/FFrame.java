@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.agent.transport.frame;
+package org.mmfmilku.atom.transport.frame;
 
 /**
  * 基础通信帧

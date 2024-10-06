@@ -1,18 +1,15 @@
-package org.mmfmilku.atom.agent.transport.protocol.file;
+package org.mmfmilku.atom.file;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.junit.Test;
-import org.mmfmilku.atom.agent.transport.ConnectContext;
-import org.mmfmilku.atom.agent.transport.MessageUtils;
-import org.mmfmilku.atom.agent.transport.handle.ClientSession;
-import org.mmfmilku.atom.agent.transport.handle.RRModeServerHandle;
-import org.mmfmilku.atom.agent.util.TestUtil;
+import org.mmfmilku.atom.transport.ConnectContext;
+import org.mmfmilku.atom.transport.MessageUtils;
+import org.mmfmilku.atom.transport.handle.RRModeServerHandle;
+import org.mmfmilku.atom.transport.protocol.file.FServer;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class FServerTest {
 
@@ -25,7 +22,7 @@ public class FServerTest {
 
     @Test
     public void rrModeServer() {
-        TestUtil.FServerUtil.runServer(new RRModeServerHandle() {
+        FServerUtil.runServer(new RRModeServerHandle() {
             @Override
             public void onReceive(ConnectContext ctx, String data) {
                 JSONObject jsonObject = JSON.parseObject(data);
