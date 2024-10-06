@@ -19,11 +19,6 @@ public class ConnectContext implements Closeable {
         return close;
     }
 
-    public ConnectContext(InputStream inputStream, OutputStream outputStream) {
-        this.inputStream = inputStream;
-        this.outputStream = outputStream;
-    }
-
     public ConnectContext(InputStream inputStream, OutputStream outputStream, Consumer<ConnectContext> closeCallback) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;

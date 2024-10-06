@@ -4,10 +4,12 @@ import org.mmfmilku.atom.agent.transport.ConnectContext;
 
 public interface ServerHandle<T> {
 
-    boolean open(ConnectContext ctx);
+    boolean onOpen(ConnectContext ctx);
 
-    void close(ConnectContext ctx);
+    void onClose(ConnectContext ctx);
 
-    void receive(ConnectContext ctx, T data);
+    void onError(ConnectContext ctx);
+
+    void onReceive(ConnectContext ctx, T data);
 
 }

@@ -1,7 +1,16 @@
 package org.mmfmilku.atom.agent.transport.protocol.file;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.junit.Test;
+import org.mmfmilku.atom.agent.transport.ConnectContext;
 import org.mmfmilku.atom.agent.transport.MessageUtils;
+import org.mmfmilku.atom.agent.transport.handle.ClientSession;
+import org.mmfmilku.atom.agent.transport.handle.RRModeServerHandle;
+import org.mmfmilku.atom.agent.util.TestUtil;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -12,6 +21,20 @@ public class FServerTest {
         String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
         FServer fServer = new FServer(path);
         fServer.start();
+    }
+
+    @Test
+    public void rrModeServer() {
+        TestUtil.FServerUtil.runServer(new RRModeServerHandle() {
+            @Override
+            public void onReceive(ConnectContext ctx, String data) {
+                JSONObject jsonObject = JSON.parseObject(data);
+                String v1 = (String) jsonObject.get("k1");
+                String v2 = (String) jsonObject.get("k2");
+                int i = Integer.parseInt(v1) + Integer.parseInt(v2);
+                ctx.write( "服务器返回：" + i);
+            }
+        });
     }
 
     @Test

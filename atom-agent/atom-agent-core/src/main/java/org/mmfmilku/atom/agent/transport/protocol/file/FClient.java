@@ -47,7 +47,7 @@ public class FClient {
         try {
             inputStream = new FileInputStream(responseFile);
             outputStream = new FileOutputStream(requestFile);
-            ConnectContext ctx = new ConnectContext(inputStream, outputStream);
+            ConnectContext ctx = new ConnectContext(inputStream, outputStream, null);
             // TODO @chenxp 2024/9/30 建立连接
             String read = ctx.read();
             if ("PING".equals(read)) {

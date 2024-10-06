@@ -1,8 +1,12 @@
 package org.mmfmilku.atom.agent.transport.protocol.file;
 
+import com.alibaba.fastjson.JSON;
 import org.junit.Test;
 import org.mmfmilku.atom.agent.transport.handle.ClientSession;
+import org.mmfmilku.atom.agent.util.TestUtil;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Function;
 
@@ -75,6 +79,16 @@ public class FClientTest {
         String read = connect.sendThenRead("fuck");
         System.out.println(read);
         connect.close();
+    }
+
+    @Test
+    public void testRRModeClient() {
+        ClientSession<String> connect = TestUtil.FServerUtil.connect();
+        Map<String, Object> map = new HashMap<>();
+        map.put("k1", "5");
+        map.put("k2", "8");
+        String s = connect.sendThenRead(JSON.toJSONString(map));
+        System.out.println("客户端接收" + s);
     }
     
     private String printCostTime(Function<String, String> function) {

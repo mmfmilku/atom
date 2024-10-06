@@ -1,24 +1,31 @@
-package org.mmfmilku.atom.agent.transport.handle;
+package org.mmfmilku.atom.agent.transport.handle.file;
 
 import org.mmfmilku.atom.agent.transport.ConnectContext;
+import org.mmfmilku.atom.agent.transport.handle.ServerHandle;
 
-public class RRModeServerHandle implements ServerHandle<String> {
+public class FHandle implements ServerHandle<String> {
 
     @Override
     public boolean onOpen(ConnectContext ctx) {
-        return true;
+        ctx.write("PING");
+        String read = ctx.read();
+        return "PONG".equals(read);
     }
 
     @Override
     public void onClose(ConnectContext ctx) {
+        // TODO 关闭标志
+        ctx.write("");
+        ctx.close();
     }
 
     @Override
     public void onError(ConnectContext ctx) {
+
     }
 
     @Override
     public void onReceive(ConnectContext ctx, String data) {
-
     }
+
 }

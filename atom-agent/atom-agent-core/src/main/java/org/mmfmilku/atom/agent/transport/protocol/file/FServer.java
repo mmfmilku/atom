@@ -1,16 +1,16 @@
 package org.mmfmilku.atom.agent.transport.protocol.file;
 
 import org.mmfmilku.atom.agent.transport.ConnectContext;
-import org.mmfmilku.atom.agent.transport.handle.BaseServerHandle;
+import org.mmfmilku.atom.agent.transport.handle.file.FHandle;
 import org.mmfmilku.atom.agent.transport.handle.ServerHandle;
 import org.mmfmilku.atom.agent.util.AgentLogUtils;
 import org.mmfmilku.atom.agent.util.IOUtils;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.*;
 
 /**
@@ -31,14 +31,21 @@ public class FServer {
 
     private ServerHandle<String> handle;
 
+    private List<ServerHandle> handles = new ArrayList<>();
+
     public FServer(String listenPath) {
         this.listenPath = listenPath;
-        handle = new BaseServerHandle();
+        handle = new FHandle();
     }
 
     public FServer(String listenPath, ServerHandle<String> handle) {
         this.listenPath = listenPath;
         this.handle = handle;
+    }
+
+    public FServer addHandle(ServerHandle<String> handle) {
+        handles.add(handle);
+        return this;
     }
 
     public void start() {
@@ -63,7 +70,7 @@ public class FServer {
                     accept(requestFile);
                 }
             }
-            sleep(5000);
+            sleep(3000);
         }
     }
 
@@ -92,16 +99,19 @@ public class FServer {
                             System.out.println("关闭" + o);
                         }
                 );
-                boolean open = handle.open(ctx);
+                boolean open = handle.onOpen(ctx);
                 if (!open) {
                     throw new RuntimeException("连接建立失败");
                 }
+                handles.forEach(h -> h.onOpen(ctx));
                 ctxMap.put(requestFile.getName(), ctx);
                 while (!ctx.isClose()) {
                     if (ctx.canRead()) {
                         String read = ctx.read();
                         if (read != null) {
-                            handle.receive(ctx, read);
+                            handle.onReceive(ctx, read);
+                            // TODO
+                            handles.forEach(h -> h.onReceive(ctx, read));
                         }
                     }
                 }
