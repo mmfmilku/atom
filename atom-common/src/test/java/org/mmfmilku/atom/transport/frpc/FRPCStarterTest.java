@@ -1,10 +1,12 @@
 package org.mmfmilku.atom.transport.frpc;
 
 import org.junit.Test;
+import org.mmfmilku.atom.util.IOUtils;
 import org.mmfmilku.atom.util.ReflectUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -22,6 +24,48 @@ public class FRPCStarterTest {
                     "org.mmfmilku.atom.transport.frpc.api.FRpcService2"};
             Object[] actual = classes.stream().map(Class::getName).toArray();
             assertArrayEquals(expect, actual);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testMapService() {
+        try {
+            FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom");
+            ReflectUtils.invokeMethod(starter, "scanService");
+            ReflectUtils.invokeMethod(starter, "mapService");
+            Map<String, ServiceMapping> mappings = (Map<String, ServiceMapping>)
+                    ReflectUtils.getMember(starter, "mappings");
+            System.out.println(mappings);
+            assertEquals(2, mappings.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testMappingExecute() {
+        try {
+            FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom");
+            ReflectUtils.invokeMethod(starter, "scanService");
+            ReflectUtils.invokeMethod(starter, "mapService");
+            Map<String, ServiceMapping> mappings = (Map<String, ServiceMapping>)
+                    ReflectUtils.getMember(starter, "mappings");
+            ServiceMapping fRpcService1 = mappings.get(
+                    "org.mmfmilku.atom.transport.frpc.api.FRpcService1");
+            ServiceMapping fRpcService2 = mappings.get(
+                    "org.mmfmilku.atom.transport.frpc.api.FRpcService2");
+            Object s1r1 = IOUtils.deserialize((byte[]) fRpcService1.execute("getList", null));
+            System.out.println(s1r1);
+            Object s1r2 = IOUtils.deserialize((byte[]) fRpcService1.execute("getList2", IOUtils.serialize(new String[] {
+                    "a", "b"
+            })));
+            System.out.println(s1r2);
+            Object s2r1 = IOUtils.deserialize((byte[]) fRpcService2.execute("getMap", IOUtils.serialize("3")));
+            System.out.println(s2r1);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

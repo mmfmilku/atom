@@ -2,11 +2,16 @@ package org.mmfmilku.atom.transport.frpc;
 
 import org.mmfmilku.atom.transport.handle.FRPCHandle;
 import org.mmfmilku.atom.transport.protocol.file.FServer;
+import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class FRPCStarter {
 
@@ -14,6 +19,7 @@ public class FRPCStarter {
 
     private String scanPackage;
     private List<Class<?>> classes = new ArrayList<>();
+    private Map<String, ServiceMapping> mappings = new HashMap<>();
 
     public FRPCStarter(String scanPackage) {
         this.scanPackage = scanPackage;
@@ -21,16 +27,17 @@ public class FRPCStarter {
 
     public void runServer() {
         scanService();
+        mapService();
         runWithThread();
     }
 
     private void runWithThread() {
         File baseDir = new File(F_SERVER_DIR);
         baseDir.delete();
-        Thread thread = new Thread("frpc-thread") {
+        Thread thread = new Thread("frpc-main-thread") {
             @Override
             public void run() {
-                FServer fServer = new FServer(F_SERVER_DIR).addHandle(new FRPCHandle());
+                FServer fServer = new FServer(F_SERVER_DIR).addHandle(new FRPCHandle(mappings));
                 fServer.start();
             }
         };
@@ -70,8 +77,8 @@ public class FRPCStarter {
                                     file.getName().replace(".class", "");
                             try {
                                 Class<?> clazz = Class.forName(className);
-                                FRpc fRpc = clazz.getAnnotation(FRpc.class);
-                                if (fRpc != null) {
+                                FRPCService annotation = clazz.getAnnotation(FRPCService.class);
+                                if (annotation != null) {
                                     classes.add(clazz);
                                 }
                             } catch (ClassNotFoundException e) {
@@ -83,5 +90,52 @@ public class FRPCStarter {
             }
         }
     }
+
+    private void mapService() {
+        if (classes.size() == 0) {
+            return;
+        }
+        try {
+            for (Class<?> clazz : classes) {
+                Object invokeObj = clazz.newInstance();
+                ServiceMapping serviceMapping = new ServiceMapping();
+                serviceMapping.setInvokeObj(invokeObj);
+                Map<String, Function<byte[], byte[]>> funcMap = new HashMap<>();
+                serviceMapping.setFuncMap(funcMap);
+
+                Method[] methods = clazz.getMethods();
+                for (Method method : methods) {
+                    FRPCService annotation = method.getAnnotation(FRPCService.class);
+                    method.setAccessible(true);
+                    if (annotation != null) {
+                        Function<Object, Object> callFunc = a -> {
+                            try {
+                                // TODO 传参
+                                if (a == null) {
+                                    return method.invoke(invokeObj);
+                                }
+                                return method.invoke(invokeObj, a);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                throw new RuntimeException(e);
+                            }
+                        };
+                        funcMap.put(method.getName(),
+                                DESERIALIZE_FUNC
+                                .andThen(callFunc)
+                                .andThen(SERIALIZE_FUNC));
+                    }
+                }
+
+                mappings.put(clazz.getName() ,serviceMapping);
+            }
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Function<Object, byte[]> SERIALIZE_FUNC = IOUtils::serialize;
+
+    private static Function<byte[], Object> DESERIALIZE_FUNC = IOUtils::deserialize;
 
 }
