@@ -61,11 +61,14 @@ public class FRPCStarterTest {
             Object s1r1 = IOUtils.deserialize((byte[]) fRpcService1.execute("getList", null));
             System.out.println(s1r1);
             Object s1r2 = IOUtils.deserialize((byte[]) fRpcService1.execute("getList2", IOUtils.serialize(new String[] {
-                    "a", "b"
+                    "c", "d"
             })));
             System.out.println(s1r2);
-            Object s2r1 = IOUtils.deserialize((byte[]) fRpcService2.execute("getMap", IOUtils.serialize("3")));
+            Object s2r1 = IOUtils.deserialize((byte[]) fRpcService2.execute("getMap", IOUtils.serialize(new String[]{"3"})));
             System.out.println(s2r1);
+            assertEquals("[{a=1}, {b=2}]", s1r1.toString());
+            assertEquals("[{c=1}, {d=2}]", s1r2.toString());
+            assertEquals("{k0=v0, k3=v3, k4=v4, k5=v5}", s2r1.toString());
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

@@ -114,12 +114,13 @@ public class FRPCStarter {
                                 if (a == null) {
                                     return method.invoke(invokeObj);
                                 }
-                                return method.invoke(invokeObj, a);
+                                return method.invoke(invokeObj, (Object[]) a);
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 throw new RuntimeException(e);
                             }
                         };
+                        // TODO 不支持重载
                         funcMap.put(method.getName(),
                                 DESERIALIZE_FUNC
                                 .andThen(callFunc)
