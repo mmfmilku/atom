@@ -1,6 +1,8 @@
 package org.mmfmilku.atom.transport.frpc;
 
-public class FRPCReturn {
+import java.io.Serializable;
+
+public class FRPCReturn implements Serializable {
 
     private Object data;
 

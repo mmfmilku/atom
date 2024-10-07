@@ -1,8 +1,30 @@
 package org.mmfmilku.atom.transport.frpc;
 
-public class FRPCParam {
+import java.io.Serializable;
+
+public class FRPCParam implements Serializable {
+
+    private String serviceClass;
+
+    private String apiName;
 
     private Object data;
+
+    public String getServiceClass() {
+        return serviceClass;
+    }
+
+    public void setServiceClass(String serviceClass) {
+        this.serviceClass = serviceClass;
+    }
+
+    public String getApiName() {
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+        this.apiName = apiName;
+    }
 
     public Object getData() {
         return data;

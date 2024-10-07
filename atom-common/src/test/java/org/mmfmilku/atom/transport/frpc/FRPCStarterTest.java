@@ -53,21 +53,26 @@ public class FRPCStarterTest {
             ReflectUtils.invokeMethod(starter, "mapService");
             Map<String, ServiceMapping> mappings = (Map<String, ServiceMapping>)
                     ReflectUtils.getMember(starter, "mappings");
-            ServiceMapping fRpcService1 = mappings.get(
-                    "org.mmfmilku.atom.transport.frpc.api.FRpcService1");
-            ServiceMapping fRpcService2 = mappings.get(
-                    "org.mmfmilku.atom.transport.frpc.api.FRpcService2");
 
             FRPCParam frpcParam = new FRPCParam();
-            Object s1r1 = fRpcService1.execute("getList", frpcParam).getData();
+            frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService1");
+            frpcParam.setApiName("getList");
+            Object s1r1 = mappings.get(frpcParam.getServiceClass())
+                    .execute(frpcParam.getApiName(), frpcParam).getData();
             System.out.println(s1r1);
 
+            frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService1");
+            frpcParam.setApiName("getList2");
             frpcParam.setData(new Object[]{"c", "d"});
-            Object s1r2 = fRpcService1.execute("getList2", frpcParam).getData();
+            Object s1r2 = mappings.get(frpcParam.getServiceClass())
+                    .execute(frpcParam.getApiName(), frpcParam).getData();
             System.out.println(s1r2);
 
+            frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService2");
+            frpcParam.setApiName("getMap");
             frpcParam.setData(new Object[]{"3"});
-            Object s2r1 = fRpcService2.execute("getMap", frpcParam).getData();
+            Object s2r1 = mappings.get(frpcParam.getServiceClass())
+                    .execute(frpcParam.getApiName(), frpcParam).getData();
             System.out.println(s2r1);
 
             assertEquals("[{a=1}, {b=2}]", s1r1.toString());
