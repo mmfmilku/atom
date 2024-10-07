@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class FRPCHandle extends RRModeServerHandle {
 
-    Map<String, ServiceMapping> mappings;
+    private Map<String, ServiceMapping> mappings;
 
     public FRPCHandle(Map<String, ServiceMapping> mappings) {
         this.mappings = mappings;
@@ -19,7 +19,7 @@ public class FRPCHandle extends RRModeServerHandle {
 
     @Override
     public void onReceive(ConnectContext ctx, String data) {
-        byte[] rawData = Base64.getDecoder().decode(data);
+        byte[] rawData = Base64.getDecoder().decode(data.trim());
 
         FRPCParam frpcParam = IOUtils.deserialize(rawData);
 
@@ -28,7 +28,7 @@ public class FRPCHandle extends RRModeServerHandle {
 
         byte[] serialize = IOUtils.serialize(frpcReturn);
         String encode = Base64.getEncoder().encodeToString(serialize);
-        ctx.write(encode);
+        ctx.write(encode + "\r");
     }
 
 }

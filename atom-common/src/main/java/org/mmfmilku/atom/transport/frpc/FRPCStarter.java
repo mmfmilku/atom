@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 public class FRPCStarter {
 
-    private static final String F_SERVER_DIR = System.getProperty("user.dir") + File.separator + "fserver";
+    public static final String F_SERVER_DIR = System.getProperty("user.dir") + File.separator + "fserver";
 
     private String scanPackage;
     private List<Class<?>> classes = new ArrayList<>();
@@ -33,7 +33,7 @@ public class FRPCStarter {
 
     private void runWithThread() {
         File baseDir = new File(F_SERVER_DIR);
-        baseDir.delete();
+//        baseDir.delete();
         Thread thread = new Thread("frpc-main-thread") {
             @Override
             public void run() {

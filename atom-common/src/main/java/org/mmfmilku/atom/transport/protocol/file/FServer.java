@@ -6,10 +6,10 @@ import org.mmfmilku.atom.transport.handle.ServerHandle;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -49,13 +49,20 @@ public class FServer {
 
     public void start() {
         File listen = new File(listenPath);
-        if (!listen.exists()) {
-            boolean mkdirs = listen.mkdirs();
-            if (!mkdirs) {
-                throw new RuntimeException("启动失败,创建目录失败");
-            }
-        } else if (listen.isFile()) {
+        if (listen.isFile()) {
             throw new RuntimeException("启动失败,监听路径需为文件夹");
+        }
+        // TODO 对于历史文件的处理，先暴力删除
+        try {
+            Files.walk(Paths.get(listenPath))
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (!listen.mkdirs()) {
+            throw new RuntimeException("启动失败,创建目录失败");
         }
         listen(listen);
     }

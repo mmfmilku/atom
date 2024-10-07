@@ -84,4 +84,27 @@ public class FRPCStarterTest {
         }
     }
 
+    @Test
+    public void testRunServer() {
+        FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom");
+        starter.runServer();
+
+        FRPCClient frpcClient = new FRPCClient();
+
+        FRPCParam frpcParam = new FRPCParam();
+        frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService1");
+        frpcParam.setApiName("getList2");
+        frpcParam.setData(new Object[]{"e", "f"});
+        Object data = frpcClient.call(frpcParam).getData();
+        assertEquals("[{e=1}, {f=2}]", data.toString());
+
+        frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService2");
+        frpcParam.setApiName("getMap");
+        frpcParam.setData(new Object[]{"4"});
+        data = frpcClient.call(frpcParam).getData();
+        data = frpcClient.call(frpcParam).getData();
+        data = frpcClient.call(frpcParam).getData();
+        assertEquals("{k0=v0, k4=v4, k5=v5}", data.toString());
+    }
+
 }
