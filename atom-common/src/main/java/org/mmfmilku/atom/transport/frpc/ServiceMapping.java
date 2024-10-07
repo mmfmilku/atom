@@ -7,7 +7,7 @@ public class ServiceMapping {
 
     private Object invokeObj;
 
-    Map<String, Function<byte[], byte[]>> funcMap;
+    Map<String, Function<FRPCParam, FRPCReturn>> funcMap;
 
     public Object getInvokeObj() {
         return invokeObj;
@@ -17,20 +17,16 @@ public class ServiceMapping {
         this.invokeObj = invokeObj;
     }
 
-    public Map<String, Function<byte[], byte[]>> getFuncMap() {
-        return funcMap;
-    }
-
-    public void setFuncMap(Map<String, Function<byte[], byte[]>> funcMap) {
+    public void setFuncMap(Map<String, Function<FRPCParam, FRPCReturn>> funcMap) {
         this.funcMap = funcMap;
     }
 
-    public Object execute(String apiName, Object data) {
-        Function function = funcMap.get(apiName);
+    public FRPCReturn execute(String apiName, FRPCParam frpcParam) {
+        Function<FRPCParam, FRPCReturn> function = funcMap.get(apiName);
         if (function == null) {
             throw new RuntimeException("无此接口" + apiName);
         }
-        return function.apply(data);
+        return function.apply(frpcParam);
     }
 
 }

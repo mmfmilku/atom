@@ -100,7 +100,7 @@ public class FRPCStarter {
                 Object invokeObj = clazz.newInstance();
                 ServiceMapping serviceMapping = new ServiceMapping();
                 serviceMapping.setInvokeObj(invokeObj);
-                Map<String, Function<byte[], byte[]>> funcMap = new HashMap<>();
+                Map<String, Function<FRPCParam, FRPCReturn>> funcMap = new HashMap<>();
                 serviceMapping.setFuncMap(funcMap);
 
                 Method[] methods = clazz.getMethods();
@@ -108,23 +108,19 @@ public class FRPCStarter {
                     FRPCService annotation = method.getAnnotation(FRPCService.class);
                     method.setAccessible(true);
                     if (annotation != null) {
-                        Function<Object, Object> callFunc = a -> {
+                        Function<FRPCParam, FRPCReturn> callFunc = param -> {
                             try {
-                                // TODO 传参
-                                if (a == null) {
-                                    return method.invoke(invokeObj);
-                                }
-                                return method.invoke(invokeObj, (Object[]) a);
+                                Object returnData = method.invoke(invokeObj, (Object[]) param.getData());
+                                FRPCReturn frpcReturn = new FRPCReturn();
+                                frpcReturn.setData(returnData);
+                                return frpcReturn;
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 throw new RuntimeException(e);
                             }
                         };
                         // TODO 不支持重载
-                        funcMap.put(method.getName(),
-                                DESERIALIZE_FUNC
-                                .andThen(callFunc)
-                                .andThen(SERIALIZE_FUNC));
+                        funcMap.put(method.getName(), callFunc);
                     }
                 }
 

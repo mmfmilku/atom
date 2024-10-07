@@ -1,13 +1,12 @@
 package org.mmfmilku.atom.transport.frpc;
 
 import org.junit.Test;
+import org.mmfmilku.atom.transport.handle.FRPCHandle;
 import org.mmfmilku.atom.util.IOUtils;
 import org.mmfmilku.atom.util.ReflectUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -58,14 +57,19 @@ public class FRPCStarterTest {
                     "org.mmfmilku.atom.transport.frpc.api.FRpcService1");
             ServiceMapping fRpcService2 = mappings.get(
                     "org.mmfmilku.atom.transport.frpc.api.FRpcService2");
-            Object s1r1 = IOUtils.deserialize((byte[]) fRpcService1.execute("getList", null));
+
+            FRPCParam frpcParam = new FRPCParam();
+            Object s1r1 = fRpcService1.execute("getList", frpcParam).getData();
             System.out.println(s1r1);
-            Object s1r2 = IOUtils.deserialize((byte[]) fRpcService1.execute("getList2", IOUtils.serialize(new String[] {
-                    "c", "d"
-            })));
+
+            frpcParam.setData(new Object[]{"c", "d"});
+            Object s1r2 = fRpcService1.execute("getList2", frpcParam).getData();
             System.out.println(s1r2);
-            Object s2r1 = IOUtils.deserialize((byte[]) fRpcService2.execute("getMap", IOUtils.serialize(new String[]{"3"})));
+
+            frpcParam.setData(new Object[]{"3"});
+            Object s2r1 = fRpcService2.execute("getMap", frpcParam).getData();
             System.out.println(s2r1);
+
             assertEquals("[{a=1}, {b=2}]", s1r1.toString());
             assertEquals("[{c=1}, {d=2}]", s1r2.toString());
             assertEquals("{k0=v0, k3=v3, k4=v4, k5=v5}", s2r1.toString());
