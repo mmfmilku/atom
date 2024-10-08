@@ -1,11 +1,12 @@
-package org.mmfmilku.atom.transport.frpc.api;
+package org.mmfmilku.atom.transport.frpc.api.impl;
 
 import org.mmfmilku.atom.transport.frpc.FRPCService;
+import org.mmfmilku.atom.transport.frpc.api.FRpcServiceOne;
 
 import java.util.*;
 
 @FRPCService
-public class FRpcService1 {
+public class FRpcServiceOneImpl implements FRpcServiceOne {
 
     @FRPCService
     public List<Map<String, String>> getList() {

@@ -104,10 +104,27 @@ public class FRPCStarter {
                 serviceMapping.setFuncMap(funcMap);
 
                 Method[] methods = clazz.getMethods();
+                Class<?>[] interfaces = clazz.getInterfaces();
+                if (interfaces.length != 1) {
+                    throw new RuntimeException("FRPCService must have only one interface:" + clazz.getName());
+                }
+
+                String serviceName = interfaces[0].getName();
+                if (mappings.containsKey(serviceName)) {
+                    throw new RuntimeException("repeat service impl for " + serviceName
+                            + ": " + mappings.get(serviceName).getInvokeObj().getClass().getName()
+                            + "," + clazz.getName());
+                }
+
                 for (Method method : methods) {
                     FRPCService annotation = method.getAnnotation(FRPCService.class);
                     method.setAccessible(true);
                     if (annotation != null) {
+                        // TODO 不支持重载
+                        if (funcMap.containsKey(method.getName())) {
+                            throw new RuntimeException("repeat method " + method.getName());
+                        }
+
                         Function<FRPCParam, FRPCReturn> callFunc = param -> {
                             try {
                                 Object returnData = method.invoke(invokeObj, (Object[]) param.getData());
@@ -119,20 +136,17 @@ public class FRPCStarter {
                                 throw new RuntimeException(e);
                             }
                         };
-                        // TODO 不支持重载
+
                         funcMap.put(method.getName(), callFunc);
                     }
                 }
 
-                mappings.put(clazz.getName() ,serviceMapping);
+                mappings.put(serviceName, serviceMapping);
             }
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
-
-    private static Function<Object, byte[]> SERIALIZE_FUNC = IOUtils::serialize;
-
-    private static Function<byte[], Object> DESERIALIZE_FUNC = IOUtils::deserialize;
 
 }

@@ -1,12 +1,13 @@
-package org.mmfmilku.atom.transport.frpc.api;
+package org.mmfmilku.atom.transport.frpc.api.impl;
 
 import org.mmfmilku.atom.transport.frpc.FRPCService;
+import org.mmfmilku.atom.transport.frpc.api.FRpcServiceTwo;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @FRPCService
-public class FRpcService2 {
+public class FRpcServiceTwoImpl implements FRpcServiceTwo {
 
     @FRPCService
     public Map<String, String> getMap(String type) {

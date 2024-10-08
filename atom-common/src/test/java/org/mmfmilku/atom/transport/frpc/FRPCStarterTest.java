@@ -1,8 +1,11 @@
 package org.mmfmilku.atom.transport.frpc;
 
 import org.junit.Test;
-import org.mmfmilku.atom.transport.handle.FRPCHandle;
-import org.mmfmilku.atom.util.IOUtils;
+import org.mmfmilku.atom.transport.frpc.api.FRpcServiceOne;
+import org.mmfmilku.atom.transport.frpc.api.FRpcServiceTwo;
+import org.mmfmilku.atom.transport.frpc.api.impl.FRpcServiceOneImpl;
+import org.mmfmilku.atom.transport.frpc.api.impl.FRpcServiceTwoImpl;
+import org.mmfmilku.atom.transport.frpc.client.FRPCClient;
 import org.mmfmilku.atom.util.ReflectUtils;
 
 import java.util.List;
@@ -19,8 +22,8 @@ public class FRPCStarterTest {
             ReflectUtils.invokeMethod(starter, "scanService");
             List<Class<?>> classes = (List<Class<?>>)
                     ReflectUtils.getMember(starter, "classes");
-            String[] expect = new String[]{"org.mmfmilku.atom.transport.frpc.api.FRpcService1",
-                    "org.mmfmilku.atom.transport.frpc.api.FRpcService2"};
+            String[] expect = new String[]{FRpcServiceOneImpl.class.getName(),
+                    FRpcServiceTwoImpl.class.getName()};
             Object[] actual = classes.stream().map(Class::getName).toArray();
             assertArrayEquals(expect, actual);
         } catch (Exception e) {
@@ -55,20 +58,20 @@ public class FRPCStarterTest {
                     ReflectUtils.getMember(starter, "mappings");
 
             FRPCParam frpcParam = new FRPCParam();
-            frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService1");
+            frpcParam.setServiceClass(FRpcServiceOne.class.getName());
             frpcParam.setApiName("getList");
             Object s1r1 = mappings.get(frpcParam.getServiceClass())
                     .execute(frpcParam.getApiName(), frpcParam).getData();
             System.out.println(s1r1);
 
-            frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService1");
+            frpcParam.setServiceClass(FRpcServiceOne.class.getName());
             frpcParam.setApiName("getList2");
             frpcParam.setData(new Object[]{"c", "d"});
             Object s1r2 = mappings.get(frpcParam.getServiceClass())
                     .execute(frpcParam.getApiName(), frpcParam).getData();
             System.out.println(s1r2);
 
-            frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService2");
+            frpcParam.setServiceClass(FRpcServiceTwo.class.getName());
             frpcParam.setApiName("getMap");
             frpcParam.setData(new Object[]{"3"});
             Object s2r1 = mappings.get(frpcParam.getServiceClass())
@@ -92,13 +95,13 @@ public class FRPCStarterTest {
         FRPCClient frpcClient = new FRPCClient();
 
         FRPCParam frpcParam = new FRPCParam();
-        frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService1");
+        frpcParam.setServiceClass(FRpcServiceOne.class.getName());
         frpcParam.setApiName("getList2");
         frpcParam.setData(new Object[]{"e", "f"});
         Object data = frpcClient.call(frpcParam).getData();
         assertEquals("[{e=1}, {f=2}]", data.toString());
 
-        frpcParam.setServiceClass("org.mmfmilku.atom.transport.frpc.api.FRpcService2");
+        frpcParam.setServiceClass(FRpcServiceTwo.class.getName());
         frpcParam.setApiName("getMap");
         frpcParam.setData(new Object[]{"4"});
         data = frpcClient.call(frpcParam).getData();
