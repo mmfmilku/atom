@@ -7,6 +7,7 @@ import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.*;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * FClient
@@ -28,6 +29,7 @@ public class FClient {
     }
     
     public ClientSession<String> connect(String name) {
+        checkListen();
         String requestName = name + FServer.REQUEST;
         String responseName = requestName + FServer.RESPONSE;
         File requestFile = new File(connectPath, requestName);
@@ -41,7 +43,7 @@ public class FClient {
             throw new RuntimeException("连接失败");
         }
         File responseFile = new File(connectPath, responseName);
-        responseFile = waitCount(responseName, responseFile);
+        waitCount(o -> responseFile.exists());
         InputStream inputStream = null;
         OutputStream outputStream = null;
         try {
@@ -64,9 +66,14 @@ public class FClient {
         throw new RuntimeException("连接失败");
     }
 
-    private File waitCount(String responseName, File responseFile) {
+    private void checkListen() {
+        File connectDir = new File(connectPath);
+        waitCount(o -> connectDir.exists());
+    }
+
+    private void waitCount(Function<Integer, Boolean> function) {
         int waitCount = 0;
-        while (!responseFile.exists()) {
+        while (!function.apply(waitCount)) {
             if (waitCount > 10) {
                 throw new RuntimeException("等待服务器响应超时");
             }
@@ -77,9 +84,7 @@ public class FClient {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            responseFile = new File(connectPath, responseName);
         }
-        return responseFile;
     }
 
 }

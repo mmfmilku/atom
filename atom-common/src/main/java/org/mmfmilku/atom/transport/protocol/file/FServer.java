@@ -24,6 +24,8 @@ public class FServer {
 
     public static final String RESPONSE = ".response";
 
+    private static final String LISTEN_FILE = "fserver.listen";
+
     private String listenPath;
 
     private Map<String, ConnectContext> ctxMap = new HashMap<>();
@@ -31,6 +33,8 @@ public class FServer {
     private ServerHandle<String> handle;
 
     private List<ServerHandle> handles = new ArrayList<>();
+
+    private OutputStream outputStream;
 
     public FServer(String listenPath) {
         this.listenPath = listenPath;
@@ -52,22 +56,33 @@ public class FServer {
         if (listen.isFile()) {
             throw new RuntimeException("启动失败,监听路径需为文件夹");
         }
+        File[] files = listen.listFiles(filter -> filter.getName().equals(LISTEN_FILE));
+        if (files != null && files.length != 0) {
+            boolean delete = files[0].delete();
+            if (!delete) {
+                throw new RuntimeException("启动失败,监听文件夹已被占用");
+            }
+        }
         // TODO 对于历史文件的处理，先暴力删除
         try {
             Files.walk(Paths.get(listenPath))
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
+            if (!listen.mkdirs()) {
+                throw new RuntimeException("启动失败,创建目录失败");
+            }
+            listen(listen);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        if (!listen.mkdirs()) {
-            throw new RuntimeException("启动失败,创建目录失败");
-        }
-        listen(listen);
     }
 
-    private void listen(File listen) {
+    private void listen(File listen) throws IOException {
+        Path occupyPath = new File(listen, LISTEN_FILE).toPath();
+        outputStream = new FileOutputStream(occupyPath.toFile());
+
         while (true) {
             File[] requestFiles = listen.listFiles((dir, name) -> !ctxMap.containsKey(name)
                     && name.endsWith(REQUEST));
@@ -78,6 +93,14 @@ public class FServer {
             }
             sleep(3000);
         }
+    }
+
+    public void stop() {
+        executorService.shutdown();
+        ctxMap.forEach((name, ctx) -> {
+            ctx.close();
+        });
+        IOUtils.closeStream(outputStream);
     }
 
     private void sleep(long millis) {
