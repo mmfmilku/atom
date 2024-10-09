@@ -2,7 +2,6 @@ package org.mmfmilku.atom.transport.frpc;
 
 import org.mmfmilku.atom.transport.handle.FRPCHandle;
 import org.mmfmilku.atom.transport.protocol.file.FServer;
-import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -127,7 +126,7 @@ public class FRPCStarter {
 
                         Function<FRPCParam, FRPCReturn> callFunc = param -> {
                             try {
-                                Object returnData = method.invoke(invokeObj, (Object[]) param.getData());
+                                Object returnData = method.invoke(invokeObj, param.getData());
                                 FRPCReturn frpcReturn = new FRPCReturn();
                                 frpcReturn.setData(returnData);
                                 return frpcReturn;

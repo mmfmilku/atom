@@ -92,7 +92,7 @@ public class FRPCStarterTest {
         FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom");
         starter.runServer();
 
-        FRPCClient frpcClient = new FRPCClient();
+        FRPCClient frpcClient = FRPCClient.getInstance();
 
         FRPCParam frpcParam = new FRPCParam();
         frpcParam.setServiceClass(FRpcServiceOne.class.getName());

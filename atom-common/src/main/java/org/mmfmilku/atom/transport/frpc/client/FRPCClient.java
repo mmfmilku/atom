@@ -11,23 +11,38 @@ import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class FRPCClient {
 
     private int maxConnect = 10;
     private FClient fClient;
     private final List<FRPCSession> clientList = new CopyOnWriteArrayList<>();
+    private Lock lock = new ReentrantLock(false);
+    private Condition waitCall = lock.newCondition();
 
-    public FRPCClient() {
+    private static FRPCClient instance = new FRPCClient();
+
+    public static FRPCClient getInstance() {
+        return instance;
+    }
+
+    private FRPCClient() {
         fClient = new FClient(FRPCStarter.F_SERVER_DIR);
     }
 
     public FRPCReturn call(ClientSession<String> session, FRPCParam frpcParam) {
-        byte[] serialize = IOUtils.serialize(frpcParam);
-        String toSend = Base64.getEncoder().encodeToString(serialize);
-        String read = session.sendThenRead(toSend + "\r");
-        byte[] decode = Base64.getDecoder().decode(read.trim());
-        return IOUtils.deserialize(decode);
+        try {
+            byte[] serialize = IOUtils.serialize(frpcParam);
+            String toSend = Base64.getEncoder().encodeToString(serialize);
+            String read = session.sendThenRead(toSend + "\r");
+            byte[] decode = Base64.getDecoder().decode(read.trim());
+            return IOUtils.deserialize(decode);
+        } finally {
+//            waitCall.signalAll();
+        }
     }
 
     public FRPCReturn call(FRPCParam frpcParam) {
@@ -44,7 +59,9 @@ public class FRPCClient {
             synchronized (clientList) {
                 if (clientList.size() < maxConnect) {
                     FRPCSession frpcSession = new FRPCSession(fClient.connect());
+                    // 局部变量，无需上锁
                     FRPCReturn result = call(frpcSession, frpcParam);
+                    // 调用完后再添加至连接列表，避免被其他线程抢夺
                     clientList.add(frpcSession);
                     return result;
                 }
@@ -55,7 +72,7 @@ public class FRPCClient {
         }
     }
 
-    private FRPCSession lockSession () {
+    private FRPCSession lockSession() {
         while (true) {
             // TODO 使用等待唤起
             for (FRPCSession frpcSession : clientList) {
@@ -63,6 +80,12 @@ public class FRPCClient {
                     return frpcSession;
                 }
             }
+//            try {
+//                waitCall.await();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//                throw new RuntimeException(e);
+//            }
         }
     }
 

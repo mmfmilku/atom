@@ -1,12 +1,15 @@
 package org.mmfmilku.atom.transport.frpc.client;
 
+import org.mmfmilku.atom.transport.frpc.FRPCParam;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 public class FRPCClientProxy<T> implements InvocationHandler {
     
     private Class<T> delegateClass;
+
+    private FRPCClient frpcClient = FRPCClient.getInstance();
 
     public FRPCClientProxy(Class<T> delegateClass) {
         this.delegateClass = delegateClass;
@@ -24,11 +27,11 @@ public class FRPCClientProxy<T> implements InvocationHandler {
     }
     
     private Object remoteCall(String methodName, Object[] args) {
-        System.out.println("-------------代理开始-------------");
-        System.out.println("调用服务:" + delegateClass.getName());
-        System.out.println("调用方法:" + methodName);
-        System.out.println("传参:" + Arrays.toString(args));
-        System.out.println("-------------代理结束-------------");
-        return null;
+        FRPCParam frpcParam = new FRPCParam();
+        frpcParam.setServiceClass(delegateClass.getName());
+        frpcParam.setApiName(methodName);
+        frpcParam.setData(args);
+        System.out.println("执行远程调用" + frpcParam);
+        return frpcClient.call(frpcParam).getData();
     }
 }
