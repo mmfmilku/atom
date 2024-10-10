@@ -17,11 +17,13 @@ public class FRPCStarter {
     public static final String F_SERVER_DIR = System.getProperty("user.dir") + File.separator + "fserver";
 
     private String scanPackage;
+    private String fDir;
     private List<Class<?>> classes = new ArrayList<>();
     private Map<String, ServiceMapping> mappings = new HashMap<>();
 
-    public FRPCStarter(String scanPackage) {
+    public FRPCStarter(String scanPackage, String fDir) {
         this.scanPackage = scanPackage;
+        this.fDir = fDir;
     }
 
     public void runServer() {
@@ -31,12 +33,12 @@ public class FRPCStarter {
     }
 
     private void runWithThread() {
-        File baseDir = new File(F_SERVER_DIR);
-//        baseDir.delete();
         Thread thread = new Thread("frpc-main-thread") {
             @Override
             public void run() {
-                FServer fServer = new FServer(F_SERVER_DIR).addHandle(new FRPCHandle(mappings));
+                // TODO dir传参送入
+                FServer fServer = new FServer(fDir)
+                        .addHandle(new FRPCHandle(mappings));
                 fServer.start();
             }
         };

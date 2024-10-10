@@ -8,6 +8,7 @@ import org.mmfmilku.atom.transport.frpc.api.impl.FRpcServiceTwoImpl;
 import org.mmfmilku.atom.transport.frpc.client.FRPCClient;
 import org.mmfmilku.atom.util.ReflectUtils;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +19,8 @@ public class FRPCStarterTest {
     @Test
     public void testScanService() {
         try {
-            FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom");
+            String fDir = System.getProperty("user.dir") + File.separator + "fserver";
+            FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
             ReflectUtils.invokeMethod(starter, "scanService");
             List<Class<?>> classes = (List<Class<?>>)
                     ReflectUtils.getMember(starter, "classes");
@@ -35,7 +37,8 @@ public class FRPCStarterTest {
     @Test
     public void testMapService() {
         try {
-            FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom");
+            String fDir = System.getProperty("user.dir") + File.separator + "fserver";
+            FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
             ReflectUtils.invokeMethod(starter, "scanService");
             ReflectUtils.invokeMethod(starter, "mapService");
             Map<String, ServiceMapping> mappings = (Map<String, ServiceMapping>)
@@ -51,7 +54,8 @@ public class FRPCStarterTest {
     @Test
     public void testMappingExecute() {
         try {
-            FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom");
+            String fDir = System.getProperty("user.dir") + File.separator + "fserver";
+            FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
             ReflectUtils.invokeMethod(starter, "scanService");
             ReflectUtils.invokeMethod(starter, "mapService");
             Map<String, ServiceMapping> mappings = (Map<String, ServiceMapping>)
@@ -89,10 +93,12 @@ public class FRPCStarterTest {
 
     @Test
     public void testRunServer() {
-        FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom");
+        String fDir = System.getProperty("user.dir") + File.separator + "fserver";
+
+        FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
         starter.runServer();
 
-        FRPCClient frpcClient = FRPCClient.getInstance();
+        FRPCClient frpcClient = FRPCClient.getInstance(fDir);
 
         FRPCParam frpcParam = new FRPCParam();
         frpcParam.setServiceClass(FRpcServiceOne.class.getName());

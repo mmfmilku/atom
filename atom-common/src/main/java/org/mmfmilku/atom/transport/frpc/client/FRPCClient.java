@@ -8,7 +8,10 @@ import org.mmfmilku.atom.transport.protocol.file.FClient;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
@@ -20,17 +23,26 @@ public class FRPCClient {
     private int maxConnect = 10;
     private FClient fClient;
     private final List<FRPCSession> clientList = new CopyOnWriteArrayList<>();
-    private Lock lock = new ReentrantLock(false);
-    private Condition waitCall = lock.newCondition();
+//    private Lock lock = new ReentrantLock(false);
+//    private Condition waitCall = lock.newCondition();
 
-    private static FRPCClient instance = new FRPCClient();
+    private final static Map<String, FRPCClient> frpcClientMap = new ConcurrentHashMap<>();
 
-    public static FRPCClient getInstance() {
-        return instance;
+    public static FRPCClient getInstance(String fDir) {
+        if (frpcClientMap.containsKey(fDir)) {
+            return frpcClientMap.get(fDir);
+        }
+        // double check
+        synchronized (frpcClientMap) {
+            if (!frpcClientMap.containsKey(fDir)) {
+                frpcClientMap.put(fDir, new FRPCClient(fDir));
+            }
+        }
+        return frpcClientMap.get(fDir);
     }
 
-    private FRPCClient() {
-        fClient = new FClient(FRPCStarter.F_SERVER_DIR);
+    private FRPCClient(String fDir) {
+        fClient = new FClient(fDir);
     }
 
     public FRPCReturn call(ClientSession<String> session, FRPCParam frpcParam) {
