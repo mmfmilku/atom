@@ -17,7 +17,7 @@ public class ParseTestUtil {
     private static final String TEST_RESOURCE_BATH_PATH = "F:\\dev\\project\\atom\\atom-parse\\src\\test\\test-resources\\";
 
     public static DefaultAtomChain<TestParam> parse(String path) throws IOException {
-        String data = FileUtil.getData(path);
+        String data = FileTestUtil.getData(path);
         DefaultAtomChain<TestParam> atomChain = ParseTestUtil.parse(data, DefaultAtomChain.class);
         return atomChain;
     }

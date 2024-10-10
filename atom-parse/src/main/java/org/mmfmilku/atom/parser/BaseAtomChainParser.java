@@ -19,14 +19,14 @@ public class BaseAtomChainParser<T extends Param> implements AtomChainParser<Bas
     // atom实例工厂
     private Function<String, Atom<T>> handleFactory;
 
-    private ELParser<T> elParser;
+    private Parser<List<String>, Atom<T>> elParser;
 
     public BaseAtomChainParser(Function<String, Atom<T>> handleFactory) {
         this.handleFactory = handleFactory;
         this.elParser = new ELParser<>();
     }
 
-    public BaseAtomChainParser(Function<String, Atom<T>> handleFactory, ELParser<T> elParser) {
+    public BaseAtomChainParser(Function<String, Atom<T>> handleFactory, Parser<List<String>, Atom<T>> elParser) {
         this.handleFactory = handleFactory;
         this.elParser = elParser;
     }

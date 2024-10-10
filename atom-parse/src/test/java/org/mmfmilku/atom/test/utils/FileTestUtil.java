@@ -2,7 +2,7 @@ package org.mmfmilku.atom.test.utils;
 
 import java.io.*;
 
-public class FileUtil {
+public class FileTestUtil {
 
     public static String getData(String path) throws IOException {
         StringBuilder sb = new StringBuilder();

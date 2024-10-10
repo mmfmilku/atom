@@ -1,0 +1,40 @@
+class com.hundsun.jres.impl.db.session.DBSession {
+    method dbSessionDebugLog(){
+        /*
+        if ($1.contains("file")) {
+             System.out.println("in ord11 msg:" + $1);
+        } else {
+             System.out.println("in ord222 msg:" + $1);
+        }
+        */
+        System.out.println("sb hs");
+    }
+    
+}
+
+class com.hundsun.lcpt.dxfund.controller.ifmDxfundPrdManage.ifmCCpglDxfundBaseParam.DxfundPrdAccController {
+    method queryService() {
+        /*
+        return com.hundsun.lcpt.bizframe.core.util.RequestResponseUtil.getResultJsonString();
+        */
+        
+        int pageNo = dxfundPrdAccDto.getPageNo();
+                int pageSize = dxfundPrdAccDto.getPageSize();
+                if (pageNo > 0 && pageSize > 0) {
+                    dxfundPrdAccDto.setStart((pageNo-1) * pageSize + 1);
+                    dxfundPrdAccDto.setLimit(pageSize);
+                }
+                //动态控制前端实时赎回垫资账号是否必输 beg
+                com.hundsun.jres.interfaces.share.dataset.IDataset result = null;
+                if ("isQueryPrdInfo".equals(dxfundPrdAccDto.getFlag())){
+                    result = lcdxPrdAccService.qryPrdInfoService(dxfundPrdAccDto);
+                }else{
+                    result = lcdxPrdAccService.queryService(dxfundPrdAccDto);
+                }
+                //动态控制前端实时赎回垫资账号是否必输 end
+                return com.hundsun.lcpt.bizframe.core.util.RequestResponseUtil.getResultJsonString(result);
+    }
+}
+
+
+
