@@ -1,0 +1,28 @@
+class com.hundsun.jres.impl.db.session.DBSession {
+    method dbSessionDebugLog(){
+        /*
+        if ($1.contains("file")) {
+             System.out.println("in ord11 msg:" + $1);
+        } else {
+             System.out.println("in ord222 msg:" + $1);
+        }
+        */
+        System.out.println("sb hs");
+    }
+    
+    pprint dbSessionDebugLog(){
+
+        }
+    
+}
+
+
+class com.hundsun.lcpt.pub.cache.ParamCache {
+    pprint getParamByBelongType(){}
+    rprint getParamByBelongType(){}
+    pprint getParamValue(){}
+    rprint getParamValue(){}
+    pprint getSysOrBankParamValue(){}
+    rprint getSysOrBankParamValue(){}
+}
+

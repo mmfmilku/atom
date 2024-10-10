@@ -1,0 +1,95 @@
+class com.hundsun.jres.impl.db.session.DBSession {
+    method dbSessionDebugLog(){
+        /*
+        if ($1.contains("file")) {
+             System.out.println("in ord11 msg:" + $1);
+        } else {
+             System.out.println("in ord222 msg:" + $1);
+        }
+        */
+    }
+    
+}
+class com.hundsun.lcpt.dxfund.pub.online.adapter.T110381.T110381HSAdapter {
+
+    cprint toLocal(com.hundsun.lcpt.pub.dxfund.util.DxFundParamUtil#getDxFundSysParamValue) {
+        
+    }
+    
+    cprint checkData(com.hundsun.lcpt.pub.dxfund.util.DxFundParamUtil#getDxFundSysParamValue) {
+            System.out.println("custom cprint start:call com.hundsun.lcpt.pub.dxfund.util.DxFundParamUtil#getDxFundSysParamValue");
+            System.out.println(com.alibaba.fastjson.JSON.toJSONString($args));
+            $_ = $proceed($$);
+            System.out.println("custom cprint return:" + com.alibaba.fastjson.JSON.toJSONString($_));
+    }
+
+    pprint packAnswer(cc,dd) {
+        System.out.println("custom printParam packAnswer start:");
+    }
+    
+    rprint packAnswer(ee,bb,aa,nob1,nob2,hb1  ,    hb2,   hb3   ,nob3) {
+        System.out.println("custom printReturn:TotNum=" +  $2.getTotRecNum());
+        System.out.println("custom printReturn:OffSet=" + $1.getRequestDataset().getInt("OffSet"));
+        com.hundsun.jres.interfaces.share.dataset.IDataset result = $1.getResult("result");
+        String json = com.hundsun.jres.common.share.dataset.DatasetUtil.dataset2Json(result, "UTF-8");
+        System.out.println("custom printReturn:all data json start=" + json);
+        System.out.println("custom printReturn:all data json end==============================");
+    }
+    
+    rprint transRequest() {
+        System.out.println("custom printReturn transRequest return " + $1.getRequestDataset().getString("FunctionId"));
+    }
+    
+    pprint getVersion() {}
+    
+    rprint getVersion() {}
+
+    method getVersion() {
+        boolean b = false;
+        try {
+                    b = $0.getClass() == java.lang.Class.forName("com.hundsun.lcpt.dxfund.pub.online.adapter.T110381.T110381HSAdapter");
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+        return "6.0.0.39" + b;
+    }
+    
+    method packAnswer() {
+                com.hundsun.jres.interfaces.share.dataset.IDataset request = $0.getRequestDataset($1);
+                com.hundsun.lcpt.business.dataset.AnswerDataset response = new com.hundsun.lcpt.business.dataset.AnswerDataset(request);
+                com.hundsun.jres.interfaces.share.dataset.IDataset resultDataSet = $2.getResultDataSet();
+                if (resultDataSet.getRowCount()<1){
+                    response.setValue(1, "RecordFlag","0");
+                    setResponseDataset($1, response.getAnswerDataset());
+                }
+                resultDataSet.beforeFirst();
+                for (int i = 1; i <= resultDataSet.getRowCount(); i++) {
+                    resultDataSet.next();
+                    response.setValue(i, "TotNum", $2.getTotRecNum());
+                    response.setValue(i, "RetNum", resultDataSet.getRowCount());
+                    response.setValue(i, "OffSet", request.getInt("OffSet"));
+                    
+                    response.setValue(i, "Fuck", "YOU BITCH 55");
+                    response.setValue(i, "Test", getVersion());
+
+                }
+                setResponseDataset($1, response.getAnswerDataset());
+    }
+
+}
+
+class com.hundsun.lcpt.dxfund.pub.online.adapter.T110873.T110873HSAdapter {
+    cprint toLocal(com.hundsun.lcpt.pub.cache.ParamCache) {
+        
+    }
+        
+    rprint checkData(com.hundsun.lcpt.pub.cache.ParamCache) {
+            
+    }
+        
+    rprint transRequest(com.hundsun.lcpt.pub.cache.ParamCache) {
+            
+    }
+    
+}
+

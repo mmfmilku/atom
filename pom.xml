@@ -11,11 +11,17 @@
     <modules>
         <module>atom-core</module>
         <module>atom-parse</module>
+        <module>atom-agent</module>
+        <module>atom-common</module>
+        <module>atom-web-console</module>
     </modules>
 
     <properties>
         <junit.version>4.13</junit.version>
         <atom-core-version>0.0.1-SNAPSHOT</atom-core-version>
+        <atom-version>0.0.1-SNAPSHOT</atom-version>
+        <spring.boot.version>2.2.10.RELEASE</spring.boot.version>
+        <com.alibaba.fastjson.version>1.2.78</com.alibaba.fastjson.version>
     </properties>
 
     <dependencies>
@@ -29,7 +35,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.78</version>
+            <version>${com.alibaba.fastjson.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

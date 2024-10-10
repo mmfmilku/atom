@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<style>
+h1 { text-align: center; }
+h3 { 
+    text-align: center; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.flex {
+  display: flex;
+}
+.vm-list{
+    flex-direction: column;
+}
+.vm-list-block {
+    border: 2px solid #2196F3;
+    margin-top: 5px;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+.vm-field {
+    display: flex;
+    justify-content: flex-start;
+    margin: 4px;
+}
+.vm-field-button {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px;
+}
+.vm-field-label {
+    width: 75px;
+}
+.vm-field-value {
+    word-wrap: break-word;
+    width: 85%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.vm-button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin: 4px;
+}
+.vm-button-container>button{
+    margin-left: 5px;
+}
+
+#confDialog {
+    width: 75%;
+}
+#ordDialog {
+    width: 75%;
+}
+#ordFileText {
+    color: white;
+    background-color: #000000cc;
+    font: caption;
+}
+
+</style>
+<script src=./js/util.js></script>
+<script>
+    let post = (path, data) => {
+        return atom.post(path, data)
+    }
+
+    post('/listVm', {})
+        .then(res => {
+            console.log(res)
+            let listHtml = res.map(e => 
+                `
+                <div class="vm-list-block">
+                    <div class="vm-field">
+                        <label class="vm-field-label">应用名称:</label>
+                        <div class="vm-field-value">${e.displayName}</div>
+                    </div>
+                    <div class="vm-field">
+                        <label class="vm-field-label">id:</label>
+                        <div class="vm-field-value">${e.vmId}</div>
+                    </div>
+                    <div class="vm-button-container">
+                        <button onclick="configPage('${e.vmId}', '${e.displayName}')">ord文件</button>
+                        <button onclick="attach('${e.vmId}', '${e.displayName}')">attach</button>
+                    </div>
+                </div>
+                `
+            ).join('')
+            document.querySelector('.vm-list').innerHTML  = listHtml
+        })
+
+    let attach = (id, appName) => {
+        console.log(id)
+        
+        post(`/loadAgent?vmId=${id}&appName=${appName}`)
+            .then(res => {
+                alert(res)
+            })
+    }
+    
+    <!--  配置部分  -->
+
+    let configPage = (vmId, appName) => {
+        let favDialog = document.getElementById("confDialog");
+        if (typeof favDialog.showModal === "function") {
+            favDialog.showModal()
+        } else {
+            alert("Sorry, this browser is too low.")
+        }
+        
+        post('/listOrd?appName=' + appName)
+            .then(res => {
+                let pListHtml = res.map(e => 
+                    `
+                    <div class="vm-field-button">
+                        <span onclick="readOrd('${appName}', '${e}')">${e}</span>
+                        <button onclick="deleteOrd('${vmId}', '${appName}', '${e}')">删除</button>
+                    </div>
+                    `
+                ).join('')
+                let listHtml = 
+                    `
+                    <h3>${appName}</h3>
+                    <form method="dialog">
+                        ${pListHtml}
+                        <div class="vm-button-container">
+                            <button onclick="addOrd('${appName}')" value="commit">新增</button>
+                            <button onclick="attach('${vmId}', '${appName}')">attach</button>
+                            <button value="cancel">关闭</button>
+                        </div>
+                    </form>
+                    `
+                favDialog.innerHTML  = listHtml
+            })
+    }
+
+    let addOrd = (appName) => {
+        UI.openInputDialog()
+            .then(ordFileName => {
+                readOrd(appName, ordFileName)
+            })
+    }
+    
+    let deleteOrd = (vmId, appName, ordFileName) => {
+        post(`/deleteOrd?appName=${appName}&ordFileName=${ordFileName}`)
+            .then(res => {
+                configPage(vmId, appName)
+            })
+    }
+
+    let readOrd = (appName, ordFileName) => {
+        console.log(ordFileName);
+        post(`/readOrd?appName=${appName}&ordFileName=${ordFileName}`)
+            .then(res => {
+                let ordDialog = document.getElementById("ordDialog")
+                ordDialog.showModal()
+                ordDialog.innerHTML = 
+                    `
+                    <h3>${appName}</h3>
+                    <h4>${ordFileName}</h4>
+                    <textarea id="ordFileText" cols="140" rows="25">${res.text}</textarea>
+                    <form method="dialog">
+                        <div class="vm-button-container">
+                            <button onclick="writeOrd('${appName}', '${ordFileName}')" value="commit">提交</button>
+                            <button value="cancel">关闭</button>
+                        </div>
+                    </form>
+                    `
+            })
+    }
+    
+    let writeOrd = (appName, ordFileName) => {
+        console.log('writeOrd')
+        let ordText = document.getElementById("ordFileText").value
+        post(`/writeOrd?appName=${appName}&ordFileName=${ordFileName}`, {fileName:ordFileName,text:ordText})
+            .then(res => {
+                console.log(res)
+            })
+    }
+
+</script>
+<div id="app">
+    <dialog id="confDialog">
+        <h3>${appName}</h3>
+        <form method="dialog">
+            <div class="vm-field-button">
+                <span onclick="readOrd(1, 9)">/sfa/fadf/asdfa/asdfa/adfa/afdsfa/afda/afa/adfa.ord</span>
+                <button onclick="deleteOrd(1, 9)">删除</button>
+            </div>
+            <div class="vm-field-button">
+                <span onclick="readOrd(2, 8)">/sfa/fadf/asdfa/asdfa/adfa/afdsfa/afda/afa/adfa.ord</span>
+                <button onclick="deleteOrd(1, 9)">删除</button>
+            </div>
+            <div class="vm-button-container">
+                <button value="cancel">关闭</button>
+            </div>
+        </form>
+    </dialog>
+    <dialog id="ordDialog">
+        <h3>${appName}</h3>
+        <h4>${ordFileName}</h4>
+        <textarea id="ordFileText" cols="140" rows="25">
+            a;lkdfjaklafjlkdjasfl;kajkldajflk;ajl;kf
+            jaslkjaslkffjakldjalkffalksdjfdkl;aj法
+            兰克的骄傲234241234
+        </textarea>
+        <form method="dialog">
+            <div class="vm-button-container">
+                <button onclick="writeOrd(4444)" value="commit">提交</button>
+                <button value="cancel">关闭</button>
+            </div>
+        </form>
+    </dialog>
+    <h1>JVM列表</h1>
+    <div class="vm-list flex">
+        <div class="vm-list-block">
+            <div class="vm-field">
+                <label class="vm-field-label">应用名称:</label>
+                <div class="vm-field-value">
+                    sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的sfddsfsdfsfsfsf发生了开发建设离开房间斯洛伐克技术的
+                </div>
+            </div>
+            <div class="vm-field">
+                <label class="vm-field-label">id:</label>
+                <div class="vm-field-value">${e.vmId}</div>
+            </div>
+            <div class="vm-button-container">
+                <button onclick="configPage(4444)">ord文件</button>
+                <button onclick="attach(333, 'aaa')">attach</button>
+            </div>
+        </div>
+
+        <div class="vm-list-block">
+            <div class="vm-field">
+                <label class="vm-field-label">应用名称:</label>
+                <div class="vm-field-value">${e.displayName}</div>
+            </div>
+            <div class="vm-field">
+                <label class="vm-field-label">id:</label>
+                <div class="vm-field-value">${e.vmId}</div>
+            </div>
+            <div class="vm-button-container">
+                <button onclick="configPage('${e.vmId}', '${e.displayName}')">ord文件</button>
+                <button onclick="attach('${e.vmId}', '${e.displayName}')">attach</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
