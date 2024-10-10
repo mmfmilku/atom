@@ -1,32 +1,15 @@
-/********************************************
- * 文件名称: InstrumentationUtils.java
- * 系统名称: 综合理财管理平台6.0
- * 模块名称:
- * 软件版权: 恒生电子股份有限公司
- * 功能说明:
- * 系统版本: 6.0.0.1
- * 开发人员: chenxp
- * 开发时间: 2024/6/17
- * 审核人员:
- * 相关文档:
- * 修改记录:   修改日期    修改人员    修改单号       版本号                   修改说明
- * V6.0.0.1  20240617-01  chenxp   TXXXXXXXXXXXX    IFMS6.0VXXXXXXXXXXXXX   新增 
- *********************************************/
-package org.mmfmilku.atom.agent.context;
-
-import org.mmfmilku.atom.agent.instrument.FileDefineTransformer;
+package org.mmfmilku.atom.agent.instrument;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
 /**
  * InstrumentationUtils
  *
- * @author chenxp
+ * @author mmfmilku
  * @date 2024/6/17:14:03
  */
 public class InstrumentationContext {
@@ -53,6 +36,14 @@ public class InstrumentationContext {
             instance.inst = inst;
         }
     }
+
+    public static synchronized void clear() {
+        System.out.println("---------------------clear InstrumentationContext-------------------------");
+        if (instance != null) {
+            clearTransformer();
+            instance = null;
+        }
+    }
     
     public static InstrumentationContext getInstance() {
         if (instance != null) {
@@ -61,14 +52,8 @@ public class InstrumentationContext {
         throw new RuntimeException("InstrumentationContext have not init");
     }
     
-    public static void checkInit() {
-        if (instance == null) {
-            throw new RuntimeException("InstrumentationContext have not init");
-        }
-    }
-    
     public static void addTransformer(ClassFileTransformer transformer) {
-        checkInit();
+        InstrumentationContext instance = getInstance();
         if (instance.addedTransformer.contains(transformer)) {
             System.out.println("already add transformer:" + transformer.toString());
             return;
@@ -78,7 +63,7 @@ public class InstrumentationContext {
     }
 
     public static Class<?> searchClass(String searchClassName) {
-        checkInit();
+        InstrumentationContext instance = getInstance();
         Class<?>[] loadedClasses = instance.inst.getAllLoadedClasses();
         for (Class<?> loadedClass : loadedClasses) {
             if (loadedClass.getName().equals(searchClassName)) {
@@ -87,21 +72,30 @@ public class InstrumentationContext {
         }
         return null;
     }
-
-    public static List<Class<?>> searchClassByPackage(String packageName) {
-        checkInit();
-        Class<?>[] loadedClasses = instance.inst.getAllLoadedClasses();
-        List<Class<?>> searchList = new ArrayList<>();
-        for (Class<?> loadedClass : loadedClasses) {
-            if (loadedClass.getName().startsWith(packageName)) {
-                searchList.add(loadedClass);
+    
+    private static List<String> getLoadedClasses(Function<Class<?>, Boolean> matchFunc) {
+        InstrumentationContext instance = getInstance();
+        Class<?>[] allLoadedClasses = instance.inst.getAllLoadedClasses();
+        List<String> result = new ArrayList<>();
+        for (Class<?> loadedClass : allLoadedClasses) {
+            if (matchFunc.apply(loadedClass)) {
+                result.add(loadedClass.getName());
             }
         }
-        return searchList;
+        return result;
+    }
+
+    public static List<String> getLoadedClasses(String packageName) {
+        return getLoadedClasses(clazz -> clazz.getName().startsWith(packageName));
+    }
+
+    public static List<String> getLoadedClasses(String packageName, String classShortNameLike) {
+        return getLoadedClasses(clazz -> clazz.getName().startsWith(packageName)
+                && clazz.getSimpleName().contains(classShortNameLike));
     }
 
     public static ClassLoader searchClassLoader(String searchClassLoaderName) {
-        checkInit();
+        InstrumentationContext instance = getInstance();
         Class<?>[] loadedClasses = instance.inst.getAllLoadedClasses();
         for (Class<?> loadedClass : loadedClasses) {
             ClassLoader classLoader = loadedClass.getClassLoader();
@@ -113,13 +107,13 @@ public class InstrumentationContext {
     }
 
     public static void removeTransformer(ClassFileTransformer transformer) {
-        checkInit();
+        InstrumentationContext instance = getInstance();
         instance.inst.removeTransformer(transformer);
         instance.addedTransformer.remove(transformer);
     }
 
     public static void clearTransformer() {
-        checkInit();
+        InstrumentationContext instance = getInstance();
         instance.addedTransformer.forEach(transformer -> {
             instance.inst.removeTransformer(transformer);
         });
@@ -127,7 +121,7 @@ public class InstrumentationContext {
     }
     
     public static void retransformClasses(Class<?>... classes) throws UnmodifiableClassException {
-        checkInit();
+        InstrumentationContext instance = getInstance();
         instance.inst.retransformClasses(classes);
     }
     

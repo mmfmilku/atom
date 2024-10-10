@@ -12,13 +12,13 @@
  * 修改记录:   修改日期    修改人员    修改单号       版本号                   修改说明
  * V6.0.0.1  20240618-01  chenxp   TXXXXXXXXXXXX    IFMS6.0VXXXXXXXXXXXXX   新增 
  *********************************************/
-package org.mmfmilku.atom.agent.instrument;
+package org.mmfmilku.atom.agent.instrument.transformer;
 
 import javassist.*;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import org.mmfmilku.atom.agent.config.*;
-import org.mmfmilku.atom.agent.context.InstrumentationContext;
+import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -26,7 +26,6 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -130,7 +129,7 @@ public class ParamPrintTransformer implements ClassFileTransformer {
             callMethod = methodCall.getMethod().getLongName();
         }
         StringBuilder insertSource = new StringBuilder("{");
-        String defaultPrintMethod = "org.mmfmilku.atom.agent.instrument.ParamPrintTransformer.print";
+        String defaultPrintMethod = "org.mmfmilku.atom.agent.instrument.transformer.ParamPrintTransformer.print";
         String callPrintFormat = String.format(defaultPrintMethod +
                 "(\"%s\",\"%s\",%s);", ctMethod.getLongName(), callMethod, "$args");
         insertSource.append(callPrintFormat);
@@ -144,7 +143,7 @@ public class ParamPrintTransformer implements ClassFileTransformer {
             callMethod = methodCall.getMethod().getLongName();
         }
         StringBuilder insertSource = new StringBuilder("{");
-        String defaultPrintMethod = "org.mmfmilku.atom.agent.instrument.ParamPrintTransformer.print";
+        String defaultPrintMethod = "org.mmfmilku.atom.agent.instrument.transformer.ParamPrintTransformer.print";
         String callPrintFormat = String.format(defaultPrintMethod +
                 "(\"%s\",\"%s\",%s);", ctMethod.getLongName(), callMethod, "$_");
         insertSource.append(callPrintFormat);
