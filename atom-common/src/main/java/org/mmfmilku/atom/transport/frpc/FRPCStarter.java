@@ -116,10 +116,12 @@ public class FRPCStarter {
                 }
 
                 for (Method method : methods) {
-                    FRPCService annotation = method.getAnnotation(FRPCService.class);
                     method.setAccessible(true);
-                    if (annotation != null) {
-                        // TODO 不支持重载
+                    Class<?>[] declaringInterfaces = method.getDeclaringClass().getInterfaces();
+
+                    if (declaringInterfaces.length == 1 &&
+                            declaringInterfaces[0].getName().equals(serviceName)) {
+                        // TODO 待支持重载
                         if (funcMap.containsKey(method.getName())) {
                             throw new RuntimeException("repeat method " + method.getName());
                         }

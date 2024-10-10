@@ -8,7 +8,6 @@ import java.util.*;
 @FRPCService
 public class FRpcServiceOneImpl implements FRpcServiceOne {
 
-    @FRPCService
     public List<Map<String, String>> getList() {
         List<Map<String, String>> list = new ArrayList<>();
         list.add(Collections.singletonMap("a", "1"));
@@ -16,7 +15,6 @@ public class FRpcServiceOneImpl implements FRpcServiceOne {
         return list;
     }
 
-    @FRPCService
     public List<Map<String, String>> getList2(String a, String b) {
         List<Map<String, String>> list = new ArrayList<>();
         list.add(Collections.singletonMap(a, "1"));
