@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.transport.frpc;
 
+import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.transport.handle.FRPCHandle;
 import org.mmfmilku.atom.transport.protocol.file.FServer;
 
@@ -17,11 +18,13 @@ public class FRPCStarter {
     public static final String F_SERVER_DIR = System.getProperty("user.dir") + File.separator + "fserver";
 
     private String scanPackage;
+    private String fDir;
     private List<Class<?>> classes = new ArrayList<>();
     private Map<String, ServiceMapping> mappings = new HashMap<>();
 
-    public FRPCStarter(String scanPackage) {
+    public FRPCStarter(String scanPackage, String fDir) {
         this.scanPackage = scanPackage;
+        this.fDir = fDir;
     }
 
     public void runServer() {
@@ -31,12 +34,12 @@ public class FRPCStarter {
     }
 
     private void runWithThread() {
-        File baseDir = new File(F_SERVER_DIR);
-//        baseDir.delete();
         Thread thread = new Thread("frpc-main-thread") {
             @Override
             public void run() {
-                FServer fServer = new FServer(F_SERVER_DIR).addHandle(new FRPCHandle(mappings));
+                // TODO dir传参送入
+                FServer fServer = new FServer(fDir)
+                        .addHandle(new FRPCHandle(mappings));
                 fServer.start();
             }
         };
@@ -49,6 +52,7 @@ public class FRPCStarter {
             throw new RuntimeException("错误的frpc扫描路径：" + scanPackage);
         }
 
+        // TODO，仅扫描了当前线程所在class路径
         URL resource = Thread.currentThread().getContextClassLoader()
                 .getResource(scanPackage.replace(".", "/"));
         if (resource == null) {
@@ -71,9 +75,9 @@ public class FRPCStarter {
                     if (file.isDirectory()) {
                         scanDir(basePath + "." + file.getName(), file);
                     } else {
-                        if (file.getName().endsWith(".class")) {
+                        if (file.getName().endsWith(CodeConst.CLASS_FILE_SUFFIX)) {
                             String className = basePath + "." +
-                                    file.getName().replace(".class", "");
+                                    file.getName().replace(CodeConst.CLASS_FILE_SUFFIX, "");
                             try {
                                 Class<?> clazz = Class.forName(className);
                                 FRPCService annotation = clazz.getAnnotation(FRPCService.class);
@@ -116,10 +120,12 @@ public class FRPCStarter {
                 }
 
                 for (Method method : methods) {
-                    FRPCService annotation = method.getAnnotation(FRPCService.class);
                     method.setAccessible(true);
-                    if (annotation != null) {
-                        // TODO 不支持重载
+                    Class<?>[] declaringInterfaces = method.getDeclaringClass().getInterfaces();
+
+                    if (declaringInterfaces.length == 1 &&
+                            declaringInterfaces[0].getName().equals(serviceName)) {
+                        // TODO 待支持重载
                         if (funcMap.containsKey(method.getName())) {
                             throw new RuntimeException("repeat method " + method.getName());
                         }

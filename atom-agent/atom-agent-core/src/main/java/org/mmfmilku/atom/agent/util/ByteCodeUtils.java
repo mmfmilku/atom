@@ -22,10 +22,13 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.consts.CodeConst;
+import org.mmfmilku.atom.util.CodeUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +55,14 @@ public class ByteCodeUtils {
         ClassPool classPool = ClassPool.getDefault();
         CtClass clazz = classPool.get(fullClassName);
         return clazz.toBytecode();
+    }
+
+    public static String writeByteCodeFile(String fullClassName, String directoryName) throws NotFoundException, IOException, CannotCompileException {
+        ClassPool classPool = ClassPool.getDefault();
+        CtClass clazz = classPool.get(fullClassName);
+        clazz.debugWriteFile(directoryName);
+        return Paths.get(directoryName, CodeUtils.toFileName(fullClassName))
+                .toString() + CodeConst.CLASS_FILE_SUFFIX;
     }
     
     public static void appendClassPath(ClassLoader classLoader) {

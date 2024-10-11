@@ -7,6 +7,7 @@ import org.mmfmilku.atom.agent.handle.AgentHandle;
 import org.mmfmilku.atom.agent.handle.AgentMainHandle;
 import org.mmfmilku.atom.agent.handle.PreMainHandle;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
+import org.mmfmilku.atom.transport.frpc.FRPCStarter;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.Objects;
  * @author chenxp
  * @date 2024/6/4:15:02
  */
-public class AgentHelper {
+public class AgentBootstrap {
 
     private static List<AgentHandle> handleChain = new ArrayList<>();
 
@@ -63,6 +64,12 @@ public class AgentHelper {
             for (AgentHandle handle : handleChain) {
                 handle.handle(agentArgs, inst);
             }
+
+            String basePackage = AgentProperties.getProperty(AgentProperties.PROP_APP_BASE_PACKAGE);
+            String fServerDir = AgentProperties.getProperty(AgentProperties.PROP_FSERVER_DIR);
+
+            FRPCStarter frpcStarter = new FRPCStarter(basePackage, fServerDir);
+            frpcStarter.runServer();
         } catch (Throwable e) {
             System.out.println("agent main error");
             e.printStackTrace();

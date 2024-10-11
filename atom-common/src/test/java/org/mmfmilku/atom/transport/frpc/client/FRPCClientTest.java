@@ -7,6 +7,8 @@ import org.mmfmilku.atom.transport.frpc.api.FRpcServiceTwo;
 import org.mmfmilku.atom.transport.frpc.api.impl.FRpcServiceOneImpl;
 import org.mmfmilku.atom.transport.frpc.api.impl.FRpcServiceTwoImpl;
 
+import java.io.File;
+
 import static org.junit.Assert.*;
 
 /**
@@ -20,10 +22,12 @@ public class FRPCClientTest {
     @Test
     public void getService() {
 
-        FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom");
+        String fDir = System.getProperty("user.dir") + File.separator + "fserver";
+
+        FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
         starter.runServer();
 
-        FRpcServiceOne remote = FRPCFactory.getService(FRpcServiceOne.class);
+        FRpcServiceOne remote = FRPCFactory.getService(FRpcServiceOne.class, fDir);
         FRpcServiceOne local = new FRpcServiceOneImpl();
 
         assertEquals(local.getList(), remote.getList());
@@ -32,7 +36,7 @@ public class FRPCClientTest {
         assertEquals(local.getList2("b", "d"), remote.getList2("b", "d"));
         assertEquals(local.getList2("a", "c"), remote.getList2("a", "c"));
 
-        FRpcServiceTwo remote2 = FRPCFactory.getService(FRpcServiceTwo.class);
+        FRpcServiceTwo remote2 = FRPCFactory.getService(FRpcServiceTwo.class, fDir);
         FRpcServiceTwo local2 = new FRpcServiceTwoImpl();
 
         assertEquals(local2.getMap("1"), remote2.getMap("1"));

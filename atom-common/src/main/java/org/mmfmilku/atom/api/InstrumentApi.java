@@ -16,6 +16,8 @@ public interface InstrumentApi {
     
     byte[] getByteCode(String fullClassName);
 
+    String writeByteCodeFile(String fullClassName, String targetDir);
+
     void retransformClass(String className);
     
 }

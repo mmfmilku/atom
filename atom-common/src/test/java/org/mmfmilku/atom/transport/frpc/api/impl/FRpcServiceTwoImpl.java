@@ -9,7 +9,6 @@ import java.util.Map;
 @FRPCService
 public class FRpcServiceTwoImpl implements FRpcServiceTwo {
 
-    @FRPCService
     public Map<String, String> getMap(String type) {
         Map<String, String> map = new HashMap<>();
         switch (type) {

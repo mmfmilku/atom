@@ -23,7 +23,6 @@ import java.util.List;
 public class InstrumentApiImpl implements InstrumentApi {
 
     @Override
-    @FRPCService
     public List<String> listClassForPage(int offset, int size) {
         if (offset < 1 || size < 1) {
             return Collections.emptyList();
@@ -35,7 +34,6 @@ public class InstrumentApiImpl implements InstrumentApi {
     }
 
     @Override
-    @FRPCService
     public List<String> listClassForPage(int offset, int size, String classShortNameLike) {
         if (offset < 1 || size < 1) {
             return Collections.emptyList();
@@ -47,10 +45,19 @@ public class InstrumentApiImpl implements InstrumentApi {
     }
 
     @Override
-    @FRPCService
     public byte[] getByteCode(String fullClassName) {
         try {
             return ByteCodeUtils.getByteCode(fullClassName);
+        } catch (NotFoundException | IOException | CannotCompileException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String writeByteCodeFile(String fullClassName, String targetDir) {
+        try {
+            return ByteCodeUtils.writeByteCodeFile(fullClassName, targetDir);
         } catch (NotFoundException | IOException | CannotCompileException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -65,7 +72,6 @@ public class InstrumentApiImpl implements InstrumentApi {
     }
 
     @Override
-    @FRPCService
     public void retransformClass(String className) {
         Class<?> clazz = InstrumentationContext.searchClass(className);
         if (clazz == null) {

@@ -9,10 +9,14 @@ public class FRPCClientProxy<T> implements InvocationHandler {
     
     private Class<T> delegateClass;
 
-    private FRPCClient frpcClient = FRPCClient.getInstance();
+    private String fDir;
 
-    public FRPCClientProxy(Class<T> delegateClass) {
+    private FRPCClient frpcClient;
+
+    public FRPCClientProxy(Class<T> delegateClass, String fDir) {
         this.delegateClass = delegateClass;
+        this.fDir = fDir;
+        this.frpcClient = FRPCClient.getInstance(fDir);
     }
 
     @Override

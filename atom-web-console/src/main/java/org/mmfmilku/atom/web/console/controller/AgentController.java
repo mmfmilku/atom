@@ -1,22 +1,11 @@
-/********************************************
- * 文件名称: MainController.java
- * 系统名称: 综合理财管理平台6.0
- * 模块名称:
- * 软件版权: 恒生电子股份有限公司
- * 功能说明:
- * 系统版本: 6.0.0.1
- * 开发人员: chenxp
- * 开发时间: 2024/7/26
- * 审核人员:
- * 相关文档:
- * 修改记录:   修改日期    修改人员    修改单号       版本号                   修改说明
- * V6.0.0.1  20240726-01  chenxp   TXXXXXXXXXXXX    IFMS6.0VXXXXXXXXXXXXX   新增 
- *********************************************/
 package org.mmfmilku.atom.web.console.controller;
 
 import org.mmfmilku.atom.agent.client.AgentClient;
+import org.mmfmilku.atom.api.AppInfoApi;
+import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
-import org.mmfmilku.atom.web.console.interfaces.IOrdConfigService;
+import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
+import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,35 +16,64 @@ import java.util.Map;
 /**
  * MainController
  *
- * @author chenxp
+ * @author mmfmilku
  * @date 2024/7/26:13:59
  */
 @RestController
 public class AgentController {
 
     @Autowired
-    IOrdConfigService ordConfigService;
+    IAgentConfigService ordConfigService;
     
     @Autowired
     IOrdFileOperation ordFileOperation;
+    
+    @Autowired
+    IInstrumentService instrumentService;
 
     @RequestMapping("listVm")
     @ResponseBody
     public List<Map<String, String>> listVm() {
         return AgentClient.listVMMap();
     }
-
+    
     @RequestMapping("loadAgent")
-    public String loadAgent(@RequestParam String vmId, @RequestParam String appName) {
+    public String loadAgent(@RequestParam String vmId, @RequestParam String appName, @RequestParam(required = false) String basePackage) {
         AgentConfig config = ordConfigService.getConfig(appName);
-        String dir = ordFileOperation.getDir(config.getOrdId());
+        // TODO,ord文件读取不支持低柜文件夹，暂时使用ord目录
+        String dir = config.getOrdDir();
+        // TODO 配置 classloader
+        String customClassloader = "org.springframework.boot.loader.LaunchedURLClassLoader";
         try {
-            AgentClient.loadAgent(vmId, "base-path=" + dir);
+            AgentClient.loadAgent(vmId, "base-path=" + dir 
+                    + ";app-classloader=" + customClassloader
+                    + ";app-base-package=" + basePackage
+                    + ";app-fserver-dir=" + config.getFDir()
+            );
         } catch (Exception e) {
             e.printStackTrace();
             return "fail";
         }
+        
+        AppInfoApi infoApi = FRPCFactory.getService(AppInfoApi.class, config.getFDir());
+        infoApi.ping();
+
         return "success";
+    }
+
+    @RequestMapping("listClass")
+    @ResponseBody
+    public List<String> listClass(@RequestParam String appName, @RequestParam int offset, @RequestParam int size,
+                                  @RequestParam String classShortNameLike) {
+        if (classShortNameLike != null) {
+            return instrumentService.listClassForPage(appName, offset, 1000, classShortNameLike);
+        }
+        return instrumentService.listClassForPage(appName, offset, 1000);
+    }
+
+    @RequestMapping("genSource")
+    public String genSource(@RequestParam String appName, @RequestParam String fullClassName) {
+        return instrumentService.decompile(appName, fullClassName);
     }
     
 }
