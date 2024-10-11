@@ -60,15 +60,17 @@ public class FServer {
         if (files != null && files.length != 0) {
             boolean delete = files[0].delete();
             if (!delete) {
-                throw new RuntimeException("启动失败,监听文件夹已被占用");
+                throw new RuntimeException("fserver start fail,listen path is used");
             }
         }
         // TODO 对于历史文件的处理，先暴力删除
         try {
-            Files.walk(Paths.get(listenPath))
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
+            if (Files.exists(Paths.get(listenPath))) {
+                Files.walk(Paths.get(listenPath))
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
             if (!listen.mkdirs()) {
                 throw new RuntimeException("启动失败,创建目录失败");
             }

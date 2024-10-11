@@ -1,34 +1,75 @@
-/********************************************
- * 文件名称: AgentConfig.java
- * 系统名称: 综合理财管理平台6.0
- * 模块名称:
- * 软件版权: 恒生电子股份有限公司
- * 功能说明:
- * 系统版本: 6.0.0.1
- * 开发人员: chenxp
- * 开发时间: 2024/7/31
- * 审核人员:
- * 相关文档:
- * 修改记录:   修改日期    修改人员    修改单号       版本号                   修改说明
- * V6.0.0.1  20240731-01  chenxp   TXXXXXXXXXXXX    IFMS6.0VXXXXXXXXXXXXX   新增 
- *********************************************/
 package org.mmfmilku.atom.web.console.domain;
 
 /**
  * AgentConfig
  *
- * @author chenxp
+ * @author mmfmilku
  * @date 2024/7/31:9:13
  */
 public class AgentConfig {
     
-    private String ordId;
+    /**
+     * 根据应用启动命令映射的id
+     * */
+    private String id;
 
-    public String getOrdId() {
-        return ordId;
+    /**
+     * 为每个应用分配的基础路径
+     * */
+    private String appBaseDir;
+
+    /**
+     * 应用ORD存放路径
+     * */
+    private String ordDir;
+
+    /**
+     * 应用FServer监听路径
+     * */
+    private String fDir;
+
+    /**
+     * 应用缓存文件
+     * */
+    private String tmpDir;
+
+    public String getTmpDir() {
+        return tmpDir;
     }
 
-    public void setOrdId(String ordId) {
-        this.ordId = ordId;
+    public void setTmpDir(String tmpDir) {
+        this.tmpDir = tmpDir;
+    }
+
+    public String getAppBaseDir() {
+        return appBaseDir;
+    }
+
+    public void setAppBaseDir(String appBaseDir) {
+        this.appBaseDir = appBaseDir;
+    }
+
+    public String getOrdDir() {
+        return ordDir;
+    }
+
+    public void setOrdDir(String ordDir) {
+        this.ordDir = ordDir;
+    }
+
+    public String getFDir() {
+        return fDir;
+    }
+
+    public void setFDir(String fDir) {
+        this.fDir = fDir;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

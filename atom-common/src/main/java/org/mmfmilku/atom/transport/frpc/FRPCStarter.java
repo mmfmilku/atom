@@ -52,6 +52,7 @@ public class FRPCStarter {
             throw new RuntimeException("错误的frpc扫描路径：" + scanPackage);
         }
 
+        // TODO，仅扫描了当前线程所在class路径
         URL resource = Thread.currentThread().getContextClassLoader()
                 .getResource(scanPackage.replace(".", "/"));
         if (resource == null) {

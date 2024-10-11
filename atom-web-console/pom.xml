@@ -72,6 +72,12 @@
             <artifactId>cfr</artifactId>
             <version>0.152</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.mmfmilku</groupId>
+            <artifactId>atom-common</artifactId>
+            <version>${atom-version}</version>
+        </dependency>
         
     </dependencies>
 </project>

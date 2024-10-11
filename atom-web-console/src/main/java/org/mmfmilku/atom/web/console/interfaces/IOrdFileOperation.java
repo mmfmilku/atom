@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.web.console.interfaces;
 
+import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 
 import java.util.List;
@@ -7,23 +8,17 @@ import java.util.List;
 /**
  * IOrdFileOperation
  *
- * @author chenxp
+ * @author mmfmilku
  * @date 2024/7/31:13:13
  */
 public interface IOrdFileOperation {
     
-    String getOrdId(String appName);
+    List<String> listFiles(AgentConfig config);
+
+    OrdFile getOrd(AgentConfig config, String ordName);
     
-    String getDir(String ordId);
+    void setText(AgentConfig config, OrdFile ordFile);
     
-    List<String> listDirs();
-    
-    List<String> listFiles(String ordId);
-    
-    String getText(OrdFile ordFile);
-    
-    void setText(OrdFile ordFile);
-    
-    void delete(OrdFile ordFile);
+    void delete(AgentConfig config, OrdFile ordFile);
     
 }

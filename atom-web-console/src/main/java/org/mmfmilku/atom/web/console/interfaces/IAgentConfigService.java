@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * IAgentConfigService
  *
- * @author chenxp
+ * @author mmfmilku
  * @date 2024/7/31:9:12
  */
 public interface IAgentConfigService {
@@ -20,8 +20,10 @@ public interface IAgentConfigService {
     
     List<String> listOrd(String appName);
 
+    void deleteOrd(String appName, String ordFileName);
+    
     OrdFile readOrd(String appName, String ordFileName);
     
-    void writeOrd(String appName, String ordFileName, String text);
+    void writeOrd(String appName, OrdFile ordFile);
     
 }
