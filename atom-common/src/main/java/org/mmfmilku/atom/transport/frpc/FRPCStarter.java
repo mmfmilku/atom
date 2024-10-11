@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.transport.frpc;
 
+import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.transport.handle.FRPCHandle;
 import org.mmfmilku.atom.transport.protocol.file.FServer;
 
@@ -73,9 +74,9 @@ public class FRPCStarter {
                     if (file.isDirectory()) {
                         scanDir(basePath + "." + file.getName(), file);
                     } else {
-                        if (file.getName().endsWith(".class")) {
+                        if (file.getName().endsWith(CodeConst.CLASS_FILE_SUFFIX)) {
                             String className = basePath + "." +
-                                    file.getName().replace(".class", "");
+                                    file.getName().replace(CodeConst.CLASS_FILE_SUFFIX, "");
                             try {
                                 Class<?> clazz = Class.forName(className);
                                 FRPCService annotation = clazz.getAnnotation(FRPCService.class);

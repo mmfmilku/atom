@@ -1,4 +1,6 @@
-package org.mmfmilku.atom.agent.util;
+package org.mmfmilku.atom.util;
+
+import java.io.File;
 
 public class CodeUtils {
 
@@ -23,5 +25,9 @@ public class CodeUtils {
             codeBuilder.append(c);
         }
         return codeBuilder.toString();
+    }
+
+    public static String toFileName(String fullClassName) {
+        return fullClassName.replaceAll("\\.", "\\" + File.separator);
     }
 }
