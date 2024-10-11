@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.mmfmilku</groupId>
             <artifactId>atom-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${atom-version}</version>
         </dependency>
     </dependencies>
 

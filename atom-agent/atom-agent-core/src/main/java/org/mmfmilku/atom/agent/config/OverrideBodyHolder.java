@@ -18,6 +18,7 @@ import org.mmfmilku.atom.agent.compiler.CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 import org.mmfmilku.atom.agent.util.FileUtils;
+import org.mmfmilku.atom.consts.CodeConst;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,7 +87,7 @@ public class OverrideBodyHolder {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (file.endsWith(".java")) {
+        } else if (file.endsWith(CodeConst.JAVA_FILE_SUFFIX)) {
             System.out.println("--------------load .java file:" + file);
             try {
                 String text = FileUtils.readText(file).trim();

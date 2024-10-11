@@ -54,6 +54,16 @@ public class InstrumentApiImpl implements InstrumentApi {
         }
     }
 
+    @Override
+    public String writeByteCodeFile(String fullClassName, String targetDir) {
+        try {
+            return ByteCodeUtils.writeByteCodeFile(fullClassName, targetDir);
+        } catch (NotFoundException | IOException | CannotCompileException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
     private <T> List<T> pageList(int offset, int size, List<T> list) {
         int startIndex = offset - 1;
         // copy

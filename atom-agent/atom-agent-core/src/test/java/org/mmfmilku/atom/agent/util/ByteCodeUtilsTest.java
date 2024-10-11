@@ -3,13 +3,13 @@ package org.mmfmilku.atom.agent.util;
 import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.parser.Parser;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Method;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class ByteCodeUtilsTest {
 
@@ -21,6 +21,19 @@ public class ByteCodeUtilsTest {
         JavaAST javaAST = new Parser(lexer).execute();
         Map<String, Map<String, Method>> stringMapMap = ByteCodeUtils.toJavassistCode(javaAST);
         System.out.println(javaAST.getSourceCode());
+    }
+
+    @Test
+    public void testWriteByteCodeFile() {
+        String file = null;
+        try {
+            file = ByteCodeUtils.writeByteCodeFile("org.mmfmilku.atom.agent.util.TestUtil",
+                    System.getProperty("user.dir") + "\\src\\main\\resources\\test");
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+        System.out.println(file);
     }
 
 }
