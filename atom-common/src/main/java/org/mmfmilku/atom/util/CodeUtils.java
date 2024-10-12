@@ -30,4 +30,9 @@ public class CodeUtils {
     public static String toFileName(String fullClassName) {
         return fullClassName.replaceAll("\\.", "\\" + File.separator);
     }
+
+    public static String toClassName(String filePathName) {
+        filePathName.replaceAll("/", "\\.");
+        return filePathName.replaceAll("/", "\\.");
+    }
 }

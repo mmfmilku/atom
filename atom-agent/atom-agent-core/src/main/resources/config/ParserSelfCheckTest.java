@@ -2,7 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser;
 
 import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
-import org.mmfmilku.atom.agent.util.FileUtils;
+import org.mmfmilku.atom.util.FileUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;

@@ -2,7 +2,7 @@ import org.junit.Test;
 import org.mmfmilku.atom.agent.config.AgentProperties;
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
 import org.mmfmilku.atom.agent.config.OverrideBodyHolder;
-import org.mmfmilku.atom.agent.util.FileUtils;
+import org.mmfmilku.atom.util.FileUtils;
 
 import java.io.IOException;
 import java.util.Map;

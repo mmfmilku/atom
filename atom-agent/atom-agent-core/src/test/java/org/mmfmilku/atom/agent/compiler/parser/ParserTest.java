@@ -6,7 +6,7 @@ import org.mmfmilku.atom.agent.compiler
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler
         .parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.util.FileUtils;
+import org.mmfmilku.atom.util.FileUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;

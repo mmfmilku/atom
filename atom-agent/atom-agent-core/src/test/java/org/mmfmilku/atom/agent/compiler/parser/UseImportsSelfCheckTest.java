@@ -1,13 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser;
 import org.junit.Test;
-import org.mmfmilku.atom.agent.compiler.CompilerUtil;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Method;
-import org.mmfmilku.atom.agent.util.FileUtils;
-import org.mmfmilku.atom.agent.util.TestUtil;
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 
 public class UseImportsSelfCheckTest {@Test()
