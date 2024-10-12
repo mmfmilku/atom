@@ -23,8 +23,12 @@ public class FRPCHandle extends RRModeServerHandle {
 
         FRPCParam frpcParam = IOUtils.deserialize(rawData);
 
-        FRPCReturn frpcReturn = mappings.get(frpcParam.getServiceClass())
-                .execute(frpcParam.getApiName(), frpcParam);
+        ServiceMapping serviceMapping = mappings.get(frpcParam.getServiceClass());
+        if (serviceMapping == null) {
+            throw new RuntimeException("找不到服务" + frpcParam.getServiceClass());
+        }
+
+        FRPCReturn frpcReturn = serviceMapping.execute(frpcParam.getApiName(), frpcParam);
 
         byte[] serialize = IOUtils.serialize(frpcReturn);
         String encode = Base64.getEncoder().encodeToString(serialize);

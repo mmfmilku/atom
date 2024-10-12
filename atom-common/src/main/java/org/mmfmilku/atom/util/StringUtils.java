@@ -93,5 +93,20 @@ public class StringUtils {
     public static String replaceNoRepeat(String str, String target, String replacement) {
         return str.replaceAll(target, replacement);
     }
+
+    public static String replaceSuffix(String str, String target, String replacement) {
+        if (isEmpty(str) || !str.endsWith(target)) {
+            return str;
+        }
+        return removeSuffix(str, target) + replacement;
+    }
+
+    public static String removeSuffix(String str, String suffix) {
+        if (isEmpty(str) || !str.endsWith(suffix)) {
+            return str;
+        }
+        int index = str.lastIndexOf(suffix);
+        return str.substring(0, index);
+    }
     
 }
