@@ -1,9 +1,7 @@
 package org.mmfmilku.atom.web.console.controller;
 
 import org.mmfmilku.atom.agent.client.AgentClient;
-import org.mmfmilku.atom.api.AppInfoApi;
-import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
-import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.interfaces.IAgentService;
 import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
@@ -23,7 +21,10 @@ import java.util.Map;
 public class AgentController {
 
     @Autowired
-    IAgentConfigService ordConfigService;
+    IAgentConfigService agentConfigService;
+
+    @Autowired
+    IAgentService agentService;
     
     @Autowired
     IOrdFileOperation ordFileOperation;
@@ -39,26 +40,8 @@ public class AgentController {
     
     @RequestMapping("loadAgent")
     public String loadAgent(@RequestParam String vmId, @RequestParam String appName, @RequestParam(required = false) String basePackage) {
-        AgentConfig config = ordConfigService.getConfig(appName);
-        // TODO,ord文件读取不支持低柜文件夹，暂时使用ord目录
-        String dir = config.getOrdDir();
-        // TODO 配置 classloader
-        String customClassloader = "org.springframework.boot.loader.LaunchedURLClassLoader";
-        try {
-            AgentClient.loadAgent(vmId, "base-path=" + dir 
-                    + ";app-classloader=" + customClassloader
-                    + ";app-base-package=" + basePackage
-                    + ";app-fserver-dir=" + config.getFDir()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
-        
-        AppInfoApi infoApi = FRPCFactory.getService(AppInfoApi.class, config.getFDir());
-        infoApi.ping();
-
-        return "success";
+        boolean success = agentService.loadAgent(vmId, appName, basePackage);
+        return String.valueOf(success);
     }
 
     @RequestMapping("listClass")

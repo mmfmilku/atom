@@ -6,4 +6,6 @@ public class CodeConst {
 
     public static final String CLASS_FILE_SUFFIX = ".class";
 
+    public static final String JAR_FILE_SUFFIX = ".jar";
+
 }
