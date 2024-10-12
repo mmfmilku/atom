@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.util;
 
+import org.mmfmilku.atom.consts.CodeConst;
+
 import java.io.File;
 
 public class CodeUtils {
@@ -29,5 +31,12 @@ public class CodeUtils {
 
     public static String toFileName(String fullClassName) {
         return fullClassName.replaceAll("\\.", "\\" + File.separator);
+    }
+
+    public static String toClassName(String filePathName) {
+        String className = filePathName.replaceAll("/", "\\.");
+        className = StringUtils.removeSuffix(className, CodeConst.CLASS_FILE_SUFFIX);
+        className = StringUtils.removeSuffix(className, CodeConst.JAVA_FILE_SUFFIX);
+        return className;
     }
 }

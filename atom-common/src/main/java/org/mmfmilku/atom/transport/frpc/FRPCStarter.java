@@ -3,15 +3,16 @@ package org.mmfmilku.atom.transport.frpc;
 import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.transport.handle.FRPCHandle;
 import org.mmfmilku.atom.transport.protocol.file.FServer;
+import org.mmfmilku.atom.util.CodeUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.jar.JarEntry;
 
 public class FRPCStarter {
 
@@ -59,8 +60,26 @@ public class FRPCStarter {
             throw new RuntimeException("错误的frpc扫描路径：" + scanPackage);
         }
 
-        File scanDir = new File(resource.getFile());
-        scanDir(scanPackage, scanDir);
+        String protocol = resource.getProtocol();
+        if ("jar".equals(protocol)) {
+            try {
+                JarURLConnection jarURLConnection = (JarURLConnection) resource.openConnection();
+                Enumeration<JarEntry> entries = jarURLConnection.getJarFile().entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry jarEntry = entries.nextElement();
+                    if (jarEntry.getName().endsWith(CodeConst.CLASS_FILE_SUFFIX)) {
+                        registerService(CodeUtils.toClassName(jarEntry.getName()));
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        } else {
+            File scanDir = new File(resource.getFile());
+            scanDir(scanPackage, scanDir);
+        }
+
     }
 
     private void scanDir(String basePath, File scanFile) {
@@ -78,19 +97,24 @@ public class FRPCStarter {
                         if (file.getName().endsWith(CodeConst.CLASS_FILE_SUFFIX)) {
                             String className = basePath + "." +
                                     file.getName().replace(CodeConst.CLASS_FILE_SUFFIX, "");
-                            try {
-                                Class<?> clazz = Class.forName(className);
-                                FRPCService annotation = clazz.getAnnotation(FRPCService.class);
-                                if (annotation != null) {
-                                    classes.add(clazz);
-                                }
-                            } catch (ClassNotFoundException e) {
-                                e.printStackTrace();
-                            }
+                            registerService(className);
                         }
                     }
                 }
             }
+        }
+    }
+
+    private void registerService(String className) {
+        try {
+            Class<?> clazz = Class.forName(className);
+            FRPCService annotation = clazz.getAnnotation(FRPCService.class);
+            if (annotation != null) {
+                classes.add(clazz);
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

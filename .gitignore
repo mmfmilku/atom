@@ -26,8 +26,14 @@ target/
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-/ord/
 
-*/src/main/resources/test/
+# 所有测试文件
+**/src/main/resources/test/
 
-/atom-common/fserver/
+# fserver生成的文件
+**/fserver/*.request
+**/fserver/*.response
+**/fserver/*.listen
+
+# web控制台相关数据文件
+/atom-web-console/AgentData/

@@ -12,7 +12,7 @@
  * 修改记录:   修改日期    修改人员    修改单号       版本号                   修改说明
  * V6.0.0.1  20240604-01  chenxp   TXXXXXXXXXXXX    IFMS6.0VXXXXXXXXXXXXX   新增 
  *********************************************/
-package org.mmfmilku.atom.agent.util;
+package org.mmfmilku.atom.util;
 
 import java.io.*;
 import java.util.Map;

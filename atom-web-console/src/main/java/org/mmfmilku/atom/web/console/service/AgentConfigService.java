@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentMap;
 @Service
 public class AgentConfigService implements IAgentConfigService {
     
-    public static final String CONSOLE_BASE_DIR = System.getProperty("user.dir") + File.separator + "agent";
+    public static final String CONSOLE_BASE_DIR = System.getProperty("user.dir") + File.separator + "AgentData";
 
     private static final ConcurrentMap<String, AgentConfig> configMap = new ConcurrentHashMap<>();
     

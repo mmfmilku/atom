@@ -4,12 +4,10 @@ import com.sun.tools.attach.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,57 +16,13 @@ import java.util.stream.Collectors;
 /**
  * org.mmfmilku.atom.agent.client.AgentClient
  *
- * @author chenxp
+ * @author mmfmilku
  * @date 2024/6/6:19:23
  */
 public class AgentClient {
 
-    public static void main(String[] args) throws Exception {
-        doAttach(args);
-    }
-
-    private static void doAttach(String[] args) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
-        // -Xbootclasspath/a:D:\Program Files\Java\jdk1.8.0_221\lib\tools.jar
-        //获取当前系统中所有 运行中的 虚拟机
-        System.out.println("running org.mmfmilku.atom.agent.client.AgentClient start ");
-        System.out.println("args=" + args.length + ";" + Arrays.toString(args));
-
-
-        List<VirtualMachineDescriptor> list = VirtualMachine.list();
-        System.out.println(list.stream().map(VirtualMachineDescriptor::displayName).collect(Collectors.joining("\n")));
-        for (VirtualMachineDescriptor vmd : list) {
-            //如果虚拟机的名称为 xxx 则 该虚拟机为目标虚拟机，获取该虚拟机的 pid
-            //然后加载 agent.jar 发送给该虚拟机
-            if (args.length > 0 && args[0].equals(vmd.displayName())) {
-                System.out.println("--------------start attach " + vmd.displayName() + "---------");
-                loadAgent(vmd.id());
-            }
-            if (vmd.displayName().startsWith("lcpt-web-manager-dxfund-bootstrap-4.0.0-SNAPSHOT.jar")) {
-                System.out.println("--------------start attach " + vmd.displayName() + "---------");
-                loadAgent(vmd.id());
-            }
-        }
-
-
-//        List<VirtualMachineDescriptor> list = VirtualMachine.list();
-//        System.out.println(list);
-//        for (VirtualMachineDescriptor vmd : list) {
-//            //如果虚拟机的名称为 xxx 则 该虚拟机为目标虚拟机，获取该虚拟机的 pid
-//            //然后加载 agent.jar 发送给该虚拟机
-//            System.out.println(vmd.displayName());
-//            if (vmd.displayName().endsWith("com.hundsun.lcpt.dxfund.pub.online.ServerStarter")) {
-//                System.out.println("--------------start attach---------");
-//                VirtualMachine virtualMachine = VirtualMachine.attach(vmd.id());
-//                virtualMachine.loadAgent("E:\\project\\atom\\atom-agent\\target\\atom-agent-jar-with-dependencies.jar",
-//                        "base-path=E:/project/atom/atom-agent/src/main/resources/config/;to-string-method=com.alibaba.fastjson.JSON.toJSONString");
-//                virtualMachine.detach();
-//            }
-//        }
-    }
-
     public static List<VirtualMachineDescriptor> listVM() {
-        List<VirtualMachineDescriptor> list = VirtualMachine.list();
-        return list;
+        return VirtualMachine.list();
     }
     
     public static List<Map<String, String>> listVMMap() {
@@ -80,11 +34,7 @@ public class AgentClient {
         }).collect(Collectors.toList());
     }
 
-    public static void loadAgent(String id) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
-        loadAgent(id,
-                "base-path=E:/project/atom/atom-agent/src/main/resources/config/;to-string-method=com.alibaba.fastjson.JSON.toJSONString");
-    }
-
+    @Deprecated
     public static void loadAgent(String id, String args) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
         String userDir = System.getProperty("user.dir");
         System.out.println("userDir=" + userDir);
@@ -101,6 +51,32 @@ public class AgentClient {
         VirtualMachine virtualMachine = VirtualMachine.attach(id);
         virtualMachine.loadAgent(agentJar.getAbsolutePath(), args);
         virtualMachine.detach();
+    }
+
+    public static void loadAgent(String id, String agentJarPath, String args) {
+        File agentJar = new File(agentJarPath);
+        if (!agentJar.exists()) {
+            System.out.println(agentJar.getAbsolutePath() + " not exists");
+            throw new RuntimeException("can not find agentJar");
+        }
+
+        VirtualMachine virtualMachine = null;
+        try {
+            virtualMachine = VirtualMachine.attach(id);
+            virtualMachine.loadAgent(agentJar.getAbsolutePath(), args);
+        } catch (AttachNotSupportedException | IOException | AgentLoadException
+                | AgentInitializationException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            if (virtualMachine != null) {
+                try {
+                    virtualMachine.detach();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private static String FOUND_JAVA_HOME = null;
