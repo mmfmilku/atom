@@ -7,7 +7,7 @@ public class ServiceMapping {
 
     private Object invokeObj;
 
-    Map<String, Function<FRPCParam, FRPCReturn>> funcMap;
+    private Map<String, Function<FRPCParam, FRPCReturn>> funcMap;
 
     public Object getInvokeObj() {
         return invokeObj;
@@ -24,7 +24,8 @@ public class ServiceMapping {
     public FRPCReturn execute(String apiName, FRPCParam frpcParam) {
         Function<FRPCParam, FRPCReturn> function = funcMap.get(apiName);
         if (function == null) {
-            throw new RuntimeException("无此接口" + apiName);
+            throw new RuntimeException("service api not found " +
+                    invokeObj.getClass().getName() + "." + apiName);
         }
         return function.apply(frpcParam);
     }

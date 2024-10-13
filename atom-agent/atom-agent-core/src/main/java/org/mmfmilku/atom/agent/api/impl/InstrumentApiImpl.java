@@ -34,7 +34,7 @@ public class InstrumentApiImpl implements InstrumentApi {
     }
 
     @Override
-    public List<String> listClassForPage(int offset, int size, String classShortNameLike) {
+    public List<String> searchClassForPage(int offset, int size, String classShortNameLike) {
         if (offset < 1 || size < 1) {
             return Collections.emptyList();
         }

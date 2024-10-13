@@ -3,6 +3,7 @@ package org.mmfmilku.atom.transport.frpc;
 import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.transport.handle.FRPCHandle;
 import org.mmfmilku.atom.transport.protocol.file.FServer;
+import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
 
 import java.io.File;
@@ -22,8 +23,10 @@ public class FRPCStarter {
     private String fDir;
     private List<Class<?>> classes = new ArrayList<>();
     private Map<String, ServiceMapping> mappings = new HashMap<>();
+    private Listener listener;
 
     public FRPCStarter(String scanPackage, String fDir) {
+        AssertUtil.notnull(scanPackage, "FRPC服务包路径为空");
         this.scanPackage = scanPackage;
         this.fDir = fDir;
     }
@@ -34,14 +37,29 @@ public class FRPCStarter {
         runWithThread();
     }
 
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
     private void runWithThread() {
         Thread thread = new Thread("frpc-main-thread") {
             @Override
             public void run() {
-                // TODO dir传参送入
-                FServer fServer = new FServer(fDir)
-                        .addHandle(new FRPCHandle(mappings));
-                fServer.start();
+                try {
+                    FServer fServer = new FServer(fDir)
+                            .addHandle(new FRPCHandle(mappings));
+                    fServer.start();
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    if (listener != null) {
+                        listener.onFail(throwable);
+                    }
+                } finally {
+                    if (listener != null) {
+                        listener.onClose();
+                    }
+                }
+
             }
         };
         thread.setDaemon(true);
@@ -68,7 +86,10 @@ public class FRPCStarter {
                 while (entries.hasMoreElements()) {
                     JarEntry jarEntry = entries.nextElement();
                     if (jarEntry.getName().endsWith(CodeConst.CLASS_FILE_SUFFIX)) {
-                        registerService(CodeUtils.toClassName(jarEntry.getName()));
+                        String scanClassName = CodeUtils.toClassName(jarEntry.getName());
+                        if (scanClassName.startsWith(scanPackage)) {
+                            registerService(CodeUtils.toClassName(jarEntry.getName()));
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -78,6 +99,10 @@ public class FRPCStarter {
         } else {
             File scanDir = new File(resource.getFile());
             scanDir(scanPackage, scanDir);
+            if (scanDir.getAbsolutePath().contains("test-classes")) {
+                // 单元测试
+                scanDir(scanPackage, new File(resource.getFile().replace("test-classes", "classes")));
+            }
         }
 
     }
@@ -151,7 +176,7 @@ public class FRPCStarter {
                             declaringInterfaces[0].getName().equals(serviceName)) {
                         // TODO 待支持重载
                         if (funcMap.containsKey(method.getName())) {
-                            throw new RuntimeException("repeat method " + method.getName());
+                            throw new RuntimeException(serviceName + " repeat method " + method.getName());
                         }
 
                         Function<FRPCParam, FRPCReturn> callFunc = param -> {

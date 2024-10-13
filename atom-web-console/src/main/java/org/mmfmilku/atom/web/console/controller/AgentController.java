@@ -39,8 +39,8 @@ public class AgentController {
     }
     
     @RequestMapping("loadAgent")
-    public String loadAgent(@RequestParam String vmId, @RequestParam String appName, @RequestParam(required = false) String basePackage) {
-        boolean success = agentService.loadAgent(vmId, appName, basePackage);
+    public String loadAgent(@RequestParam String vmId, @RequestParam String appName) {
+        boolean success = agentService.loadAgent(vmId, appName);
         return String.valueOf(success);
     }
 

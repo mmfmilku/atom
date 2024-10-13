@@ -1,8 +1,5 @@
 package org.mmfmilku.atom.transport;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 public class MessageUtils {
 
     private static int MAX_BYTE_2 = 0xffff;

@@ -61,8 +61,7 @@ public class ByteCodeUtils {
         ClassPool classPool = ClassPool.getDefault();
         CtClass clazz = classPool.get(fullClassName);
         clazz.debugWriteFile(directoryName);
-        return Paths.get(directoryName, CodeUtils.toFileName(fullClassName))
-                .toString() + CodeConst.CLASS_FILE_SUFFIX;
+        return Paths.get(directoryName, CodeUtils.toClassFilePath(fullClassName)).toString();
     }
     
     public static void appendClassPath(ClassLoader classLoader) {

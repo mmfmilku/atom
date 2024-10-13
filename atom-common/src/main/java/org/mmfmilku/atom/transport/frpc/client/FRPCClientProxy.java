@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.transport.frpc.client;
 
 import org.mmfmilku.atom.transport.frpc.FRPCParam;
+import org.mmfmilku.atom.transport.frpc.FRPCReturn;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -36,6 +37,11 @@ public class FRPCClientProxy<T> implements InvocationHandler {
         frpcParam.setApiName(methodName);
         frpcParam.setData(args);
         System.out.println("执行远程调用" + frpcParam);
-        return frpcClient.call(frpcParam).getData();
+        FRPCReturn frpcReturn = frpcClient.call(frpcParam);
+        System.out.println("远程调用返回" + frpcReturn);
+        if (Boolean.FALSE.equals(frpcReturn.getSuccess())) {
+            throw frpcReturn.getFrpcException();
+        }
+        return frpcReturn.getData();
     }
 }

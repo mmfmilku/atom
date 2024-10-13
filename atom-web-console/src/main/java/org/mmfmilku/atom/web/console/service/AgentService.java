@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class AgentService implements IAgentService {
@@ -22,17 +23,22 @@ public class AgentService implements IAgentService {
     IAgentConfigService agentConfigService;
 
     @Override
-    public boolean loadAgent(String vmId, String appName, String basePackage) {
+    public boolean loadAgent(String vmId, String appName) {
         AgentConfig config = agentConfigService.getConfig(appName);
         // TODO,ord文件读取不支持低柜文件夹，暂时使用ord目录
         String dir = config.getOrdDir();
         // TODO 配置 classloader
         String customClassloader = "org.springframework.boot.loader.LaunchedURLClassLoader";
         try {
-            AgentClient.loadAgent(vmId, getAgentJar(), "base-path=" + dir
-                    + ";app-classloader=" + customClassloader
-                    + ";app-base-package=" + basePackage
-                    + ";app-fserver-dir=" + config.getFDir()
+            AgentClient.loadAgent(vmId, getAgentJar()
+                    // 基础路径，ord文件、配置文件所在目录
+                    , "base-path=" + dir
+                            // 需要拓展的类加载器
+                            + ";app-classloader=" + customClassloader
+                            // frpc服务扫描的包路径
+                            + ";app-base-package=org.mmfmilku.atom.agent.api.impl"
+                            // ferver监听路径
+                            + ";app-fserver-dir=" + config.getFDir()
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,19 +51,24 @@ public class AgentService implements IAgentService {
         return true;
     }
 
-    // TODO jar名称如何配置
-    private static final String AGENT_JAR_NAME = "xxx.jar";
+    // TODO jar版本如何配置
+    private static final String AGENT_JAR_NAME = "atom-agent-core-0.0.1-SNAPSHOT-jar-with-dependencies.jar";
     private static final String AGENT_JAR_RESOURCE_PATH = "jar/" + AGENT_JAR_NAME;
 
     private String getAgentJar() {
+        File baseDir = new File(AgentConfigService.CONSOLE_BASE_DIR, "jar");
+        if (!baseDir.exists()) {
+            baseDir.mkdirs();
+        }
         File agentFile = new File(AgentConfigService.CONSOLE_BASE_DIR, AGENT_JAR_RESOURCE_PATH);
-        if (agentFile.exists()) {
+        if (!agentFile.exists()) {
             InputStream jarInputStream = Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream(AGENT_JAR_RESOURCE_PATH);
             AssertUtil.notnull(jarInputStream, "can not find agentJar!");
             try {
-                Files.copy(jarInputStream, agentFile.toPath());
+                agentFile.createNewFile();
+                Files.copy(jarInputStream, agentFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
