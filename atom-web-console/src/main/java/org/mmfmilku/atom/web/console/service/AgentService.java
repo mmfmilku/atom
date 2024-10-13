@@ -45,8 +45,8 @@ public class AgentService implements IAgentService {
         return true;
     }
 
-    // TODO jar名称如何配置
-    private static final String AGENT_JAR_NAME = "xxx.jar";
+    // TODO jar版本如何配置
+    private static final String AGENT_JAR_NAME = "atom-agent-core-0.0.1-SNAPSHOT-jar-with-dependencies.jar";
     private static final String AGENT_JAR_RESOURCE_PATH = "jar/" + AGENT_JAR_NAME;
 
     private String getAgentJar() {
