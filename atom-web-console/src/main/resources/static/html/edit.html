@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" href="./css/ui.css"/>
+    <link rel="stylesheet" href="../css/ui.css"/>
 </head>
 <body>
-<script src=./js/util.js></script>
+<script src=../js/util.js></script>
 <script>
     let post = (path, data) => {
         return atom.post(path, data)
@@ -15,6 +15,19 @@
     const urlParams = new URLSearchParams(window.location.search);
     const vmId = urlParams.get('vmId');
     console.log(vmId);
+
+    const vmInfo = {
+        vmId: vmId,
+        displayName: ''
+    }
+
+    post('agent/vmInfo?vmId=' + vmId).then(res => {
+        if (!res.vmId) {
+            alert('进程不存在:' + vmId)
+            return
+        }
+        vmInfo.displayName = res.displayName
+    })
 </script>
 <div>
     aaa
