@@ -51,7 +51,7 @@ public class AgentService implements IAgentService {
 
     private String getAgentJar() {
         File agentFile = new File(AgentConfigService.CONSOLE_BASE_DIR, AGENT_JAR_RESOURCE_PATH);
-        if (agentFile.exists()) {
+        if (!agentFile.exists()) {
             InputStream jarInputStream = Thread.currentThread()
                     .getContextClassLoader()
                     .getResourceAsStream(AGENT_JAR_RESOURCE_PATH);
