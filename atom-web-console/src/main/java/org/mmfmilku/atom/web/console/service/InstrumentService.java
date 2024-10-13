@@ -3,7 +3,9 @@ package org.mmfmilku.atom.web.console.service;
 import org.mmfmilku.atom.api.InstrumentApi;
 import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
+import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
+import org.mmfmilku.atom.util.FileUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -43,21 +46,40 @@ public class InstrumentService implements IInstrumentService {
         return getApi(appName).searchClassForPage(offset, size, classShortNameLike);
     }
 
-    private String byteCodeDir = File.separator + "byteCode";
+    private String byteCodeDir = "byteCode";
 
-    private String decompileDir = File.separator + "decompile";
+    private String decompileDir = "decompile";
 
     @Override
     public String decompile(String appName, String fullClassName) {
-        String tmpFile = CodeUtils.toFileName(fullClassName) + CodeConst.CLASS_FILE_SUFFIX;
-        if (Files.exists(Paths.get(tmpFile))) {
-            return tmpFile;
-        }
         AgentConfig config = agentConfigService.getConfig(appName);
-        String byteCodeFile = getApi(appName)
-                .writeByteCodeFile(fullClassName, config.getTmpDir() + byteCodeDir);
-        return Decompile.decompile(byteCodeFile, config.getTmpDir() + decompileDir);
-        // TODO 获取源码文件
+        String tmpClassFile = Paths.get(config.getTmpDir(), byteCodeDir
+                , CodeUtils.toClassFilePath(fullClassName))
+                .toFile().getAbsolutePath();
+        String tmpJavaFile = Paths.get(config.getTmpDir(), decompileDir
+                , CodeUtils.toJavaFilePath(fullClassName))
+                .toFile().getAbsolutePath();
+
+        if (!Files.exists(Paths.get(tmpClassFile))) {
+            // 字节码文件缓存
+            String byteCodeFile = getApi(appName)
+                    .writeByteCodeFile(fullClassName,
+                            config.getTmpDir() + File.separator + byteCodeDir);
+            AssertUtil.isTrue(tmpClassFile.equals(byteCodeFile), "字节码生成路径错误" + byteCodeFile);
+        }
+
+        if (!Files.exists(Paths.get(tmpJavaFile))) {
+            // 反编译文件缓存
+            Decompile.decompile(tmpClassFile, config.getTmpDir() + decompileDir);
+        }
+
+        AssertUtil.isTrue(Files.exists(Paths.get(tmpJavaFile)), "反编译文件不存在");
+
+        try {
+            return FileUtils.readText(tmpJavaFile);
+        } catch (IOException e) {
+            throw new RuntimeException("读取反编译文件异常");
+        }
     }
 
     @Override

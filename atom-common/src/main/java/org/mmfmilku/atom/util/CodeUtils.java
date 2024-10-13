@@ -29,6 +29,14 @@ public class CodeUtils {
         return codeBuilder.toString();
     }
 
+    public static String toJavaFilePath(String fullClassName) {
+        return toFileName(fullClassName) + CodeConst.JAVA_FILE_SUFFIX;
+    }
+
+    public static String toClassFilePath(String fullClassName) {
+        return toFileName(fullClassName) + CodeConst.JAVA_FILE_SUFFIX;
+    }
+
     public static String toFileName(String fullClassName) {
         return fullClassName.replaceAll("\\.", "\\" + File.separator);
     }

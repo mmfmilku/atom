@@ -47,6 +47,10 @@ public class FileUtils {
         return childrenPath;
     }
 
+    public static String readText(File file) throws IOException {
+        return readText(file.getAbsolutePath());
+    }
+
     public static String readText(String file) throws IOException {
         StringBuilder content = new StringBuilder();
         forEachLine(file, line -> content.append(line).append("\n"));

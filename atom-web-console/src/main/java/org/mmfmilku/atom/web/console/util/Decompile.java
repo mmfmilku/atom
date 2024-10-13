@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class Decompile {
 
-    public static String decompile(String classFilePath, String targetPath) {
+    public static void decompile(String classFilePath, String targetPath) {
         List<String> files = new ArrayList<>();
         files.add(classFilePath);
         // target dir
@@ -25,7 +25,6 @@ public class Decompile {
         OptionsImpl options = new OptionsImpl(outputMap);
         CfrDriver cfrDriver = new CfrDriver.Builder().withBuiltOptions(options).build();
         cfrDriver.analyse(files);
-        return "";
     }
     
 }
