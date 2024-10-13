@@ -18,12 +18,6 @@
             <artifactId>javassist</artifactId>
             <version>3.23.1-GA</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.mmfmilku</groupId>
-            <artifactId>atom-common</artifactId>
-            <version>${atom-version}</version>
-        </dependency>
     </dependencies>
 
     <build>

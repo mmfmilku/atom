@@ -29,6 +29,7 @@ hs_err_pid*
 
 # 所有测试文件
 **/src/main/resources/test/
+!/test/ord/
 
 # fserver生成的文件
 **/fserver/*.request

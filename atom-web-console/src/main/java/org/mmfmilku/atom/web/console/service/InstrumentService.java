@@ -40,7 +40,7 @@ public class InstrumentService implements IInstrumentService {
 
     @Override
     public List<String> listClassForPage(String appName, int offset, int size, String classShortNameLike) {
-        return getApi(appName).listClassForPage(offset, size, classShortNameLike);
+        return getApi(appName).searchClassForPage(offset, size, classShortNameLike);
     }
 
     private String byteCodeDir = File.separator + "byteCode";

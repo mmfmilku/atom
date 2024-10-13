@@ -3,6 +3,7 @@ package org.mmfmilku.atom.transport.frpc;
 import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.transport.handle.FRPCHandle;
 import org.mmfmilku.atom.transport.protocol.file.FServer;
+import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
 
 import java.io.File;
@@ -25,6 +26,7 @@ public class FRPCStarter {
     private Listener listener;
 
     public FRPCStarter(String scanPackage, String fDir) {
+        AssertUtil.notnull(scanPackage, "FRPC服务包路径为空");
         this.scanPackage = scanPackage;
         this.fDir = fDir;
     }
@@ -84,7 +86,10 @@ public class FRPCStarter {
                 while (entries.hasMoreElements()) {
                     JarEntry jarEntry = entries.nextElement();
                     if (jarEntry.getName().endsWith(CodeConst.CLASS_FILE_SUFFIX)) {
-                        registerService(CodeUtils.toClassName(jarEntry.getName()));
+                        String scanClassName = CodeUtils.toClassName(jarEntry.getName());
+                        if (scanClassName.startsWith(scanPackage)) {
+                            registerService(CodeUtils.toClassName(jarEntry.getName()));
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -94,6 +99,10 @@ public class FRPCStarter {
         } else {
             File scanDir = new File(resource.getFile());
             scanDir(scanPackage, scanDir);
+            if (scanDir.getAbsolutePath().contains("test-classes")) {
+                // 单元测试
+                scanDir(scanPackage, new File(resource.getFile().replace("test-classes", "classes")));
+            }
         }
 
     }
@@ -167,7 +176,7 @@ public class FRPCStarter {
                             declaringInterfaces[0].getName().equals(serviceName)) {
                         // TODO 待支持重载
                         if (funcMap.containsKey(method.getName())) {
-                            throw new RuntimeException("repeat method " + method.getName());
+                            throw new RuntimeException(serviceName + " repeat method " + method.getName());
                         }
 
                         Function<FRPCParam, FRPCReturn> callFunc = param -> {

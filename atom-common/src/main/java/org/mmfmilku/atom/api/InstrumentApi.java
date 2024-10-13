@@ -12,7 +12,7 @@ public interface InstrumentApi {
     
     List<String> listClassForPage(int offset, int size);
     
-    List<String> listClassForPage(int offset, int size, String classShortNameLike);
+    List<String> searchClassForPage(int offset, int size, String classShortNameLike);
     
     byte[] getByteCode(String fullClassName);
 

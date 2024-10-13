@@ -14,4 +14,10 @@ public class FRPCReturn implements Serializable {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return "FRPCReturn{" +
+                "data=" + data +
+                '}';
+    }
 }

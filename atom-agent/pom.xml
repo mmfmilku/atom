@@ -16,5 +16,11 @@
         <module>atom-agent-client</module>
     </modules>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>org.mmfmilku</groupId>
+            <artifactId>atom-common</artifactId>
+            <version>${atom-version}</version>
+        </dependency>
+    </dependencies>
 </project>

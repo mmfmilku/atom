@@ -6,6 +6,8 @@ import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.agent.handle.AgentHandle;
 import org.mmfmilku.atom.agent.handle.AgentMainHandle;
 import org.mmfmilku.atom.agent.handle.PreMainHandle;
+import org.mmfmilku.atom.agent.instrument.transformer.FileDefineTransformer;
+import org.mmfmilku.atom.agent.instrument.transformer.ParamPrintTransformer;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 import org.mmfmilku.atom.transport.frpc.FRPCStarter;
 
@@ -64,6 +66,9 @@ public class AgentBootstrap {
             for (AgentHandle handle : handleChain) {
                 handle.handle(agentArgs, inst);
             }
+
+            InstrumentationContext.addTransformer(new FileDefineTransformer());
+            InstrumentationContext.addTransformer(new ParamPrintTransformer());
 
             String basePackage = AgentProperties.getProperty(AgentProperties.PROP_APP_BASE_PACKAGE);
             String fServerDir = AgentProperties.getProperty(AgentProperties.PROP_FSERVER_DIR);

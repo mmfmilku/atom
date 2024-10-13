@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class AppInfoApiImplTest {
 
-//    @Test
+    @Test
     public void ping() {
         String fDir = System.getProperty("user.dir") + File.separator + "src/main/resources/test/fserver";
 
