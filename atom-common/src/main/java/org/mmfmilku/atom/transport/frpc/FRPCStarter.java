@@ -22,6 +22,7 @@ public class FRPCStarter {
     private String fDir;
     private List<Class<?>> classes = new ArrayList<>();
     private Map<String, ServiceMapping> mappings = new HashMap<>();
+    private Listener listener;
 
     public FRPCStarter(String scanPackage, String fDir) {
         this.scanPackage = scanPackage;
@@ -34,14 +35,29 @@ public class FRPCStarter {
         runWithThread();
     }
 
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
     private void runWithThread() {
         Thread thread = new Thread("frpc-main-thread") {
             @Override
             public void run() {
-                // TODO dir传参送入
-                FServer fServer = new FServer(fDir)
-                        .addHandle(new FRPCHandle(mappings));
-                fServer.start();
+                try {
+                    FServer fServer = new FServer(fDir)
+                            .addHandle(new FRPCHandle(mappings));
+                    fServer.start();
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    if (listener != null) {
+                        listener.onFail(throwable);
+                    }
+                } finally {
+                    if (listener != null) {
+                        listener.onClose();
+                    }
+                }
+
             }
         };
         thread.setDaemon(true);
