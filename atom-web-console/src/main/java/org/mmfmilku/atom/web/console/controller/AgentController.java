@@ -8,6 +8,7 @@ import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import java.util.Map;
  * @date 2024/7/26:13:59
  */
 @RestController
+@RequestMapping("agent")
 public class AgentController {
 
     @Autowired
@@ -36,6 +38,16 @@ public class AgentController {
     @ResponseBody
     public List<Map<String, String>> listVm() {
         return AgentClient.listVMMap();
+    }
+
+    @RequestMapping("vmInfo")
+    public Map<String, String> vmInfo(@RequestParam String vmId) {
+        for (Map<String, String> vmMap : AgentClient.listVMMap()) {
+            if (vmMap.containsKey(vmId)) {
+                return vmMap;
+            }
+        }
+        return Collections.emptyMap();
     }
     
     @RequestMapping("loadAgent")
