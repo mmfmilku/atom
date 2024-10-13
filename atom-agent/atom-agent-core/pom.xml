@@ -81,6 +81,7 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <finalName>${project.name}-${project.version}</finalName>
+                    <outputDirectory>../../atom-web-console/src/main/resources/jar</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
