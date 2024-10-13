@@ -26,13 +26,13 @@ public class AgentBootstrap {
 
     public static void premain(String agentArgs, Instrumentation inst) {
         System.out.println("------------------------premain-----------------------");
-        handleChain.add(new PreMainHandle());
+//        handleChain.add(new PreMainHandle());
         main(agentArgs, inst);
     }
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
         System.out.println("------------------------agentmain-----------------------");
-        handleChain.add(new AgentMainHandle());
+//        handleChain.add(new AgentMainHandle());
         main(agentArgs, inst);
     }
 
