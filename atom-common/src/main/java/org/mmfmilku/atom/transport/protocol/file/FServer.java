@@ -15,7 +15,7 @@ import java.util.concurrent.*;
 /**
  * Server
  *
- * @author chenxp
+ * @author mmfmilku
  * @date 2024/9/29:16:49
  */
 public class FServer {
@@ -34,7 +34,7 @@ public class FServer {
 
     private List<ServerHandle> handles = new ArrayList<>();
 
-    private OutputStream outputStream;
+    private OutputStream listenStream;
 
     public FServer(String listenPath) {
         this.listenPath = listenPath;
@@ -49,6 +49,10 @@ public class FServer {
     public FServer addHandle(ServerHandle<String> handle) {
         handles.add(handle);
         return this;
+    }
+
+    public boolean isRunning() {
+        return listenStream != null;
     }
 
     public void start() {
@@ -71,30 +75,36 @@ public class FServer {
                         .map(Path::toFile)
                         .forEach(File::delete);
             }
-            if (!listen.mkdirs()) {
-                throw new RuntimeException("启动失败,创建目录失败");
-            }
+            listen.mkdirs();
             listen(listen);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
+            this.stop();
+            throw new RuntimeException("启动失败");
         }
     }
 
     private void listen(File listen) throws IOException {
         Path occupyPath = new File(listen, LISTEN_FILE).toPath();
-        outputStream = new FileOutputStream(occupyPath.toFile());
+        listenStream = new FileOutputStream(occupyPath.toFile());
 
-        while (true) {
-            File[] requestFiles = listen.listFiles((dir, name) -> !ctxMap.containsKey(name)
-                    && name.endsWith(REQUEST));
-            if (requestFiles != null) {
-                for (File requestFile : requestFiles) {
-                    accept(requestFile);
+        try {
+            while (true) {
+                File[] requestFiles = listen.listFiles((dir, name) -> !ctxMap.containsKey(name)
+                        && name.endsWith(REQUEST));
+                if (requestFiles != null) {
+                    for (File requestFile : requestFiles) {
+                        accept(requestFile);
+                    }
                 }
+                sleep(3000);
             }
-            sleep(3000);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            stop();
+            throw e;
         }
+
     }
 
     public void stop() {
@@ -102,7 +112,8 @@ public class FServer {
         ctxMap.forEach((name, ctx) -> {
             ctx.close();
         });
-        IOUtils.closeStream(outputStream);
+        IOUtils.closeStream(listenStream);
+        listenStream = null;
     }
 
     private void sleep(long millis) {

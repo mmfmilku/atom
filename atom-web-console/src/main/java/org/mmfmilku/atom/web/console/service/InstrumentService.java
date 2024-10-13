@@ -57,11 +57,12 @@ public class InstrumentService implements IInstrumentService {
         String byteCodeFile = getApi(appName)
                 .writeByteCodeFile(fullClassName, config.getTmpDir() + byteCodeDir);
         return Decompile.decompile(byteCodeFile, config.getTmpDir() + decompileDir);
+        // TODO 获取源码文件
     }
 
     @Override
     public void retransformClass(String appName, String fullClassName) {
-        getApi(appName).getByteCode(fullClassName);
+        getApi(appName).retransformClass(fullClassName);
     }
 
 }

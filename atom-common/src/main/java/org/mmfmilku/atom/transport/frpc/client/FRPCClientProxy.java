@@ -39,6 +39,9 @@ public class FRPCClientProxy<T> implements InvocationHandler {
         System.out.println("执行远程调用" + frpcParam);
         FRPCReturn frpcReturn = frpcClient.call(frpcParam);
         System.out.println("远程调用返回" + frpcReturn);
+        if (Boolean.FALSE.equals(frpcReturn.getSuccess())) {
+            throw frpcReturn.getFrpcException();
+        }
         return frpcReturn.getData();
     }
 }

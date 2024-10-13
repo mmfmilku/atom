@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.transport.handle;
 
 import org.mmfmilku.atom.transport.ConnectContext;
+import org.mmfmilku.atom.transport.frpc.FRPCException;
 import org.mmfmilku.atom.transport.frpc.FRPCParam;
 import org.mmfmilku.atom.transport.frpc.FRPCReturn;
 import org.mmfmilku.atom.transport.frpc.ServiceMapping;
@@ -19,20 +20,35 @@ public class FRPCHandle extends RRModeServerHandle {
 
     @Override
     public void onReceive(ConnectContext ctx, String data) {
-        byte[] rawData = Base64.getDecoder().decode(data.trim());
+        try {
+            byte[] rawData = Base64.getDecoder().decode(data.trim());
 
-        FRPCParam frpcParam = IOUtils.deserialize(rawData);
+            FRPCParam frpcParam = IOUtils.deserialize(rawData);
 
-        ServiceMapping serviceMapping = mappings.get(frpcParam.getServiceClass());
-        if (serviceMapping == null) {
-            throw new RuntimeException("找不到服务" + frpcParam.getServiceClass());
+            ServiceMapping serviceMapping = mappings.get(frpcParam.getServiceClass());
+            if (serviceMapping == null) {
+                throw new RuntimeException("service not found " + frpcParam.getServiceClass());
+            }
+
+            FRPCReturn frpcReturn = serviceMapping.execute(frpcParam.getApiName(), frpcParam);
+            ctx.write(encode(frpcReturn));
+        } catch (Throwable e) {
+            try {
+                FRPCReturn frpcReturn = new FRPCReturn();
+                frpcReturn.setSuccess(Boolean.FALSE);
+                frpcReturn.setFrpcException(new FRPCException(e.getMessage()));
+                ctx.write(encode(frpcReturn));
+            } catch (Exception ex) {
+                // 异常处理再次报错
+                ex.printStackTrace();
+            }
         }
+    }
 
-        FRPCReturn frpcReturn = serviceMapping.execute(frpcParam.getApiName(), frpcParam);
-
+    private String encode(FRPCReturn frpcReturn) {
         byte[] serialize = IOUtils.serialize(frpcReturn);
         String encode = Base64.getEncoder().encodeToString(serialize);
-        ctx.write(encode + "\r");
+        return encode + "\r";
     }
 
 }

@@ -19,7 +19,7 @@ import java.util.Objects;
 /**
  * AgentHelper
  *
- * @author chenxp
+ * @author mmfmilku
  * @date 2024/6/4:15:02
  */
 public class AgentBootstrap {
@@ -38,7 +38,9 @@ public class AgentBootstrap {
         main(agentArgs, inst);
     }
 
-    public static void main(String agentArgs, Instrumentation inst) {
+    private static FRPCStarter frpcStarter;
+
+    public synchronized static void main(String agentArgs, Instrumentation inst) {
         
         try {
             InstrumentationContext.init(inst);
@@ -73,8 +75,11 @@ public class AgentBootstrap {
             String basePackage = AgentProperties.getProperty(AgentProperties.PROP_APP_BASE_PACKAGE);
             String fServerDir = AgentProperties.getProperty(AgentProperties.PROP_FSERVER_DIR);
 
-            FRPCStarter frpcStarter = new FRPCStarter(basePackage, fServerDir);
-            frpcStarter.runServer();
+            if (AgentBootstrap.frpcStarter == null) {
+                FRPCStarter frpcStarter = new FRPCStarter(basePackage, fServerDir);
+                AgentBootstrap.frpcStarter = frpcStarter;
+                frpcStarter.runServer();
+            }
         } catch (Throwable e) {
             System.out.println("agent main error");
             e.printStackTrace();
