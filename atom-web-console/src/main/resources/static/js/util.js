@@ -36,35 +36,91 @@ const UI = {
         })
     },
 
-    loadPage: () => {
+}
 
+const atom = {
+
+    post: (path, data) => {
+        return new Promise((resolve, reject) => {
+            let xhr = new XMLHttpRequest()
+            xhr.open("POST", path, true)
+            xhr.setRequestHeader('content-type', 'application/json; charset=UTF-8')
+            xhr.onload = () => {
+                try {
+                    resolve(JSON.parse(xhr.response))
+                } catch (e) {
+                    resolve(xhr.response)
+                }
+            }
+            xhr.onerror = () => {
+                reject()
+            }
+            xhr.send(JSON.stringify(data))
+        })
     },
 
-    spaRouters: () => {
-        this.routers = {};//保存注册的所有路由
-        this.beforeFun = null;//切换前
-        this.afterFun = null;
-    },
-
-    //获取路由的路径和详细参数
+    // 获取路由的路径和详细参数
     getParamsUrl: function () {
-        var hashDeatail = location.hash.split("?"),
+        let hashDeatail = location.hash.split("?"),
             hashName = hashDeatail[0].split("#")[1],//路由地址
             params = hashDeatail[1] ? hashDeatail[1].split("&") : [],//参数内容
             query = {};
-        for (var i = 0; i < params.length; i++) {
-            var item = params[i].split("=");
+        for (let i = 0; i < params.length; i++) {
+            let item = params[i].split("=");
             query[item[0]] = item[1]
         }
         return {
             path: hashName,
             query: query
         }
-    }
+    },
 
+    SPA: {
+
+        routers: [],
+
+        loadHtml: () => {
+            fetch('html/edit.html')
+                .then(response => response.text())
+                .then(data => {
+                    // document.getElementById('yourElementId').innerHTML = data
+                    console.log(data)
+                })
+                .catch(error => console.error('Error:', error));
+        },
+
+        loadPage: (file, param) => {
+            let _body = document.getElementsByTagName('body')[0];
+            let scriptEle = document.createElement('script');
+            scriptEle.type = 'text/javascript';
+            scriptEle.src = file;
+            scriptEle.async = true;
+            scriptEle.onload = function () {
+                console.log('下载' + file + '完成')
+                atom.SPA.routers[0].init(333)
+                console.log(atom.SPA.routers)
+            }
+            _body.appendChild(scriptEle);
+        },
+
+        definePage: define => {
+            atom.SPA.routers.push(define)
+        },
+    },
+
+    isFunction: obj => {
+        return !!(obj && Object.prototype.toString.call(obj) === '[object Function]')
+    }
 }
 
-UI.spaRouters.prototype = {
+
+function spaRouters() {
+    this.routers = {};//保存注册的所有路由
+    this.beforeFun = null;//切换前
+    this.afterFun = null;
+}
+
+spaRouters.prototype = {
     init: function () {
         var self = this;
         //页面加载匹配路由
@@ -96,7 +152,7 @@ UI.spaRouters.prototype = {
     },
     //路由处理
     urlChange: function () {
-        var currentHash = util.getParamsUrl();
+        var currentHash = atom.getParamsUrl();
         if (this.routers[currentHash.path]) {
             this.refresh(currentHash)
         } else {
@@ -163,31 +219,7 @@ UI.spaRouters.prototype = {
 
 }
 //注册到window全局
-window.spaRouters = new UI.spaRouters();
-
-const atom = {
-
-    post: (path, data) => {
-        return new Promise((resolve, reject) => {
-            let xhr = new XMLHttpRequest()
-            xhr.open("POST", path, true)
-            xhr.setRequestHeader('content-type', 'application/json; charset=UTF-8')
-            xhr.onload = () => {
-                try {
-                    resolve(JSON.parse(xhr.response))
-                } catch (e) {
-                    resolve(xhr.response)
-                }
-            }
-            xhr.onerror = () => {
-                reject()
-            }
-            xhr.send(JSON.stringify(data))
-        })
-    }
-
-}
-
+window.spaRouters = new spaRouters();
 
 
 //

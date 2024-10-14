@@ -22,7 +22,7 @@
             let listHtml = res.map(e => 
                 `
                 <div class="vm-list-block">
-                    <div onclick="window.location='./html/edit.html?vmId=${e.vmId}'" class="vm-field">
+                    <div onclick="atom.SPA.loadPage('/page/edit.js')" class="vm-field">
                         <label class="vm-field-label">应用名称:</label>
                         <div class="vm-field-value">${e.displayName}</div>
                     </div>
