@@ -18,6 +18,7 @@ import java.util.List;
  * @date 2024/7/30:19:45
  */
 @RestController
+@RequestMapping("config")
 public class AgentConfigController {
 
     @Autowired

@@ -1,0 +1,61 @@
+h1 { text-align: center; }
+h3 {
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.flex {
+    display: flex;
+}
+.vm-list{
+    flex-direction: column;
+}
+.vm-list-block {
+    border: 2px solid #2196F3;
+    margin-top: 5px;
+    margin-left: 50px;
+    margin-right: 50px;
+}
+.vm-field {
+    display: flex;
+    justify-content: flex-start;
+    margin: 4px;
+}
+.vm-field-button {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px;
+}
+.vm-field-label {
+    width: 75px;
+}
+.vm-field-value {
+    word-wrap: break-word;
+    width: 85%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.vm-button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin: 4px;
+}
+.vm-button-container>button{
+    margin-left: 5px;
+}
+
+#confDialog {
+    width: 75%;
+}
+#ordDialog {
+    width: 75%;
+}
+#ordFileText {
+    color: white;
+    background-color: #000000cc;
+    font: caption;
+}
