@@ -43,7 +43,7 @@ public class AgentController {
     @RequestMapping("vmInfo")
     public Map<String, String> vmInfo(@RequestParam String vmId) {
         for (Map<String, String> vmMap : AgentClient.listVMMap()) {
-            if (vmMap.containsKey(vmId)) {
+            if (vmMap.get("vmId").equals(vmId)) {
                 return vmMap;
             }
         }

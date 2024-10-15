@@ -61,17 +61,22 @@ const atom = {
 
     // 获取路由的路径和详细参数
     getParamsUrl: function () {
-        let hashDeatail = location.hash.split("?"),
-            hashName = hashDeatail[0].split("#")[1],//路由地址
-            params = hashDeatail[1] ? hashDeatail[1].split("&") : [],//参数内容
-            query = {};
-        for (let i = 0; i < params.length; i++) {
-            let item = params[i].split("=");
-            query[item[0]] = item[1]
-        }
+        return atom.getPathParam(location.hash)
+    },
+
+    getPathParam: path => {
+        // path like page?p1=1&p2=2
+        let pathArr = path.split("?")
+        let page = pathArr[0].charAt(0) === '#' ? pathArr[0].substring(1) : pathArr[0]
+        let paramArr = pathArr[1] ? pathArr[1].split("&") : []
+        let paramData = {}
+        paramArr.forEach((value, index) => {
+            let item = value.split("=");
+            paramData[item[0]] = item[1]
+        })
         return {
-            path: hashName,
-            query: query
+            page: page,
+            param: paramData
         }
     },
 
@@ -79,28 +84,46 @@ const atom = {
 
         routers: [],
 
-        loadHtml: () => {
-            fetch('html/edit.html')
-                .then(response => response.text())
-                .then(data => {
-                    // document.getElementById('yourElementId').innerHTML = data
-                    console.log(data)
-                })
-                .catch(error => console.error('Error:', error));
+        loadHtml: (path, dom) => {
+            return new Promise(((resolve, reject) => {
+                fetch(path)
+                    .then(response => response.text())
+                    .then(data => {
+                        // document.getElementById('yourElementId').innerHTML = data
+                        dom && (dom.innerHTML = data)
+                        resolve(data)
+                    })
+                    .catch(error => {
+                        reject(error)
+                    })
+            }))
         },
 
-        loadPage: (file, param) => {
+        loadJS: (path, param) => {
             let _body = document.getElementsByTagName('body')[0];
             let scriptEle = document.createElement('script');
             scriptEle.type = 'text/javascript';
-            scriptEle.src = file;
+            scriptEle.src = path;
             scriptEle.async = true;
             scriptEle.onload = function () {
-                console.log('下载' + file + '完成')
-                atom.SPA.routers[0].init(333)
-                console.log(atom.SPA.routers)
+
             }
             _body.appendChild(scriptEle);
+            return scriptEle;
+        },
+
+        loadPage: (pagePath, param) => {
+            let pathData = atom.getPathParam(pagePath)
+            let page = pathData.page
+            let htmlPath = '/page/' + page + '/' + page + '.html'
+            let jsPath = '/page/' + page + '/' + page + '.js'
+            atom.SPA.loadHtml(htmlPath, document.getElementById('app'))
+                .then(data => {
+                    // 页面加载成功修改hash
+                    location.hash = '#' + pagePath
+                    // 最后加载js
+                    let jsDom = atom.SPA.loadJS(jsPath)
+                })
         },
 
         definePage: define => {
@@ -112,6 +135,15 @@ const atom = {
         return !!(obj && Object.prototype.toString.call(obj) === '[object Function]')
     }
 }
+
+
+window.addEventListener('load', function () {
+    console.log('load')
+})
+//路由切换
+window.addEventListener('hashchange', function () {
+    console.log('hashchange')
+})
 
 
 function spaRouters() {
@@ -219,7 +251,7 @@ spaRouters.prototype = {
 
 }
 //注册到window全局
-window.spaRouters = new spaRouters();
+// window.spaRouters = new spaRouters();
 
 
 //
