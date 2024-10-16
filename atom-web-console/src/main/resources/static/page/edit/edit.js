@@ -1,18 +1,12 @@
-
-
-const urlParams = new URLSearchParams(window.location.hash);
-
 let pageData = atom.getParamsUrl()
-console.log(pageData)
-
 const vmId = pageData.param.vmId
-
-console.log(vmId);
 
 const vmInfo = {
     vmId: vmId,
     displayName: ''
 }
+
+let pageEdit = document.getElementById('page-edit')
 
 post('agent/vmInfo?vmId=' + vmId).then(res => {
     if (!res.vmId) {
@@ -20,5 +14,5 @@ post('agent/vmInfo?vmId=' + vmId).then(res => {
         return
     }
     vmInfo.displayName = res.displayName
-    console.log(vmInfo)
+    pageEdit.querySelector('.edit-title').innerText = vmInfo.displayName
 })
