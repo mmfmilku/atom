@@ -1,10 +1,13 @@
 <style>
     .edit-frame {
-        height: 80vh
+        height: 80vh;
+        /*background-color: darkgray;*/
     }
+
     .edit-area {
         height: 100%;
     }
+
     .edit-file-list {
         margin-left: 1%;
         margin-right: 1%;
@@ -12,6 +15,7 @@
         /* 左侧文件列表，占整体的宽度为20% */
         width: 20%;
     }
+
     .edit-file {
         /* 上下4px 左右0*/
         margin: 4px 0;
@@ -19,12 +23,16 @@
         /*内边距*/
         padding: 0 3%;
     }
+
     .edit-file-select {
         background-color: #424674;
     }
+
     .edit-code-title {
         text-align: center;
+        height: 5%;
     }
+
     .edit-code-box {
         width: 70%;
     }
@@ -41,8 +49,12 @@
                     <div class="edit-file">文件2</div>
                 </div>
                 <div class="edit-code-box">
-                    <div class="edit-code-title">文件名</div>
-                    <div>代码内容</div>
+                    <div class="edit-code-title" for="ordFileText">文件名</div>
+                    <textarea id="ordFileText">
+                        a;lkdfjaklafjlkdjasfl;kajkldajflk;ajl;kf
+                        jaslkjaslkffjakldjalkffalksdjfdkl;aj法
+                        兰克的骄傲234241234
+                    </textarea>
                 </div>
             </div>
         </div>

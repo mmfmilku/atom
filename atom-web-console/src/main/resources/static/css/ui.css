@@ -63,4 +63,7 @@ h3 {
     color: white;
     background-color: #000000cc;
     font: caption;
+    height: 94%;
+    width: 100%;
+    resize: none;
 }
