@@ -36,6 +36,10 @@ const UI = {
         })
     },
 
+    showMessage: (message) => {
+        alert(message)
+    },
+
 }
 
 const atom = {

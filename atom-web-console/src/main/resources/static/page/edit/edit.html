@@ -4,6 +4,13 @@
         /*background-color: darkgray;*/
     }
 
+    /* 操作按钮栏 */
+    .edit-operate-bar {
+        /* 上下  左右 */
+        margin: 4px 1%;
+        background-color: gray;
+    }
+
     .edit-area {
         height: 100%;
     }
@@ -34,27 +41,30 @@
     }
 
     .edit-code-box {
-        width: 70%;
+        width: 77%;
     }
 </style>
 <div id="page-edit">
     <div>
         <h1 class="edit-title">edit-title</h1>
         <div class="edit-frame">
+            <div class="edit-operate-bar">
+                <div class="vm-button-container">
+                    <button onclick="saveText()">保存</button>
+                    <button onclick="addFile()">创建</button>
+                    <button onclick="deleteFile()">删除</button>
+                </div>
+            </div>
             <div class="flex-row edit-area">
                 <div class="edit-file-list flex-column">
-                    <div class="edit-file">文件1</div>
-                    <div class="edit-file edit-file-select">文件2</div>
-                    <div class="edit-file">文件2</div>
-                    <div class="edit-file">文件2</div>
+<!--                    <div class="edit-file">文件1</div>-->
+<!--                    <div class="edit-file edit-file-select">文件2</div>-->
+<!--                    <div class="edit-file">文件2</div>-->
+<!--                    <div class="edit-file">文件2</div>-->
                 </div>
                 <div class="edit-code-box">
-                    <div class="edit-code-title" for="ordFileText">文件名</div>
-                    <textarea id="ordFileText">
-                        a;lkdfjaklafjlkdjasfl;kajkldajflk;ajl;kf
-                        jaslkjaslkffjakldjalkffalksdjfdkl;aj法
-                        兰克的骄傲234241234
-                    </textarea>
+                    <div class="edit-code-title" for="ordFileText"></div>
+                    <textarea id="ordFileText"></textarea>
                 </div>
             </div>
         </div>
