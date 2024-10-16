@@ -71,10 +71,13 @@ let deleteFile = () => {
         UI.showMessage('请先选择文件')
         return
     }
-    post(`config/deleteOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
-        .then(res => {
-            UI.showMessage('删除成功')
-            listFile()
+    UI.openConfirmDialog('确认删除' + ordFileName)
+        .then(() => {
+            post(`config/deleteOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
+                .then(res => {
+                    UI.showMessage('删除成功')
+                    listFile()
+                })
         })
 }
 
