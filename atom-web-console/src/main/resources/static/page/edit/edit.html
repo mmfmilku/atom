@@ -1,4 +1,72 @@
+<style>
+    .edit-frame {
+        height: 80vh;
+        /*background-color: darkgray;*/
+    }
 
-<div>
-    edit page here
+    /* 操作按钮栏 */
+    .edit-operate-bar {
+        /* 上下  左右 */
+        margin: 4px 1%;
+        background-color: gray;
+    }
+
+    .edit-area {
+        height: 100%;
+    }
+
+    .edit-file-list {
+        margin-left: 1%;
+        margin-right: 1%;
+        background-color: gray;
+        /* 左侧文件列表，占整体的宽度为20% */
+        width: 20%;
+    }
+
+    .edit-file {
+        /* 上下4px 左右0*/
+        margin: 4px 0;
+        width: 94%;
+        /*内边距*/
+        padding: 0 3%;
+    }
+
+    .edit-file-select {
+        background-color: #424674;
+    }
+
+    .edit-code-title {
+        text-align: center;
+        height: 5%;
+    }
+
+    .edit-code-box {
+        width: 77%;
+    }
+</style>
+<div id="page-edit">
+    <div>
+        <h1 class="edit-title">edit-title</h1>
+        <div class="edit-frame">
+            <div class="edit-operate-bar">
+                <div class="vm-button-container">
+                    <button onclick="saveText()">保存</button>
+                    <button onclick="addFile()">创建</button>
+                    <button onclick="deleteFile()">删除</button>
+                </div>
+            </div>
+            <div class="flex-row edit-area">
+                <div class="edit-file-list flex-column">
+<!--                    <div class="edit-file">文件1</div>-->
+<!--                    <div class="edit-file edit-file-select">文件2</div>-->
+<!--                    <div class="edit-file">文件2</div>-->
+<!--                    <div class="edit-file">文件2</div>-->
+                </div>
+                <div class="edit-code-box">
+                    <div class="edit-code-title" for="ordFileText"></div>
+                    <textarea id="ordFileText"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

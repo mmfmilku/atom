@@ -21,19 +21,56 @@ const UI = {
                 <input name="dialogInput"/>
                 <div class="vm-button-container">
                     <button class="dialog-submit">确定</button>
-                    <button class="dialog-cancel">关闭</button>
+                    <button class="dialog-cancel">取消</button>
                 </div>
             </form>
             `
             dialog.querySelector(".dialog-submit").addEventListener("click", () => {
                 let dialogValue = dialog.querySelector("input[name=dialogInput]").value
                 resolve(dialogValue)
+                document.body.removeChild(dialog)
             })
             dialog.querySelector(".dialog-cancel").addEventListener("click", () => {
                 let dialogValue = dialog.querySelector("input[name=dialogInput]").value
                 reject(dialogValue)
+                document.body.removeChild(dialog)
             })
         })
+    },
+
+    openConfirmDialog: (title) => {
+        return new Promise((resolve, reject) => {
+            let dialog = document.createElement("dialog")
+            document.body.appendChild(dialog)
+            if (typeof dialog.showModal !== "function") {
+                alert("Sorry, this browser is too low.")
+                return
+            }
+            dialog.showModal()
+            let titleHtml = title ? `<h3>${title}</h3>` : ''
+            dialog.innerHTML =
+                `
+            ${titleHtml}
+            <form method="dialog">
+                <div class="vm-button-container">
+                    <button class="dialog-submit">确定</button>
+                    <button class="dialog-cancel">取消</button>
+                </div>
+            </form>
+            `
+            dialog.querySelector(".dialog-submit").addEventListener("click", () => {
+                resolve()
+                document.body.removeChild(dialog)
+            })
+            dialog.querySelector(".dialog-cancel").addEventListener("click", () => {
+                reject()
+                document.body.removeChild(dialog)
+            })
+        })
+    },
+
+    showMessage: (message) => {
+        alert(message)
     },
 
 }

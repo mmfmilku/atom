@@ -10,7 +10,12 @@ h3 {
 .flex {
     display: flex;
 }
-.vm-list{
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+.flex-column {
+    display: flex;
     flex-direction: column;
 }
 .vm-list-block {
@@ -58,4 +63,7 @@ h3 {
     color: white;
     background-color: #000000cc;
     font: caption;
+    height: 94%;
+    width: 100%;
+    resize: none;
 }
