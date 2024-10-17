@@ -92,3 +92,22 @@ post('agent/vmInfo?vmId=' + vmId).then(res => {
     // 获取文件列表
     listFile()
 })
+
+let loadFile = () => {
+    let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
+    if (!ordFileName) {
+        UI.showMessage('请先选择文件')
+        return
+    }
+    post(`agent/retransform?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
+        .then(res => {
+            UI.showMessage(res)
+        })
+}
+
+let loadAgent = () => {
+    post(`agent/loadAgent?appName=${vmInfo.displayName}&vmId=${vmInfo.vmId}`)
+        .then(res => {
+            UI.showMessage(res)
+        })
+}

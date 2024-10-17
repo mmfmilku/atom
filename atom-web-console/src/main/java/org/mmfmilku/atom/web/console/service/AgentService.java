@@ -24,7 +24,7 @@ public class AgentService implements IAgentService {
 
     @Override
     public boolean loadAgent(String vmId, String appName) {
-        AgentConfig config = agentConfigService.getConfig(appName);
+        AgentConfig config = agentConfigService.getConfigByName(appName);
         // TODO,ord文件读取不支持低柜文件夹，暂时使用ord目录
         String dir = config.getOrdDir();
         // TODO 配置 classloader

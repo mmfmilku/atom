@@ -1,7 +1,6 @@
 package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.api.InstrumentApi;
-import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
@@ -32,7 +31,7 @@ public class InstrumentService implements IInstrumentService {
     IAgentConfigService agentConfigService;
 
     private InstrumentApi getApi(String appName) {
-        AgentConfig config = agentConfigService.getConfig(appName);
+        AgentConfig config = agentConfigService.getConfigByName(appName);
         return FRPCFactory.getService(InstrumentApi.class, config.getFDir());
     }
 
@@ -52,7 +51,7 @@ public class InstrumentService implements IInstrumentService {
 
     @Override
     public String decompile(String appName, String fullClassName) {
-        AgentConfig config = agentConfigService.getConfig(appName);
+        AgentConfig config = agentConfigService.getConfigByName(appName);
         String tmpClassFile = Paths.get(config.getTmpDir(), byteCodeDir
                 , CodeUtils.toClassFilePath(fullClassName))
                 .toFile().getAbsolutePath();
