@@ -70,5 +70,11 @@ public class AgentController {
     public String genSource(@RequestParam String appName, @RequestParam String fullClassName) {
         return instrumentService.decompile(appName, fullClassName);
     }
+
+    @RequestMapping("retransform")
+    public String retransform(@RequestParam String appName, @RequestParam String ordFileName) {
+        instrumentService.retransformClass(appName, "com.example.bootstudy.controler.MainController");
+        return "success";
+    }
     
 }

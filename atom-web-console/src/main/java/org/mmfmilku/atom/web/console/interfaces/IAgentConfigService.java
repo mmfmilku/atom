@@ -16,8 +16,10 @@ public interface IAgentConfigService {
 
     Collection<AgentConfig> list();
 
-    AgentConfig getConfig(String appName);
-    
+    AgentConfig getConfig(String vmId);
+
+    AgentConfig getConfigByName(String appName);
+
     List<String> listOrd(String appName);
 
     void deleteOrd(String appName, String ordFileName);

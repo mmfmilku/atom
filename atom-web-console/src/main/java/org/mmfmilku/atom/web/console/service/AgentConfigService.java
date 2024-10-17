@@ -53,7 +53,12 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public AgentConfig getConfig(String appName) {
+    public AgentConfig getConfig(String vmId) {
+        return null;
+    }
+
+    @Override
+    public AgentConfig getConfigByName(String appName) {
         if (configMap.containsKey(appName)) {
             return configMap.get(appName);
         }
@@ -97,13 +102,13 @@ public class AgentConfigService implements IAgentConfigService {
 
     @Override
     public List<String> listOrd(String appName) {
-        AgentConfig config = getConfig(appName);
+        AgentConfig config = getConfigByName(appName);
         return ordFileOperation.listFiles(config);
     }
 
     @Override
     public void deleteOrd(String appName, String ordFileName) {
-        AgentConfig config = getConfig(appName);
+        AgentConfig config = getConfigByName(appName);
         OrdFile ordFile = new OrdFile();
         ordFile.setFileName(ordFileName);
         ordFile.setOrdId(config.getId());
@@ -112,13 +117,13 @@ public class AgentConfigService implements IAgentConfigService {
 
     @Override
     public OrdFile readOrd(String appName, String ordFileName) {
-        AgentConfig config = getConfig(appName);
+        AgentConfig config = getConfigByName(appName);
         return ordFileOperation.getOrd(config, ordFileName);
     }
 
     @Override
     public void writeOrd(String appName, OrdFile ordFile) {
-        AgentConfig config = getConfig(appName);
+        AgentConfig config = getConfigByName(appName);
         ordFile.setOrdId(config.getId());
         ordFile.setFileName(ordFileNameFormat(ordFile.getFileName()));
         ordFileOperation.setText(config, ordFile);

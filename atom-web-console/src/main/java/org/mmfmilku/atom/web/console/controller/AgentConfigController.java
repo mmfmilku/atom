@@ -26,7 +26,7 @@ public class AgentConfigController {
 
     @RequestMapping("getConfig")
     public AgentConfig getConfig(@RequestParam String appName) {
-        return agentConfigService.getConfig(appName);
+        return agentConfigService.getConfigByName(appName);
     }
 
     @RequestMapping("listOrd")
