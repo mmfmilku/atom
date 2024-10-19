@@ -4,7 +4,7 @@ const UI = {
         console.log('UI.test')
     },
 
-    openInputDialog: (title) => {
+    openDialog: (showHtml, eventFunc) => {
         return new Promise((resolve, reject) => {
             let dialog = document.createElement("dialog")
             document.body.appendChild(dialog)
@@ -13,10 +13,16 @@ const UI = {
                 return
             }
             dialog.showModal()
-            let titleHtml = title ? `<h3>${title}</h3>` : ''
-            dialog.innerHTML =
-                `
-            ${titleHtml}
+            dialog.innerHTML = showHtml
+
+            atom.isFunction(eventFunc) && eventFunc(dialog, resolve, reject)
+        })
+    },
+
+    openInputDialog: (title) => {
+        let showHtml = title ? `<h3>${title}</h3>` : ''
+        showHtml +=
+            `
             <form method="dialog">
                 <input name="dialogInput"/>
                 <div class="vm-button-container">
@@ -25,6 +31,7 @@ const UI = {
                 </div>
             </form>
             `
+        return UI.openDialog(showHtml, (dialog, resolve, reject) => {
             dialog.querySelector(".dialog-submit").addEventListener("click", () => {
                 let dialogValue = dialog.querySelector("input[name=dialogInput]").value
                 resolve(dialogValue)
@@ -39,18 +46,9 @@ const UI = {
     },
 
     openConfirmDialog: (title) => {
-        return new Promise((resolve, reject) => {
-            let dialog = document.createElement("dialog")
-            document.body.appendChild(dialog)
-            if (typeof dialog.showModal !== "function") {
-                alert("Sorry, this browser is too low.")
-                return
-            }
-            dialog.showModal()
-            let titleHtml = title ? `<h3>${title}</h3>` : ''
-            dialog.innerHTML =
-                `
-            ${titleHtml}
+        let showHtml = title ? `<h3>${title}</h3>` : ''
+        showHtml +=
+            `
             <form method="dialog">
                 <div class="vm-button-container">
                     <button class="dialog-submit">确定</button>
@@ -58,6 +56,7 @@ const UI = {
                 </div>
             </form>
             `
+        return UI.openDialog(showHtml, (dialog, resolve, reject) => {
             dialog.querySelector(".dialog-submit").addEventListener("click", () => {
                 resolve()
                 document.body.removeChild(dialog)
