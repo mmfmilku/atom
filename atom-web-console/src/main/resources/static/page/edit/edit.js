@@ -127,9 +127,23 @@ let listJavaFile = () => {
             let dialog = UI.newDialog(showHtml)
             dialog.querySelectorAll("li").forEach(e => {
                 e.addEventListener("click", event => {
-                    doAddFile(event.target.innerText)
+                    doAddFile(event.target.innerText + '.java')
                     document.body.removeChild(dialog)
                 })
             })
+        })
+}
+
+let genCode = () => {
+    let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
+    if (!ordFileName || !ordFileName.endsWith('.java')) {
+        UI.showMessage('请选择java文件')
+        return
+    }
+    let className = ordFileName.substring(0, ordFileName.length - 5)
+    post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${className}`)
+        .then(res => {
+            pageEdit.querySelector('#ordFileText').value = res
+            console.log(res)
         })
 }

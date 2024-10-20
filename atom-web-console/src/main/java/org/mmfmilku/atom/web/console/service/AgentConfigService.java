@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.web.console.service;
 
+import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
@@ -130,7 +131,8 @@ public class AgentConfigService implements IAgentConfigService {
     }
     
     private String ordFileNameFormat(String ordFileName) {
-        if (ordFileName.endsWith(ORD_SUFFIX)) {
+        // .ord 或 .java
+        if (ordFileName.endsWith(ORD_SUFFIX) || ordFileName.endsWith(CodeConst.JAVA_FILE_SUFFIX)) {
             return ordFileName;
         }
         if (ordFileName.endsWith(".")) {
