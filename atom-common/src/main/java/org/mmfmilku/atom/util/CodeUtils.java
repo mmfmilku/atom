@@ -34,7 +34,7 @@ public class CodeUtils {
     }
 
     public static String toClassFilePath(String fullClassName) {
-        return toFileName(fullClassName) + CodeConst.JAVA_FILE_SUFFIX;
+        return toFileName(fullClassName) + CodeConst.CLASS_FILE_SUFFIX;
     }
 
     public static String toFileName(String fullClassName) {

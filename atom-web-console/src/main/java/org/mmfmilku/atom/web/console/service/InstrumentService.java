@@ -69,7 +69,7 @@ public class InstrumentService implements IInstrumentService {
 
         if (!Files.exists(Paths.get(tmpJavaFile))) {
             // 反编译文件缓存
-            Decompile.decompile(tmpClassFile, config.getTmpDir() + decompileDir);
+            Decompile.decompile(tmpClassFile, Paths.get(config.getTmpDir(),decompileDir).toString());
         }
 
         AssertUtil.isTrue(Files.exists(Paths.get(tmpJavaFile)), "反编译文件不存在");

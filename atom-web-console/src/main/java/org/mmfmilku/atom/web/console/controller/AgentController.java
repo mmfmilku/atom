@@ -58,12 +58,12 @@ public class AgentController {
 
     @RequestMapping("listClass")
     @ResponseBody
-    public List<String> listClass(@RequestParam String appName, @RequestParam int offset, @RequestParam int size,
-                                  @RequestParam String classShortNameLike) {
+    public List<String> listClass(@RequestParam String appName, @RequestParam int offset,
+                                  @RequestParam(required = false) String classShortNameLike) {
         if (classShortNameLike != null) {
-            return instrumentService.listClassForPage(appName, offset, 1000, classShortNameLike);
+            return instrumentService.listClassForPage(appName, offset, 20, classShortNameLike);
         }
-        return instrumentService.listClassForPage(appName, offset, 1000);
+        return instrumentService.listClassForPage(appName, offset, 20);
     }
 
     @RequestMapping("genSource")
