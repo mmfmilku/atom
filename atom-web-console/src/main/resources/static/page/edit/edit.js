@@ -24,13 +24,17 @@ let listFile = () => {
 let addFile = () => {
     UI.openInputDialog()
         .then(ordFileName => {
-            post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`
-                , {fileName: ordFileName, text: ''}
-            )
-                .then(res => {
-                    UI.showMessage('添加成功')
-                    listFile()
-                })
+            doAddFile(ordFileName)
+        })
+}
+
+let doAddFile = ordFileName => {
+    post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`
+        , {fileName: ordFileName, text: ''}
+    )
+        .then(res => {
+            UI.showMessage('添加成功')
+            listFile()
         })
 }
 
@@ -59,7 +63,7 @@ let saveText = () => {
     let ordText = pageEdit.querySelector('#ordFileText').value
     post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`
         , {fileName: ordFileName, text: ordText}
-        )
+    )
         .then(res => {
             UI.showMessage('保存成功')
         })
@@ -109,5 +113,23 @@ let loadAgent = () => {
     post(`agent/loadAgent?appName=${vmInfo.displayName}&vmId=${vmInfo.vmId}`)
         .then(res => {
             UI.showMessage(res)
+        })
+}
+
+let listJavaFile = () => {
+    post(`agent/listClass?appName=${vmInfo.displayName}&offset=1`)
+        .then(res => {
+            let showHtml = res.map(e =>
+                `
+                    <li >${e}</li>
+                    `
+            ).join('')
+            let dialog = UI.newDialog(showHtml)
+            dialog.querySelectorAll("li").forEach(e => {
+                e.addEventListener("click", event => {
+                    doAddFile(event.target.innerText)
+                    document.body.removeChild(dialog)
+                })
+            })
         })
 }

@@ -1,71 +1,61 @@
 const UI = {
 
-    test: () => {
-        console.log('UI.test')
+    newDialog: (showHtml = '') => {
+        let dialog = document.createElement("dialog")
+        document.body.appendChild(dialog)
+        if (typeof dialog.showModal !== "function") {
+            alert("Sorry, this browser is too low.")
+            return
+        }
+        dialog.showModal()
+        dialog.innerHTML = showHtml
+        return dialog
     },
 
-    openDialog: (showHtml, eventFunc) => {
+    openDialog: (showHtml = '', title = '') => {
+        let dialog = document.createElement("dialog")
+        document.body.appendChild(dialog)
+        if (typeof dialog.showModal !== "function") {
+            alert("Sorry, this browser is too low.")
+            return
+        }
+        dialog.showModal()
+        dialog.innerHTML =
+            `<h3>${title}</h3>
+            <form method="dialog">
+                ${showHtml}
+                <div class="vm-button-container">
+                    <button class="dialog-submit">确定</button>
+                    <button class="dialog-cancel">取消</button>
+                </div>
+            </form>
+            `
         return new Promise((resolve, reject) => {
-            let dialog = document.createElement("dialog")
-            document.body.appendChild(dialog)
-            if (typeof dialog.showModal !== "function") {
-                alert("Sorry, this browser is too low.")
-                return
-            }
-            dialog.showModal()
-            dialog.innerHTML = showHtml
-
-            atom.isFunction(eventFunc) && eventFunc(dialog, resolve, reject)
+            dialog.querySelector(".dialog-submit").addEventListener("click", event => {
+                resolve && resolve(dialog, event)
+                document.body.removeChild(dialog)
+            })
+            dialog.querySelector(".dialog-cancel").addEventListener("click", event => {
+                reject && reject(dialog, event)
+                document.body.removeChild(dialog)
+            })
         })
     },
 
     openInputDialog: (title) => {
-        let showHtml = title ? `<h3>${title}</h3>` : ''
-        showHtml +=
-            `
-            <form method="dialog">
-                <input name="dialogInput"/>
-                <div class="vm-button-container">
-                    <button class="dialog-submit">确定</button>
-                    <button class="dialog-cancel">取消</button>
-                </div>
-            </form>
-            `
-        return UI.openDialog(showHtml, (dialog, resolve, reject) => {
-            dialog.querySelector(".dialog-submit").addEventListener("click", () => {
-                let dialogValue = dialog.querySelector("input[name=dialogInput]").value
-                resolve(dialogValue)
-                document.body.removeChild(dialog)
-            })
-            dialog.querySelector(".dialog-cancel").addEventListener("click", () => {
-                let dialogValue = dialog.querySelector("input[name=dialogInput]").value
-                reject(dialogValue)
-                document.body.removeChild(dialog)
-            })
+        return new Promise((resolve, reject) => {
+            UI.openDialog('<input name="dialogInput"/>', title)
+                .then((dialog) => {
+                    resolve && resolve(dialog.querySelector("input[name=dialogInput]").value)
+                })
+                .catch((dialog) => {
+                    reject && reject()
+                })
         })
     },
 
     openConfirmDialog: (title) => {
-        let showHtml = title ? `<h3>${title}</h3>` : ''
-        showHtml +=
-            `
-            <form method="dialog">
-                <div class="vm-button-container">
-                    <button class="dialog-submit">确定</button>
-                    <button class="dialog-cancel">取消</button>
-                </div>
-            </form>
-            `
-        return UI.openDialog(showHtml, (dialog, resolve, reject) => {
-            dialog.querySelector(".dialog-submit").addEventListener("click", () => {
-                resolve()
-                document.body.removeChild(dialog)
-            })
-            dialog.querySelector(".dialog-cancel").addEventListener("click", () => {
-                reject()
-                document.body.removeChild(dialog)
-            })
-        })
+        return UI.openDialog('', title)
     },
 
     showMessage: (message) => {
