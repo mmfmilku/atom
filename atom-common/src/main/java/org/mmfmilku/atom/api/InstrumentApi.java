@@ -19,5 +19,10 @@ public interface InstrumentApi {
     String writeByteCodeFile(String fullClassName, String targetDir);
 
     void retransformClass(String className);
-    
+
+    /**
+     * 指定加载ord文件完成retransform
+     * */
+    void loadOrdFile(String file);
+
 }

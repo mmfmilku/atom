@@ -1,10 +1,21 @@
 package org.mmfmilku.atom.util;
 
+import org.mmfmilku.atom.exception.BizException;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class ReflectUtils {
+
+    public static Class<?> forName(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new BizException(e.getMessage());
+        }
+    }
 
     /**
      * 调用成员方法
