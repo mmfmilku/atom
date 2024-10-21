@@ -68,12 +68,18 @@ public class AgentController {
 
     @RequestMapping("genSource")
     public String genSource(@RequestParam String appName, @RequestParam String fullClassName) {
-        return instrumentService.decompile(appName, fullClassName);
+        return instrumentService.decompile(appName, "com.example.bootstudy.controler.MainController");
     }
 
     @RequestMapping("retransform")
     public String retransform(@RequestParam String appName, @RequestParam String ordFileName) {
         instrumentService.retransformClass(appName, "com.example.bootstudy.controler.MainController");
+        return "success";
+    }
+
+    @RequestMapping("loadOrdFile")
+    public String loadOrdFile(@RequestParam String appName, @RequestParam String ordFileName) {
+        instrumentService.loadOrdFile(appName, ordFileName);
         return "success";
     }
     
