@@ -46,24 +46,7 @@ public class FileDefineTransformer implements ClassFileTransformer {
         ClassORDDefine classOrdDefine = OverrideBodyHolder.getORMethodMap(fullClassName);
         if (classOrdDefine != null) {
             System.out.println("do FileDefineTransformer class:" + className);
-            try {
-                CtClass ctClass = ByteCodeUtils.getCtClass(classfileBuffer);
-                Map<String, MethodORDDefine> methodORDMap = classOrdDefine.getMethodORDMap();
-                for (Map.Entry<String, MethodORDDefine> entry : methodORDMap.entrySet()) {
-                    Map<Keywords, String> srcMap = entry.getValue().getSrcMap();
-                    if (srcMap.containsKey(Keywords.METHOD)) {
-                        CtMethod ctMethod = ctClass.getDeclaredMethod(entry.getKey());
-                        ctMethod.setBody(srcMap.get(Keywords.METHOD));
-                    }
-                }
-                // 返回字节码，并且detachCtClass对象
-                byte[] byteCode = ctClass.toBytecode();
-                //detach的意思是将内存中曾经被javassist加载过的对象移除，如果下次有需要在内存中找不到会重新走javassist加载
-                ctClass.detach();
-                return byteCode;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            return ByteCodeUtils.redefineClass(classfileBuffer, classOrdDefine);
         }
         return classfileBuffer;
     }

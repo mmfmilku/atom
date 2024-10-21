@@ -22,7 +22,11 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.agent.config.ClassORDDefine;
+import org.mmfmilku.atom.agent.config.Keywords;
+import org.mmfmilku.atom.agent.config.MethodORDDefine;
 import org.mmfmilku.atom.consts.CodeConst;
+import org.mmfmilku.atom.exception.BizException;
 import org.mmfmilku.atom.util.CodeUtils;
 
 import java.io.ByteArrayInputStream;
@@ -43,6 +47,30 @@ import java.util.stream.Stream;
  * @date 2024/6/19:13:54
  */
 public class ByteCodeUtils {
+
+    public static byte[] redefineClass(byte[] classfileBuffer, ClassORDDefine classOrdDefine) {
+        CtClass ctClass = null;
+        try {
+            ctClass = ByteCodeUtils.getCtClass(classfileBuffer);
+            Map<String, MethodORDDefine> methodORDMap = classOrdDefine.getMethodORDMap();
+            for (Map.Entry<String, MethodORDDefine> entry : methodORDMap.entrySet()) {
+                Map<Keywords, String> srcMap = entry.getValue().getSrcMap();
+                if (srcMap.containsKey(Keywords.METHOD)) {
+                    CtMethod ctMethod = ctClass.getDeclaredMethod(entry.getKey());
+                    ctMethod.setBody(srcMap.get(Keywords.METHOD));
+                }
+            }
+            // 返回字节码，并且detachCtClass对象
+            byte[] byteCode = ctClass.toBytecode();
+            //detach的意思是将内存中曾经被javassist加载过的对象移除，如果下次有需要在内存中找不到会重新走javassist加载
+            ctClass.detach();
+            return byteCode;
+        } catch (IOException | CannotCompileException | NotFoundException e) {
+            e.printStackTrace();
+            throw new BizException(e.getMessage());
+        }
+
+    }
 
     public static CtClass getCtClass(byte[] byteCode) throws IOException {
         try (InputStream inputStream = new ByteArrayInputStream(byteCode)) {

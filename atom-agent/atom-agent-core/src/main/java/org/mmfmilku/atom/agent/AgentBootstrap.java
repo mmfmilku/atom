@@ -50,7 +50,7 @@ public class AgentBootstrap {
                 AgentProperties.loadProperties(agentArgs);
                 System.out.println("init properties end");
                 System.out.println(AgentProperties.getInstance());
-                OverrideBodyHolder.load(AgentProperties.getProperty(AgentProperties.PROP_BASE_PATH));
+//                OverrideBodyHolder.load(AgentProperties.getProperty(AgentProperties.PROP_BASE_PATH));
             }
             
             // 初始化自定义类路径
