@@ -17,7 +17,6 @@ import org.mmfmilku.atom.util.ReflectUtils;
 import java.io.IOException;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * InstrumentApiImpl
@@ -71,6 +70,9 @@ public class InstrumentApiImpl implements InstrumentApi {
     }
 
     private <T> List<T> pageList(int offset, int size, List<T> list) {
+        if (list.size() < offset) {
+            return Collections.emptyList();
+        }
         int startIndex = offset - 1;
         // copy
         List<T> subList = list.subList(startIndex, startIndex + Math.min(list.size(), size));

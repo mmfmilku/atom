@@ -119,9 +119,13 @@ let loadAgent = () => {
 let nextJavaOffset = 1
 
 let listJavaFile = () => {
-    let dialog = UI.newDialog('<div class="javaList"></div><button>加载</button>')
+    let dialog = UI.newDialog(
+        '<div class="javaList"></div>'
+        + '<button>加载</button>'
+    )
     dialog.querySelector('.javaList').addEventListener("click", event => {
         doAddFile(event.target.innerText + '.java')
+        nextJavaOffset = 1
         document.body.removeChild(dialog)
     })
 
@@ -137,6 +141,7 @@ let listJavaFile = () => {
                 dialog.querySelector('.javaList').innerHTML += showHtml
             })
     })
+    dialog.querySelector('button').click()
 }
 
 

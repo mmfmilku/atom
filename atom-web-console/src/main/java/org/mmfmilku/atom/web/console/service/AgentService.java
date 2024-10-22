@@ -8,6 +8,7 @@ import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IAgentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -21,6 +22,10 @@ public class AgentService implements IAgentService {
 
     @Autowired
     IAgentConfigService agentConfigService;
+
+    // TODO 临时测试
+    @Value("${test.app-base-package}")
+    String testAppPackage;
 
     @Override
     public boolean loadAgent(String vmId, String appName) {
@@ -36,7 +41,7 @@ public class AgentService implements IAgentService {
                             + ";app-classloader=" + customClassloader
                             // 可重写class的包路径
                             // TODO 如何配置
-                            + ";app-base-package=com.example.bootstudy"
+                            + ";app-base-package=" + testAppPackage
                             // ferver监听路径
                             + ";app-fserver-dir=" + config.getFDir()
             );
