@@ -33,7 +33,7 @@ let doAddFile = ordFileName => {
         , {fileName: ordFileName, text: ''}
     )
         .then(res => {
-            UI.showMessage('添加成功')
+            UI.showMessage(res)
             listFile()
         })
 }
@@ -65,7 +65,7 @@ let saveText = () => {
         , {fileName: ordFileName, text: ordText}
     )
         .then(res => {
-            UI.showMessage('保存成功')
+            UI.showMessage(res)
         })
 }
 
@@ -79,7 +79,7 @@ let deleteFile = () => {
         .then(() => {
             post(`config/deleteOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
                 .then(res => {
-                    UI.showMessage('删除成功')
+                    UI.showMessage(res)
                     listFile()
                 })
         })
@@ -103,7 +103,7 @@ let loadFile = () => {
         UI.showMessage('请先选择文件')
         return
     }
-    post(`agent/retransform?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
+    post(`agent/loadOrdFile?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
         .then(res => {
             UI.showMessage(res)
         })
@@ -116,23 +116,30 @@ let loadAgent = () => {
         })
 }
 
+let nextJavaOffset = 1
+
 let listJavaFile = () => {
-    post(`agent/listClass?appName=${vmInfo.displayName}&offset=1`)
-        .then(res => {
-            let showHtml = res.map(e =>
-                `
+    let dialog = UI.newDialog('<div class="javaList"></div><button>加载</button>')
+    dialog.querySelector('.javaList').addEventListener("click", event => {
+        doAddFile(event.target.innerText + '.java')
+        document.body.removeChild(dialog)
+    })
+
+    dialog.querySelector('button').addEventListener("click", () => {
+        post(`agent/listClass?appName=${vmInfo.displayName}&offset=${nextJavaOffset}`)
+            .then(res => {
+                nextJavaOffset += (res.length | 0)
+                let showHtml = res.map(e =>
+                    `
                     <li >${e}</li>
                     `
-            ).join('')
-            let dialog = UI.newDialog(showHtml)
-            dialog.querySelectorAll("li").forEach(e => {
-                e.addEventListener("click", event => {
-                    doAddFile(event.target.innerText + '.java')
-                    document.body.removeChild(dialog)
-                })
+                ).join('')
+                dialog.querySelector('.javaList').innerHTML += showHtml
             })
-        })
+    })
 }
+
+
 
 let genCode = () => {
     let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
