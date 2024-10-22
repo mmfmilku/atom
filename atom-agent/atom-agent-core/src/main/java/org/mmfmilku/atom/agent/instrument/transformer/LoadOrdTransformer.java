@@ -22,7 +22,7 @@ public class LoadOrdTransformer implements ClassFileTransformer {
             return classfileBuffer;
         }
         String fullClassName = className.replace("/", ".");
-        if (!defineMap.containsKey(className)) {
+        if (!defineMap.containsKey(fullClassName)) {
             return classfileBuffer;
         }
         ClassORDDefine classOrdDefine = defineMap.get(fullClassName);

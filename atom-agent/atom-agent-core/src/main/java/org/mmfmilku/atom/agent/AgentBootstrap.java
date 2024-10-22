@@ -72,11 +72,10 @@ public class AgentBootstrap {
             InstrumentationContext.addTransformer(new FileDefineTransformer());
             InstrumentationContext.addTransformer(new ParamPrintTransformer());
 
-            String basePackage = AgentProperties.getProperty(AgentProperties.PROP_APP_BASE_PACKAGE);
             String fServerDir = AgentProperties.getProperty(AgentProperties.PROP_FSERVER_DIR);
 
             if (AgentBootstrap.frpcStarter == null) {
-                FRPCStarter frpcStarter = new FRPCStarter(basePackage, fServerDir);
+                FRPCStarter frpcStarter = new FRPCStarter("org.mmfmilku.atom.agent.api.impl", fServerDir);
                 AgentBootstrap.frpcStarter = frpcStarter;
                 frpcStarter.runServer();
             }

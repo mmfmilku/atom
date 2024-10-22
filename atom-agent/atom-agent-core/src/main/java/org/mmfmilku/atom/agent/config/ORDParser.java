@@ -38,7 +38,6 @@ public class ORDParser {
         }
         Set<String> importSet = new HashSet<>();
         String ordTestAfterImport = parseImport(classORDText, importSet);
-        System.out.println(importSet);
         Map<String, ClassORDDefine> overrideClassMap = new HashMap<>();
         parse(ordTestAfterImport, overrideClassMap);
         dealImport(overrideClassMap, importSet);

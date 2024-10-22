@@ -2,6 +2,7 @@ package org.mmfmilku.atom.agent.api.impl;
 
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
+import org.mmfmilku.atom.agent.config.AgentProperties;
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
 import org.mmfmilku.atom.agent.config.OverrideBodyHolder;
 import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
@@ -15,10 +16,7 @@ import org.mmfmilku.atom.util.ReflectUtils;
 
 import java.io.IOException;
 import java.lang.instrument.UnmodifiableClassException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -35,8 +33,7 @@ public class InstrumentApiImpl implements InstrumentApi {
         if (offset < 1 || size < 1) {
             return Collections.emptyList();
         }
-        // TODO,从配置属性中获取应用基础包路径
-        String appPackage = "";
+        String appPackage = AgentProperties.getProperty(AgentProperties.PROP_APP_BASE_PACKAGE);
         List<String> loadedClasses = InstrumentationContext.getLoadedClasses(appPackage);
         return pageList(offset, size, loadedClasses);
     }
@@ -46,8 +43,7 @@ public class InstrumentApiImpl implements InstrumentApi {
         if (offset < 1 || size < 1) {
             return Collections.emptyList();
         }
-        // TODO,从配置属性中获取应用基础包路径
-        String appPackage = "com.example.bootstudy";
+        String appPackage = AgentProperties.getProperty(AgentProperties.PROP_APP_BASE_PACKAGE);
         List<String> loadedClasses = InstrumentationContext.getLoadedClasses(appPackage, classShortNameLike);
         return pageList(offset, size, loadedClasses);
     }
@@ -77,17 +73,23 @@ public class InstrumentApiImpl implements InstrumentApi {
     private <T> List<T> pageList(int offset, int size, List<T> list) {
         int startIndex = offset - 1;
         // copy
-        List<T> subList = list.subList(startIndex, startIndex + size);
+        List<T> subList = list.subList(startIndex, startIndex + Math.min(list.size(), size));
         return new ArrayList<>(subList);
     }
 
-    @Override
-    public void retransformClass(String className) {
+    private void checkClass(String className) {
         AssertUtil.isTrue(!className.startsWith("java"), "禁止重写系统类" + className);
         AssertUtil.isTrue(!className.startsWith("javax"), "禁止重写系统类" + className);
         AssertUtil.isTrue(!className.startsWith("jdk"), "禁止重写系统类" + className);
         AssertUtil.isTrue(!className.startsWith("sun"), "禁止重写系统类" + className);
         AssertUtil.isTrue(!className.startsWith("com.sun"), "禁止重写系统类" + className);
+    }
+
+    @Override
+    public void retransformClass(String className) {
+        checkClass(className);
+        // TODO 如何清理
+        OverrideBodyHolder.load(AgentProperties.getProperty(AgentProperties.PROP_BASE_PATH));
         Class<?> clazz = InstrumentationContext.searchClass(className);
         if (clazz == null) {
             throw new RuntimeException(className + " not exist");
@@ -105,7 +107,9 @@ public class InstrumentApiImpl implements InstrumentApi {
         LoadOrdTransformer ordTransformer = new LoadOrdTransformer(defineMap);
         InstrumentationContext.addTransformer(ordTransformer);
         try {
-            InstrumentationContext.retransformClasses(defineMap.keySet().stream().map(ReflectUtils::forName).toArray(Class[]::new));
+            Class[] classes = defineMap.keySet().stream().map(ReflectUtils::forName).toArray(Class[]::new);
+            System.out.println("retransformClasses：" + Arrays.toString(classes));
+            InstrumentationContext.retransformClasses(classes);
         } catch (UnmodifiableClassException e) {
             e.printStackTrace();
             throw new BizException(e.getMessage());

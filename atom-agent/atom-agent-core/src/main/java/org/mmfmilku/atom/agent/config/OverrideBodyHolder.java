@@ -117,7 +117,8 @@ public class OverrideBodyHolder {
                 throw new SystemException(e.getMessage());
             }
         } else {
-            throw new BizException("不支持的文件类型" + file);
+            return Collections.emptyMap();
+//            throw new BizException("不支持的文件类型" + file);
         }
     }
 

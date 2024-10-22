@@ -33,6 +33,7 @@ public class FRPCHandle extends RRModeServerHandle {
             FRPCReturn frpcReturn = serviceMapping.execute(frpcParam.getApiName(), frpcParam);
             ctx.write(encode(frpcReturn));
         } catch (Throwable e) {
+            e.printStackTrace();
             try {
                 FRPCReturn frpcReturn = new FRPCReturn();
                 frpcReturn.setSuccess(Boolean.FALSE);
