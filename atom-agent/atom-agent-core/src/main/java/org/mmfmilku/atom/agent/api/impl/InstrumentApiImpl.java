@@ -109,7 +109,7 @@ public class InstrumentApiImpl implements InstrumentApi {
         LoadOrdTransformer ordTransformer = new LoadOrdTransformer(defineMap);
         InstrumentationContext.addTransformer(ordTransformer);
         try {
-            Class[] classes = defineMap.keySet().stream().map(ReflectUtils::forName).toArray(Class[]::new);
+            Class[] classes = defineMap.keySet().stream().map(InstrumentationContext::searchClass).toArray(Class[]::new);
             System.out.println("retransformClasses：" + Arrays.toString(classes));
             InstrumentationContext.retransformClasses(classes);
         } catch (UnmodifiableClassException e) {
