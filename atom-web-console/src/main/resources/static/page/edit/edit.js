@@ -123,6 +123,7 @@ let listJavaFile = () => {
         '<div class="javaList">'
             + '<div class="flex-column"></div>'
             + '<button>更多</button>'
+            + '<button>关闭</button>'
         + '</div>'
     )
 
@@ -133,10 +134,14 @@ let listJavaFile = () => {
         document.body.removeChild(dialog)
     })
 
-    dialog.querySelector('button').addEventListener("click", () => {
+    dialog.querySelectorAll('button')[0].addEventListener("click", () => {
+        if (!nextJavaOffset) {
+            UI.showMessage('没有更多了')
+            return;
+        }
         post(`agent/listClass?appName=${vmInfo.displayName}&offset=${nextJavaOffset}`)
             .then(res => {
-                nextJavaOffset += (res.length | 0)
+                nextJavaOffset += (res.length || -nextJavaOffset)
                 let showHtml = res.map(e =>
                     `
                     <div >${e}</div>
@@ -145,7 +150,11 @@ let listJavaFile = () => {
                 listDivDom.innerHTML += showHtml
             })
     })
-    dialog.querySelector('button').click()
+    dialog.querySelectorAll('button')[1].addEventListener("click", () => {
+        nextJavaOffset = 1
+        document.body.removeChild(dialog)
+    })
+    dialog.querySelectorAll('button')[0].click()
 }
 
 
