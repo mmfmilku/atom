@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.web.console.controller;
 
 import org.mmfmilku.atom.agent.client.AgentClient;
+import org.mmfmilku.atom.util.StringUtils;
 import org.mmfmilku.atom.web.console.interfaces.IAgentService;
 import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
@@ -60,7 +61,7 @@ public class AgentController {
     @ResponseBody
     public List<String> listClass(@RequestParam String appName, @RequestParam int offset,
                                   @RequestParam(required = false) String classShortNameLike) {
-        if (classShortNameLike != null) {
+        if (!StringUtils.isEmpty(classShortNameLike)) {
             return instrumentService.listClassForPage(appName, offset, 20, classShortNameLike);
         }
         return instrumentService.listClassForPage(appName, offset, 20);

@@ -117,13 +117,14 @@ let loadAgent = () => {
 }
 
 let nextJavaOffset = 1
+let lastSearch = ''
 
 let listJavaFile = () => {
-    let dialog = UI.newDialog(
-        '<div class="javaList">'
+    let dialog = UI.newDialog('<div class="javaList">'
             + '<div class="flex-column"></div>'
             + '<button>更多</button>'
             + '<button>关闭</button>'
+            + '<input/>'
         + '</div>'
     )
 
@@ -134,12 +135,20 @@ let listJavaFile = () => {
         document.body.removeChild(dialog)
     })
 
+    let searchDom = dialog.querySelector('input')
+
     dialog.querySelectorAll('button')[0].addEventListener("click", () => {
+        if (lastSearch !== searchDom.value) {
+            // 重新搜索
+            lastSearch = searchDom.value
+            nextJavaOffset = 1
+            listDivDom.innerHTML = ''
+        }
         if (!nextJavaOffset) {
             UI.showMessage('没有更多了')
             return;
         }
-        post(`agent/listClass?appName=${vmInfo.displayName}&offset=${nextJavaOffset}`)
+        post(`agent/listClass?appName=${vmInfo.displayName}&offset=${nextJavaOffset}&classShortNameLike=${lastSearch}`)
             .then(res => {
                 nextJavaOffset += (res.length || -nextJavaOffset)
                 let showHtml = res.map(e =>

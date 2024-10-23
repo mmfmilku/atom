@@ -75,7 +75,7 @@ public class InstrumentApiImpl implements InstrumentApi {
         }
         int startIndex = offset - 1;
         // copy
-        List<T> subList = list.subList(startIndex, startIndex + Math.min(list.size(), size));
+        List<T> subList = list.subList(startIndex, Math.min(list.size(), startIndex + size));
         return new ArrayList<>(subList);
     }
 
