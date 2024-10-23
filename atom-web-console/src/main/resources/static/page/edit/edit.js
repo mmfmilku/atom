@@ -120,10 +120,14 @@ let nextJavaOffset = 1
 
 let listJavaFile = () => {
     let dialog = UI.newDialog(
-        '<div class="javaList"></div>'
-        + '<button>加载</button>'
+        '<div class="javaList">'
+            + '<div class="flex-column"></div>'
+            + '<button>更多</button>'
+        + '</div>'
     )
-    dialog.querySelector('.javaList').addEventListener("click", event => {
+
+    let listDivDom = dialog.querySelector('.javaList > div')
+    listDivDom.addEventListener("click", event => {
         doAddFile(event.target.innerText + '.java')
         nextJavaOffset = 1
         document.body.removeChild(dialog)
@@ -135,10 +139,10 @@ let listJavaFile = () => {
                 nextJavaOffset += (res.length | 0)
                 let showHtml = res.map(e =>
                     `
-                    <li >${e}</li>
+                    <div >${e}</div>
                     `
                 ).join('')
-                dialog.querySelector('.javaList').innerHTML += showHtml
+                listDivDom.innerHTML += showHtml
             })
     })
     dialog.querySelector('button').click()
