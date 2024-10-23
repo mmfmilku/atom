@@ -35,7 +35,7 @@ public class AgentClient {
     }
 
     @Deprecated
-    public static void loadAgent(String id, String args) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
+    public static void loadAgent(String id, String args) {
         String userDir = System.getProperty("user.dir");
         System.out.println("userDir=" + userDir);
         File agentJar = new File(userDir, "atom-agent-jar-with-dependencies.jar");
@@ -48,9 +48,24 @@ public class AgentClient {
             throw new RuntimeException("can not find agentJar");
         }
 
-        VirtualMachine virtualMachine = VirtualMachine.attach(id);
-        virtualMachine.loadAgent(agentJar.getAbsolutePath(), args);
-        virtualMachine.detach();
+        VirtualMachine virtualMachine = null;
+        try {
+            virtualMachine = VirtualMachine.attach(id);
+            virtualMachine.loadAgent(agentJar.getAbsolutePath(), args);
+            virtualMachine.detach();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            if (virtualMachine != null) {
+                try {
+                    virtualMachine.detach();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
 
     public static void loadAgent(String id, String agentJarPath, String args) {
@@ -64,8 +79,7 @@ public class AgentClient {
         try {
             virtualMachine = VirtualMachine.attach(id);
             virtualMachine.loadAgent(agentJar.getAbsolutePath(), args);
-        } catch (AttachNotSupportedException | IOException | AgentLoadException
-                | AgentInitializationException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         } finally {

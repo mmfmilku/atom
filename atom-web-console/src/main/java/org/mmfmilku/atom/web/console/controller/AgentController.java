@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.web.console.controller;
 
 import org.mmfmilku.atom.agent.client.AgentClient;
+import org.mmfmilku.atom.util.StringUtils;
 import org.mmfmilku.atom.web.console.interfaces.IAgentService;
 import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
@@ -60,7 +61,7 @@ public class AgentController {
     @ResponseBody
     public List<String> listClass(@RequestParam String appName, @RequestParam int offset,
                                   @RequestParam(required = false) String classShortNameLike) {
-        if (classShortNameLike != null) {
+        if (!StringUtils.isEmpty(classShortNameLike)) {
             return instrumentService.listClassForPage(appName, offset, 20, classShortNameLike);
         }
         return instrumentService.listClassForPage(appName, offset, 20);
@@ -72,8 +73,14 @@ public class AgentController {
     }
 
     @RequestMapping("retransform")
-    public String retransform(@RequestParam String appName, @RequestParam String ordFileName) {
-        instrumentService.retransformClass(appName, "com.example.bootstudy.controler.MainController");
+    public String retransform(@RequestParam String appName, @RequestParam String fullClassName) {
+        instrumentService.retransformClass(appName, fullClassName);
+        return "success";
+    }
+
+    @RequestMapping("loadOrdFile")
+    public String loadOrdFile(@RequestParam String appName, @RequestParam String ordFileName) {
+        instrumentService.loadOrdFile(appName, ordFileName);
         return "success";
     }
     

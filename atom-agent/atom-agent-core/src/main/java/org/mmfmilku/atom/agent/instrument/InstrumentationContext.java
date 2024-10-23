@@ -78,7 +78,8 @@ public class InstrumentationContext {
         Class<?>[] allLoadedClasses = instance.inst.getAllLoadedClasses();
         List<String> result = new ArrayList<>();
         for (Class<?> loadedClass : allLoadedClasses) {
-            if (matchFunc.apply(loadedClass)) {
+            // 排除lambda
+            if (matchFunc.apply(loadedClass) && !loadedClass.getName().contains("$$Lambda")) {
                 result.add(loadedClass.getName());
             }
         }

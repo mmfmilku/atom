@@ -17,5 +17,7 @@ public interface IInstrumentService {
     String decompile(String appName, String fullClassName);
 
     void retransformClass(String appName, String fullClassName);
-    
+
+    void loadOrdFile(String appName, String file);
+
 }

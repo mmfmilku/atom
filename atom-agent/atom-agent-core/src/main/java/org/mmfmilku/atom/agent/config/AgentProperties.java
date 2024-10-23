@@ -17,6 +17,7 @@ package org.mmfmilku.atom.agent.config;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -37,13 +38,17 @@ public class AgentProperties {
     public static final String CONFIG_FILE_NAME = "agent.conf";
     
     public static final String PROP_BASE_PATH = "base-path";
-    
+
+    // toString方法
     public static final String PROP_TO_STRING_METHOD = "to-string-method";
-    
+
+    // 自定义类加载器
     public static final String PROP_APP_CLASSLOADER = "app-classloader";
 
+    // 可重写包名
     public static final String PROP_APP_BASE_PACKAGE = "app-base-package";
 
+    // fserver监听路径
     public static final String PROP_FSERVER_DIR = "app-fserver-dir";
 
     public static void loadProperties(String args) {
@@ -95,6 +100,10 @@ public class AgentProperties {
 
     public static String getProperty(String key, String defaultValue) {
         return properties.getProperty(key, defaultValue);
+    }
+
+    public static Map<Object, Object> getProperties() {
+        return new HashMap(properties);
     }
     
 }

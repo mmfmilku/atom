@@ -86,4 +86,10 @@ public class InstrumentService implements IInstrumentService {
         getApi(appName).retransformClass(fullClassName);
     }
 
+    @Override
+    public void loadOrdFile(String appName, String file) {
+        AgentConfig config = agentConfigService.getConfigByName(appName);
+        getApi(appName).loadOrdFile(Paths.get(config.getOrdDir(), file).toString());
+    }
+
 }

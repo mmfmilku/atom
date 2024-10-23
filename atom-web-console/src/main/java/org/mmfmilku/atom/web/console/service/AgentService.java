@@ -8,6 +8,7 @@ import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IAgentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -22,10 +23,13 @@ public class AgentService implements IAgentService {
     @Autowired
     IAgentConfigService agentConfigService;
 
+    // TODO 临时测试
+    @Value("${test.app-base-package}")
+    String testAppPackage;
+
     @Override
     public boolean loadAgent(String vmId, String appName) {
         AgentConfig config = agentConfigService.getConfigByName(appName);
-        // TODO,ord文件读取不支持低柜文件夹，暂时使用ord目录
         String dir = config.getOrdDir();
         // TODO 配置 classloader
         String customClassloader = "org.springframework.boot.loader.LaunchedURLClassLoader";
@@ -35,8 +39,9 @@ public class AgentService implements IAgentService {
                     , "base-path=" + dir
                             // 需要拓展的类加载器
                             + ";app-classloader=" + customClassloader
-                            // frpc服务扫描的包路径
-                            + ";app-base-package=org.mmfmilku.atom.agent.api.impl"
+                            // 可重写class的包路径
+                            // TODO 如何配置
+                            + ";app-base-package=" + testAppPackage
                             // ferver监听路径
                             + ";app-fserver-dir=" + config.getFDir()
             );

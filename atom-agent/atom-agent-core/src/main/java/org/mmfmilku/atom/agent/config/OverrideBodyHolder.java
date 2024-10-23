@@ -3,6 +3,9 @@ package org.mmfmilku.atom.agent.config;
 import org.mmfmilku.atom.agent.compiler.CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
+import org.mmfmilku.atom.exception.BizException;
+import org.mmfmilku.atom.exception.SystemException;
+import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.FileUtils;
 import org.mmfmilku.atom.consts.CodeConst;
 
@@ -61,25 +64,38 @@ public class OverrideBodyHolder {
         }
     }
 
-    private static void loadOverrideFile(String file) {
-        // 将文件定义的方法覆写体，读取到map中
+    public static void loadFile(String filePath) {
+        System.out.println("------------------agent ord load-----------------------");
+        synchronized (overrideClassMap) {
+            File base = new File(filePath);
+            if (base.exists()) {
+                AssertUtil.isTrue(base.isFile(), "agent加载文件");
+                loadOverrideFile(base.getAbsolutePath());
+            }
+            System.out.println("------------------new ord loaded:" + overrideClassMap.size());
+            System.out.println(overrideClassMap);
+        }
+    }
+
+    public static Map<String, ClassORDDefine> parseOverrideFile(String file) {
+        // 将文件定义的方法覆写体读取
         if (file.endsWith(".ord")) {
-            System.out.println("--------------load .ord file:" + file);
+            System.out.println("--------------parse .ord file:" + file);
             try {
                 String text = FileUtils.readText(file).trim();
 
-                Map<String, ClassORDDefine> parse = ORDParser.parse(text);
-                overrideClassMap.putAll(parse);
+                return ORDParser.parse(text);
             } catch (IOException e) {
                 e.printStackTrace();
+                throw new SystemException(e.getMessage());
             }
         } else if (file.endsWith(CodeConst.JAVA_FILE_SUFFIX)) {
-            System.out.println("--------------load .java file:" + file);
+            System.out.println("--------------parse .java file:" + file);
             try {
                 String text = FileUtils.readText(file).trim();
                 JavaAST javaAST = CompilerUtil.parseAST(text);
                 ByteCodeUtils.toJavassistCode(javaAST);
-                Map<String, ClassORDDefine> defineMap = javaAST.getClassList()
+                return javaAST.getClassList()
                         .stream()
                         .map(clazz -> {
                             Map<String, MethodORDDefine> methodORDMap = clazz.getMethods()
@@ -96,12 +112,20 @@ public class OverrideBodyHolder {
                             ordDefine.setMethodORDMap(methodORDMap);
                             return ordDefine;
                         }).collect(Collectors.toMap(ClassORDDefine::getName, v -> v));
-                overrideClassMap.putAll(defineMap);
             } catch (IOException e) {
                 e.printStackTrace();
+                throw new SystemException(e.getMessage());
             }
+        } else {
+            return Collections.emptyMap();
+//            throw new BizException("不支持的文件类型" + file);
         }
+    }
 
+    private static void loadOverrideFile(String file) {
+        // 将文件定义的方法覆写体，读取到map中
+        Map<String, ClassORDDefine> defineMap = parseOverrideFile(file);
+        overrideClassMap.putAll(defineMap);
     }
 
 }
