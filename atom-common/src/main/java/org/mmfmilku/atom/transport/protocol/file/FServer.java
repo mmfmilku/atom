@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Server
@@ -35,6 +36,44 @@ public class FServer {
     private List<ServerHandle> handles = new ArrayList<>();
 
     private OutputStream listenStream;
+
+    private ScheduledExecutorService bossExecutor = Executors.newSingleThreadScheduledExecutor(
+            new ThreadFactory() {
+                private final AtomicInteger threadNumber = new AtomicInteger(1);
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(Thread.currentThread().getThreadGroup(), r,
+                            "pool-fserver-boss-thread-" + threadNumber.getAndIncrement(),
+                            0);
+                    t.setDaemon(true);
+                    if (t.getPriority() != Thread.NORM_PRIORITY)
+                        t.setPriority(Thread.NORM_PRIORITY);
+                    return t;
+                }
+            });
+
+    private ExecutorService workerExecutor = new ThreadPoolExecutor(2, 2,
+            0L, TimeUnit.MILLISECONDS,
+            // 队列大于1将入队失败
+            new ArrayBlockingQueue<>(1),
+            new ThreadFactory() {
+                private final AtomicInteger threadNumber = new AtomicInteger(1);
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(Thread.currentThread().getThreadGroup(), r,
+                            "pool-fserver-worker-thread-" + threadNumber.getAndIncrement(),
+                            0);
+                    t.setDaemon(true);
+                    if (t.getPriority() != Thread.NORM_PRIORITY)
+                        t.setPriority(Thread.NORM_PRIORITY);
+                    return t;
+                }
+            },
+            (r, executor) -> System.out.println("连接" +
+                    "拒绝")
+    );
 
     public FServer(String listenPath) {
         this.listenPath = listenPath;
@@ -88,30 +127,23 @@ public class FServer {
         Path occupyPath = new File(listen, LISTEN_FILE).toPath();
         listenStream = new FileOutputStream(occupyPath.toFile());
 
-        try {
-            while (true) {
-                File[] requestFiles = listen.listFiles((dir, name) -> !ctxMap.containsKey(name)
-                        && name.endsWith(REQUEST));
-                if (requestFiles != null) {
-                    for (File requestFile : requestFiles) {
-                        accept(requestFile);
-                    }
+        ScheduledFuture<?> scheduledFuture = bossExecutor.scheduleAtFixedRate(() -> {
+            File[] requestFiles = listen.listFiles((dir, name) -> !ctxMap.containsKey(name)
+                    && name.endsWith(REQUEST));
+            if (requestFiles != null) {
+                for (File requestFile : requestFiles) {
+                    accept(requestFile);
                 }
-                sleep(3000);
             }
-        } catch (Throwable e) {
-            e.printStackTrace();
-            stop();
-            throw e;
-        }
+            // 500ms执行一次
+        }, 1, 500, TimeUnit.MILLISECONDS);
 
     }
 
     public void stop() {
-        executorService.shutdown();
-        ctxMap.forEach((name, ctx) -> {
-            ctx.close();
-        });
+        bossExecutor.shutdown();
+        workerExecutor.shutdown();
+        ctxMap.forEach((name, ctx) -> ctx.close());
         IOUtils.closeStream(listenStream);
         listenStream = null;
     }
@@ -127,7 +159,7 @@ public class FServer {
     public void accept(File requestFile) {
         // 拒绝的连接认为已处理，否则将不断处理
         ctxMap.put(requestFile.getName(), null);
-        executorService.execute(() -> {
+        workerExecutor.execute(() -> {
             InputStream inputStream = null;
             OutputStream outputStream = null;
             try {
@@ -165,16 +197,6 @@ public class FServer {
 
         });
     }
-
-    private ExecutorService executorService = new ThreadPoolExecutor(2, 2,
-            0L, TimeUnit.MILLISECONDS,
-            // 队列大于1将入队失败
-            new ArrayBlockingQueue<>(1),
-            Executors.defaultThreadFactory(),
-            (r, executor) -> System.out.println("连接" +
-                    "拒绝")
-    );
-
 
 }
 
