@@ -187,6 +187,7 @@ public class FServer {
     private void cleaner() {
         bossExecutor.scheduleAtFixedRate(() -> {
             try {
+                System.out.println("执行清理任务 " + ctxMap.size());
                 Iterator<Map.Entry<String, ConnectContext>> itr = ctxMap.entrySet().iterator();
                 while (itr.hasNext()) {
                     Map.Entry<String, ConnectContext> next = itr.next();
@@ -195,17 +196,15 @@ public class FServer {
                     if (ctx != ACCEPTED_CTX && ctx.isClose()) {
                         // 删除关闭连接的文件
                         String fileName = next.getKey();
-                        if (new File(fileName).delete()
-                                && new File(fileName + RESPONSE).delete()) {
+                        System.out.println("清理 " + fileName);
+                        if (new File(listenPath, fileName).delete()
+                                && new File(listenPath, fileName + RESPONSE).delete()) {
                             // 移除引用
                             itr.remove();
-                        } else {
-                            // 文件删除失败，再次发起关闭，确保流被关闭
-//                            System.out.println("ctx clear fail,file can not delete:" + fileName);
-//                            ctx.close();
                         }
                     }
                 }
+                System.out.println("清理任务结束 " + ctxMap.size());
             } catch (Exception e) {
                 e.printStackTrace();
             }
