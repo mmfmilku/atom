@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Server
@@ -27,9 +28,21 @@ public class FServer {
 
     private static final String LISTEN_FILE = "fserver.listen";
 
+    /**
+     * 用于标记已经处理过的连接
+     * */
+    private static final ConnectContext ACCEPTED_CTX = new ConnectContext(
+            null, null, null);
+
+    /**
+     * 用于标记连接失败的连接
+     * */
+    private static final ConnectContext FAILED_CTX = new ConnectContext(
+            null, null, null);
+
     private String listenPath;
 
-    private Map<String, ConnectContext> ctxMap = new HashMap<>();
+    private Map<String, ConnectContext> ctxMap = new ConcurrentHashMap<>();
 
     private ServerHandle<String> handle;
 
@@ -37,7 +50,7 @@ public class FServer {
 
     private OutputStream listenStream;
 
-    private ScheduledExecutorService bossExecutor = Executors.newSingleThreadScheduledExecutor(
+    private ScheduledExecutorService bossExecutor = Executors.newScheduledThreadPool(3,
             new ThreadFactory() {
                 private final AtomicInteger threadNumber = new AtomicInteger(1);
 
@@ -55,8 +68,8 @@ public class FServer {
 
     private ExecutorService workerExecutor = new ThreadPoolExecutor(2, 2,
             0L, TimeUnit.MILLISECONDS,
-            // 队列大于1将入队失败
-            new ArrayBlockingQueue<>(1),
+            // 队列长度等于最大连接数
+            new ArrayBlockingQueue<>(10),
             new ThreadFactory() {
                 private final AtomicInteger threadNumber = new AtomicInteger(1);
 
@@ -71,8 +84,7 @@ public class FServer {
                     return t;
                 }
             },
-            (r, executor) -> System.out.println("连接" +
-                    "拒绝")
+            (r, executor) -> System.out.println("连接拒绝")
     );
 
     public FServer(String listenPath) {
@@ -115,7 +127,12 @@ public class FServer {
                         .forEach(File::delete);
             }
             listen.mkdirs();
-            listen(listen);
+            // 监听连接
+            listener(listen);
+            // 处理消息
+            worker();
+            // 清理连接
+            cleaner();
         } catch (IOException e) {
             e.printStackTrace();
             this.stop();
@@ -123,7 +140,7 @@ public class FServer {
         }
     }
 
-    private void listen(File listen) throws IOException {
+    private void listener(File listen) throws IOException {
         Path occupyPath = new File(listen, LISTEN_FILE).toPath();
         listenStream = new FileOutputStream(occupyPath.toFile());
 
@@ -136,8 +153,63 @@ public class FServer {
                 }
             }
             // 500ms执行一次
-        }, 1, 500, TimeUnit.MILLISECONDS);
+        }, 0, 300, TimeUnit.MILLISECONDS);
 
+    }
+
+    private void worker() {
+        bossExecutor.scheduleWithFixedDelay(() -> {
+            try {
+                List<Callable<Boolean>> tasks = ctxMap.values()
+                        .stream()
+                        .filter(ctx ->  ctx != ACCEPTED_CTX && !ctx.isClose())
+                        .map(ctx -> (Callable<Boolean>) () -> {
+                            if (ctx.canRead()) {
+                                String read = ctx.read();
+                                if (read != null) {
+                                    handle.onReceive(ctx, read);
+                                    // TODO
+                                    handles.forEach(h -> h.onReceive(ctx, read));
+                                }
+                                return true;
+                            }
+                            return false;
+                        }).collect(Collectors.toList());
+//                System.out.println("tasks.size:" + tasks.size());
+                // 将等待所有任务执行完成，否则会不断发起定时任务，导致重复线程处理同一条连接
+                List<Future<Boolean>> futures = workerExecutor.invokeAll(tasks);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 0, 100, TimeUnit.MILLISECONDS);
+    }
+
+    private void cleaner() {
+        bossExecutor.scheduleAtFixedRate(() -> {
+            try {
+                Iterator<Map.Entry<String, ConnectContext>> itr = ctxMap.entrySet().iterator();
+                while (itr.hasNext()) {
+                    Map.Entry<String, ConnectContext> next = itr.next();
+                    // 获取关闭的上下文
+                    ConnectContext ctx = next.getValue();
+                    if (ctx != ACCEPTED_CTX && ctx.isClose()) {
+                        // 删除关闭连接的文件
+                        String fileName = next.getKey();
+                        if (new File(fileName).delete()
+                                && new File(fileName + RESPONSE).delete()) {
+                            // 移除引用
+                            itr.remove();
+                        } else {
+                            // 文件删除失败，再次发起关闭，确保流被关闭
+//                            System.out.println("ctx clear fail,file can not delete:" + fileName);
+//                            ctx.close();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 0, 5, TimeUnit.SECONDS);
     }
 
     public void stop() {
@@ -148,54 +220,31 @@ public class FServer {
         listenStream = null;
     }
 
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void accept(File requestFile) {
-        // 拒绝的连接认为已处理，否则将不断处理
-        ctxMap.put(requestFile.getName(), null);
-        workerExecutor.execute(() -> {
-            InputStream inputStream = null;
-            OutputStream outputStream = null;
-            try {
-                inputStream = new FileInputStream(requestFile);
-                outputStream = new FileOutputStream(
-                        new File(requestFile.getAbsolutePath() + RESPONSE));
-                ConnectContext ctx = new ConnectContext(inputStream, outputStream,
-                        // TODO 删除文件
-                        o -> {
-                            // ctxMap.remove(requestFile.getName());
-                            System.out.println("关闭" + o);
-                        }
-                );
-                boolean open = handle.onOpen(ctx);
-                if (!open) {
-                    throw new RuntimeException("连接建立失败");
-                }
-                handles.forEach(h -> h.onOpen(ctx));
-                ctxMap.put(requestFile.getName(), ctx);
-                while (!ctx.isClose()) {
-                    if (ctx.canRead()) {
-                        String read = ctx.read();
-                        if (read != null) {
-                            handle.onReceive(ctx, read);
-                            // TODO
-                            handles.forEach(h -> h.onReceive(ctx, read));
-                        }
-                    }
-                }
-                System.out.println("执行结束" + ctx);
-            } catch (IOException e) {
-                IOUtils.closeStream(inputStream);
-                IOUtils.closeStream(outputStream);
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try {
+            // 拒绝的连接认为已处理，否则将不断处理
+            ctxMap.put(requestFile.getName(), ACCEPTED_CTX);
+            inputStream = new FileInputStream(requestFile);
+            outputStream = new FileOutputStream(
+                    new File(requestFile.getAbsolutePath() + RESPONSE));
+            ConnectContext ctx = new ConnectContext(inputStream, outputStream,
+                    o -> System.out.println("关闭" + o)
+            );
+            boolean open = handle.onOpen(ctx);
+            if (!open) {
+                throw new RuntimeException("连接建立失败");
             }
-
-        });
+            ctxMap.put(requestFile.getName(), ctx);
+            handles.forEach(h -> h.onOpen(ctx));
+        } catch (Exception e) {
+            // 建立连接失败，关闭流
+            e.printStackTrace();
+            ctxMap.put(requestFile.getName(), FAILED_CTX);
+            IOUtils.closeStream(inputStream);
+            IOUtils.closeStream(outputStream);
+        }
     }
 
 }

@@ -11,7 +11,7 @@ public class ConnectContext implements Closeable {
     private InputStream inputStream;
     private OutputStream outputStream;
     private Consumer<ConnectContext> closeCallback;
-    private long readTimeout = 1000;
+    private long readTimeout = 2000;
     
     private boolean close = false;
 
@@ -122,7 +122,6 @@ public class ConnectContext implements Closeable {
     public void close() {
         System.out.println("关闭连接");
         write("");
-        close = true;
         if (closeCallback != null) {
             closeCallback.accept(this);
         }
@@ -140,6 +139,7 @@ public class ConnectContext implements Closeable {
                 ex.printStackTrace();
             }
         }
+        close = true;
     }
 
 }

@@ -42,28 +42,20 @@ public class FRPCStarter {
     }
 
     private void runWithThread() {
-        Thread thread = new Thread("frpc-main-thread") {
-            @Override
-            public void run() {
-                try {
-                    FServer fServer = new FServer(fDir)
-                            .addHandle(new FRPCHandle(mappings));
-                    fServer.start();
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                    if (listener != null) {
-                        listener.onFail(throwable);
-                    }
-                } finally {
-                    if (listener != null) {
-                        listener.onClose();
-                    }
-                }
-
+        try {
+            FServer fServer = new FServer(fDir)
+                    .addHandle(new FRPCHandle(mappings));
+            fServer.start();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            if (listener != null) {
+                listener.onFail(throwable);
             }
-        };
-        thread.setDaemon(true);
-        thread.start();
+        } finally {
+            if (listener != null) {
+                listener.onClose();
+            }
+        }
     }
 
     private void scanService() {

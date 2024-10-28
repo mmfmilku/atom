@@ -8,7 +8,9 @@ import org.mmfmilku.atom.transport.client.ClientSession;
 import org.mmfmilku.atom.transport.handle.RRModeServerHandle;
 import org.mmfmilku.atom.transport.protocol.file.FClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -69,23 +71,55 @@ public class FClientTest {
     }
 
     @Test
+    public void testMaxConnect() {
+        String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
+        FClient fClient = new FClient(path);
+        int max = 10;
+        List<ClientSession<String>> connects = new ArrayList<>(max);
+        for (int i = 0; i < max; i++) {
+            ClientSession<String> connect = fClient.connect();
+            connects.add(connect);
+        }
+        for (int i = 0; i < max; i++) {
+            ClientSession<String> connect = connects.get(i);
+            String s = connect.sendThenRead("连接" + i + "发送消息a");
+            System.out.println("连接" + i + "接收：" + s);
+            assertEquals("fserver接收到消息:连接" + i + "发送消息a", s);
+
+            s = connect.sendThenRead("连接" + i + "发送消息b");
+            System.out.println("连接" + i + "接收：" + s);
+            assertEquals("fserver接收到消息:连接" + i + "发送消息b", s);
+        }
+
+        for (int i = 0; i < max; i++) {
+            ClientSession<String> connect = connects.get(i);
+            connect.close();
+        }
+
+    }
+
+    @Test
     public void testClose() {
         String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
         FClient fClient = new FClient(path);
         ClientSession<String> connect1 = fClient.connect("c1");
         ClientSession<String> connect2 = fClient.connect("c2");
-        connect1.close();
-        connect2.close();
-
         ClientSession<String> connect3 = fClient.connect("c3");
         ClientSession<String> connect4 = fClient.connect("c4");
-
-        connect3.close();
-
         ClientSession<String> connect5 = fClient.connect("c5");
 
+
+        connect5.send("5555");
+
+        connect1.close();
+        connect2.close();
+        connect3.close();
         connect4.close();
         connect5.close();
+
+        ClientSession<String> connect6 = fClient.connect("c6");
+        connect6.close();
+
     }
 
     @Test
