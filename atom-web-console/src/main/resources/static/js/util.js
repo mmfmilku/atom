@@ -59,7 +59,13 @@ const UI = {
     },
 
     showMessage: (message) => {
-        alert(message)
+        let popup = document.createElement("div")
+        popup.classList.add('atom-popup')
+        popup.innerText = message
+        document.body.appendChild(popup)
+        setTimeout(function() {
+            document.body.removeChild(popup)
+        }, 5000);
     },
 
     showError: (message) => {
