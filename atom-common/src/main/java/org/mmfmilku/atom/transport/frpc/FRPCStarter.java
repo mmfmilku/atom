@@ -186,7 +186,7 @@ public class FRPCStarter {
                                 return frpcReturn;
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                throw new RuntimeException(e);
+                                throw new RuntimeException(e.getCause() == null ? e : e.getCause());
                             }
                         };
 

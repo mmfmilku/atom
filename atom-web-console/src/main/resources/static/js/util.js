@@ -62,6 +62,10 @@ const UI = {
         alert(message)
     },
 
+    showError: (message) => {
+        alert(message)
+    },
+
 }
 
 const atom = {
@@ -72,6 +76,10 @@ const atom = {
             xhr.open("POST", path, true)
             xhr.setRequestHeader('content-type', 'application/json; charset=UTF-8')
             xhr.onload = () => {
+                if (xhr.status !== 200) {
+                    UI.showError(JSON.parse(xhr.response).message)
+                    return
+                }
                 try {
                     resolve(JSON.parse(xhr.response))
                 } catch (e) {
