@@ -9,7 +9,9 @@ import org.mmfmilku.atom.agent.compiler
 import org.mmfmilku.atom.util.FileUtils;
 
 import javax.annotation.Resource;
+import java.io.Closeable;
 import java.io.IOException;
+import java.io.Serializable;
 
 import static org.junit.Assert.*;
 
@@ -18,7 +20,7 @@ import static org.junit.Assert.*;
  * */
 @SuppressWarnings("f")
 @Resource
-public class ParserTest {
+public class ParserTest extends Object implements Serializable, Closeable {
 
     private void m1(String a, int b) {
         System.out.println(a);
@@ -100,4 +102,8 @@ public class ParserTest {
                 .getSourceCode());
     }
 
+    @Override
+    public void close() throws IOException {
+
+    }
 }

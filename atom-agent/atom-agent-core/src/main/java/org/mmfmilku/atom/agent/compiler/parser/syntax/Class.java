@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.util.StringUtils;
 
 import java.util.List;
 
@@ -34,15 +35,15 @@ public class Class implements Node {
     /**
      * 继承类
      * */
-    private Class superClass;
+    private String superClass;
 
     /**
      * 实现类
      * */
-    private List<Class> implementClasses;
+    private List<String> implementClasses;
 
     // TODO 内部类,静态非静态？
-    private List<Class> innerClasses;
+    private List<String> innerClasses;
 
     // TODO 静态代码块
 
@@ -94,27 +95,27 @@ public class Class implements Node {
         this.modifier = modifier;
     }
 
-    public Class getSuperClass() {
+    public String getSuperClass() {
         return superClass;
     }
 
-    public void setSuperClass(Class superClass) {
+    public void setSuperClass(String superClass) {
         this.superClass = superClass;
     }
 
-    public List<Class> getImplementClasses() {
+    public List<String> getImplementClasses() {
         return implementClasses;
     }
 
-    public void setImplementClasses(List<Class> implementClasses) {
+    public void setImplementClasses(List<String> implementClasses) {
         this.implementClasses = implementClasses;
     }
 
-    public List<Class> getInnerClasses() {
+    public List<String> getInnerClasses() {
         return innerClasses;
     }
 
-    public void setInnerClasses(List<Class> innerClasses) {
+    public void setInnerClasses(List<String> innerClasses) {
         this.innerClasses = innerClasses;
     }
 
@@ -138,7 +139,12 @@ public class Class implements Node {
     public String getSourceCode() {
         return GrammarUtil.getLinesCode(annotations)
                 + "\n"
-                + modifier.getSourceCode() + " class " + getClassName() + " {"
+                + modifier.getSourceCode() + " class " + getClassName()
+                + (StringUtils.isEmpty(superClass) ? ""
+                    : " extends " + superClass)
+                + (implementClasses == null || implementClasses.size() == 0 ? ""
+                    : " implements " + String.join(", ", implementClasses))
+                + " {"
                 + GrammarUtil.getLinesCode(methods)
                 + "}"
                 ;

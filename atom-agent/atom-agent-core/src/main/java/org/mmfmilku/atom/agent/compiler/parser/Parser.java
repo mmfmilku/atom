@@ -262,6 +262,22 @@ public class Parser {
             Token className = needNext(TokenType.Words);
             Class clazz = new Class(className.getValue());
 
+            if (isNext(TokenType.Words)) {
+                Token next = needNext(TokenType.Words);
+                if ("extends".equals(next.getValue())) {
+                    needNext(TokenType.Words);
+                    clazz.setSuperClass(parseWordsPoint());
+
+                    if (isNext(TokenType.Words, "implements")) {
+                        needNext(TokenType.Words, "implements");
+                        parseImplements(clazz);
+                    }
+                } else if ("implements".equals(next.getValue())) {
+                    needNext(TokenType.Words, "implements");
+                    parseImplements(clazz);
+                }
+            }
+
             needNext(TokenType.LBrace);
 
             List<Method> methods = new ArrayList<>();
@@ -281,6 +297,18 @@ public class Parser {
                 throw new RuntimeException("缺少" + TokenType.RBrace + "值 " + TokenType.RBrace.getFixValue());
             }
             return clazz;
+        }
+
+        private void parseImplements(Class clazz) {
+            List<String> implementsList = new ArrayList<>();
+            needNext(TokenType.Words);
+            implementsList.add(parseWordsPoint());
+            while (isNext(TokenType.Symbol, COMMA)) {
+                needNext(TokenType.Symbol, COMMA);
+                needNext(TokenType.Words);
+                implementsList.add(parseWordsPoint());
+            }
+            clazz.setImplementClasses(implementsList);
         }
 
         private Method parseMethod() {
