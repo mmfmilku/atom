@@ -28,6 +28,12 @@ public class FRPCClient {
 
     private final static Map<String, FRPCClient> frpcClientMap = new ConcurrentHashMap<>();
 
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            frpcClientMap.forEach((k, v) -> v.close());
+        }));
+    }
+
     public static FRPCClient getInstance(String fDir) {
         if (frpcClientMap.containsKey(fDir)) {
             return frpcClientMap.get(fDir);
@@ -99,6 +105,10 @@ public class FRPCClient {
 //                throw new RuntimeException(e);
 //            }
         }
+    }
+
+    public void close() {
+        clientList.forEach(FRPCSession::close);
     }
 
     static class FRPCSession implements ClientSession<String> {

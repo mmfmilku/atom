@@ -15,7 +15,7 @@ let listFile = () => {
             let fileListDom = pageEdit.querySelector('.edit-file-list')
             fileListDom.innerHTML = res.map(e =>
                 `
-                    <div onclick="readText('${e}', this)" class="edit-file">${e}</div>
+                    <div onclick="readText('${e}', this)" class="edit-file text-wrap">${e}</div>
                     `
             ).join('')
         })

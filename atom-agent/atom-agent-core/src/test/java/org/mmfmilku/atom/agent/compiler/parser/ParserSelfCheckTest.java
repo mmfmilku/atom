@@ -4,11 +4,12 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.util.FileUtils;
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.io.Serializable;
 import static org.junit.Assert.*;
 @SuppressWarnings("f")
 @Resource()
 
-public class ParserSelfCheckTest {
+public class ParserSelfCheckTest extends Object implements Serializable {
 public void testNo (){}
 
 @Test()
@@ -27,6 +28,8 @@ System.out.println(a + b - c);
 if (c > 0){System.out.println("c大于0");
 }
 {}
+if (1 == 2){return;
+}
 System.out.println(ParserSelfCheckTest.class.getName());
 System.out.println("-----------------源码开始----------------");
 System.out.println(execute.getSourceCode());

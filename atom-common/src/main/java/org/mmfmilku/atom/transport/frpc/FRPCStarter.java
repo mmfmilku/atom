@@ -24,6 +24,7 @@ public class FRPCStarter {
     private List<Class<?>> classes = new ArrayList<>();
     private Map<String, ServiceMapping> mappings = new HashMap<>();
     private Listener listener;
+    private FServer fServer;
 
     public FRPCStarter(String scanPackage, String fDir) {
         AssertUtil.notnull(scanPackage, "FRPC服务包路径为空");
@@ -34,36 +35,34 @@ public class FRPCStarter {
     public void runServer() {
         scanService();
         mapService();
-        runWithThread();
+        run();
+    }
+
+    public void stopServer() {
+        if (fServer != null) {
+            fServer.stop();
+        }
     }
 
     public void setListener(Listener listener) {
         this.listener = listener;
     }
 
-    private void runWithThread() {
-        Thread thread = new Thread("frpc-main-thread") {
-            @Override
-            public void run() {
-                try {
-                    FServer fServer = new FServer(fDir)
-                            .addHandle(new FRPCHandle(mappings));
-                    fServer.start();
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
-                    if (listener != null) {
-                        listener.onFail(throwable);
-                    }
-                } finally {
-                    if (listener != null) {
-                        listener.onClose();
-                    }
-                }
-
+    private void run() {
+        try {
+            fServer = new FServer(fDir)
+                    .addHandle(new FRPCHandle(mappings));
+            fServer.start();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            if (listener != null) {
+                listener.onFail(throwable);
             }
-        };
-        thread.setDaemon(true);
-        thread.start();
+        } finally {
+            if (listener != null) {
+                listener.onClose();
+            }
+        }
     }
 
     private void scanService() {
@@ -187,7 +186,7 @@ public class FRPCStarter {
                                 return frpcReturn;
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                throw new RuntimeException(e);
+                                throw new RuntimeException(e.getCause() == null ? e : e.getCause());
                             }
                         };
 
