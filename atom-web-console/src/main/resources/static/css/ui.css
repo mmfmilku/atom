@@ -67,3 +67,12 @@ h3 {
     width: 100%;
     resize: none;
 }
+
+.text-wrap {
+    /*border: 1px solid #000; !* 为了清楚地展示换行效果，加上边框 *!*/
+    word-wrap: break-word; /* 使得长单词或URL可以换行 */
+}
+
+.scrollable-y {
+    overflow-y: scroll; /* 当内容超出div的高度时，垂直方向显示滚动条 */
+}
