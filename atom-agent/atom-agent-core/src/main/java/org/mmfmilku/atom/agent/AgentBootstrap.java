@@ -40,6 +40,12 @@ public class AgentBootstrap {
 
     private static FRPCStarter frpcStarter;
 
+    private static Thread shutdownHook = new Thread(() -> {
+        if (frpcStarter != null) {
+            frpcStarter.stopServer();
+        }
+    });
+
     public synchronized static void main(String agentArgs, Instrumentation inst) {
         
         try {
@@ -78,6 +84,8 @@ public class AgentBootstrap {
                 FRPCStarter frpcStarter = new FRPCStarter("org.mmfmilku.atom.agent.api.impl", fServerDir);
                 AgentBootstrap.frpcStarter = frpcStarter;
                 frpcStarter.runServer();
+
+                Runtime.getRuntime().addShutdownHook(shutdownHook);
             }
         } catch (Throwable e) {
             System.out.println("agent main error");

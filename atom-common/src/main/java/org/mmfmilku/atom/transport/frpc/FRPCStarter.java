@@ -24,6 +24,7 @@ public class FRPCStarter {
     private List<Class<?>> classes = new ArrayList<>();
     private Map<String, ServiceMapping> mappings = new HashMap<>();
     private Listener listener;
+    private FServer fServer;
 
     public FRPCStarter(String scanPackage, String fDir) {
         AssertUtil.notnull(scanPackage, "FRPC服务包路径为空");
@@ -34,16 +35,22 @@ public class FRPCStarter {
     public void runServer() {
         scanService();
         mapService();
-        runWithThread();
+        run();
+    }
+
+    public void stopServer() {
+        if (fServer != null) {
+            fServer.stop();
+        }
     }
 
     public void setListener(Listener listener) {
         this.listener = listener;
     }
 
-    private void runWithThread() {
+    private void run() {
         try {
-            FServer fServer = new FServer(fDir)
+            fServer = new FServer(fDir)
                     .addHandle(new FRPCHandle(mappings));
             fServer.start();
         } catch (Throwable throwable) {
