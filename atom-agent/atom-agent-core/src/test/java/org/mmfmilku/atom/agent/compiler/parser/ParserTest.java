@@ -32,7 +32,7 @@ public class ParserTest extends Object implements Serializable, Closeable {
 
     @Test
     public void testNo() {
-
+        return;
     }
 
     @Test

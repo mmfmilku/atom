@@ -510,6 +510,12 @@ public class Parser {
                 return new ExpStatement(expression);
             }
             if ("return".equals(value)) {
+                if (isNext(TokenType.Symbol, SEMICOLONS)) {
+                    // 直接return的情况
+                    needNext(TokenType.Symbol, SEMICOLONS);
+                    return new ReturnStatement();
+                }
+                // return具体的值
                 needNext();
                 Expression expression = parseExpression();
                 needNext(TokenType.Symbol, SEMICOLONS);
@@ -583,7 +589,7 @@ public class Parser {
          * */
         private Expression parseExpression() {
             // TODO 支持 括号包裹的表达式
-            // TODO 支持表达式后继续调用方法
+            // TODO 支持 类型强转
             Token token = tokens.get(curr);
             if (token.getType() == TokenType.Words) {
                 if ("new".equals(token.getValue())) {
