@@ -40,11 +40,7 @@ public class AgentBootstrap {
 
     private static FRPCStarter frpcStarter;
 
-    private static Thread shutdownHook = new Thread(() -> {
-        if (frpcStarter != null) {
-            frpcStarter.stopServer();
-        }
-    });
+    private static Thread shutdownHook = new Thread(AgentBootstrap::stopAgent);
 
     public synchronized static void main(String agentArgs, Instrumentation inst) {
         
@@ -93,6 +89,12 @@ public class AgentBootstrap {
             throw e;
         }
         
+    }
+
+    public static void stopAgent() {
+        if (frpcStarter != null) {
+            frpcStarter.stopServer();
+        }
     }
 
 }
