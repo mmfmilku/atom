@@ -273,7 +273,6 @@ public class Parser {
                         parseImplements(clazz);
                     }
                 } else if ("implements".equals(next.getValue())) {
-                    needNext(TokenType.Words, "implements");
                     parseImplements(clazz);
                 }
             }
@@ -589,8 +588,15 @@ public class Parser {
          * */
         private Expression parseExpression() {
             // TODO 支持 括号包裹的表达式
-            // TODO 支持 类型强转
             Token token = tokens.get(curr);
+            if (token.getType() == TokenType.LParen) {
+                // 左括号
+                // 1.表达式括号包裹
+                // TODO 支持 类型强转
+                // TODO
+                needNext();
+                // 2.类型强转
+            }
             if (token.getType() == TokenType.Words) {
                 if ("new".equals(token.getValue())) {
                     // 创建对象
