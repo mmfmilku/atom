@@ -279,17 +279,31 @@ public class Parser {
 
             needNext(TokenType.LBrace);
 
+            List<Method> constructors = new ArrayList<>();
+            clazz.setConstructors(constructors);
+
             List<Method> methods = new ArrayList<>();
             clazz.setMethods(methods);
             Token token;
             while ((token = readNext()) != null && token.getType() != TokenType.RBrace) {
                 List<Annotation> annotations = getAnnotations();
-                // 解析方法
-                Method method = parseMethod();
+                // todo 添加 static,final
+                Modifier modifier = getModifierAndNext();
+                // 此时，curr指针指向 方法返回类型
+                Method method;
+                if (isCurr(TokenType.Words, className.getValue())) {
+                    // 解析构造器
+                    method = parseConstructor();
+                    constructors.add(method);
+                } else {
+                    // 解析方法
+                    method = parseMethod();
+                    methods.add(method);
+                }
+
+                method.setModifier(modifier);
                 method.setAnnotations(annotations);
-                methods.add(method);
                 // TODO 解析成员变量
-                // TODO 解析成构造器
                 // TODO 解析静态代码块
             }
             if (token == null) {
@@ -310,37 +324,66 @@ public class Parser {
             clazz.setImplementClasses(implementsList);
         }
 
+        /**
+         * returnType methodName(...) {...}
+         * */
         private Method parseMethod() {
             Method method = new Method();
 
             // 目前解析 public void getValue(...) {...}
-            Modifier modifier = getModifierAndNext();
-            // todo 添加 static,final
             String returnType = parseWordsPoint();
             Token methodName = needNext(TokenType.Words);
             needNext(TokenType.LParen);
-            // TODO 方法参数
+
             List<VarDefineStatement> varDefineStatements = parameterDefine();
             if (isNext(TokenType.Words, "throws")) {
                 // 处理方法异常抛出
-                method.setThrowList(new ArrayList<>());
-                do {
-                    needNext();
-                    Token throwE = needNext(TokenType.Words);
-                    method.getThrowList().add(throwE.getValue());
-                } while (isNext(TokenType.Symbol, COMMA));
+                method.setThrowList(parseThrowList());
             }
             // TODO 抽象方法无代码体
             needNext(TokenType.LBrace);
-            // TODO 代码体
             CodeBlock codeBlock = parseCodeBlock();
 
             method.setMethodName(methodName.getValue());
-            method.setModifier(modifier);
             method.setReturnType(returnType);
             method.setMethodParams(varDefineStatements);
             method.setCodeBlock(codeBlock);
             return method;
+        }
+
+        private Constructor parseConstructor() {
+            String returnType = tokens.get(curr).getValue();
+            Constructor constructor = new Constructor(returnType);
+            needNext(TokenType.LParen);
+
+            List<VarDefineStatement> varDefineStatements = parameterDefine();
+            if (isNext(TokenType.Words, "throws")) {
+                // 处理方法异常抛出
+                constructor.setThrowList(parseThrowList());
+            }
+
+            needNext(TokenType.LBrace);
+            CodeBlock codeBlock = parseCodeBlock();
+
+            constructor.setReturnType(returnType);
+            constructor.setMethodParams(varDefineStatements);
+            constructor.setCodeBlock(codeBlock);
+            return constructor;
+        }
+
+        private List<String> parseThrowList() {
+            Token token = tokens.get(curr);
+            if ("throws".equals(token.getValue())) {
+                // 处理方法异常抛出
+                throwIllegalToken(token.getValue());
+            }
+            List<String> throwList = new ArrayList<>();
+            do {
+                needNext();
+                Token throwE = needNext(TokenType.Words);
+                throwList.add(throwE.getValue());
+            } while (isNext(TokenType.Symbol, COMMA));
+            return throwList;
         }
 
         private CodeBlock parseCodeBlock() {
@@ -790,6 +833,14 @@ public class Parser {
                     || isNext(TokenType.Symbol, COMMA)
                     || curr == tokens.size() - 1
                     ;
+        }
+
+        /**
+         * 判断下一个token，不移动指针
+         */
+        private boolean isCurr(TokenType type, String value) {
+            Token currToken = tokens.get(this.curr);
+            return currToken != null && currToken.getType() == type && value.equals(currToken.getValue());
         }
 
         /**

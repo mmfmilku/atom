@@ -12,14 +12,14 @@ import java.util.stream.Collectors;
 
 public class Method implements Node, ImportUse {
 
-    private List<Annotation> annotations;
-    private String methodName;
-    private Modifier modifier;
-    private List<VarDefineStatement> methodParams;
-    private List<String> throwList;
-    private String returnType;
-    private CodeBlock codeBlock;
-    private String value;
+    protected List<Annotation> annotations;
+    protected String methodName;
+    protected Modifier modifier;
+    protected List<VarDefineStatement> methodParams;
+    protected List<String> throwList;
+    protected String returnType;
+    protected CodeBlock codeBlock;
+    protected String value;
 
     @Override
     public String getSourceCode() {

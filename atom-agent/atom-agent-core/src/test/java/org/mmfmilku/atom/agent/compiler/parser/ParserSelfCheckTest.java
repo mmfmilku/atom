@@ -10,6 +10,9 @@ import static org.junit.Assert.*;
 @Resource()
 
 public class ParserSelfCheckTest extends Object implements Serializable {
+public ParserSelfCheckTest (){}
+
+
 public void testNo (){}
 
 @Test()

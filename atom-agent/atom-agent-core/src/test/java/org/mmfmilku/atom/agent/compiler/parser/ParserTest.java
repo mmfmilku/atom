@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler
         .CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler
         .parser.syntax.express.Expression;
 import org.mmfmilku.atom.util.FileUtils;
@@ -20,7 +21,11 @@ import static org.junit.Assert.*;
  * */
 @SuppressWarnings("f")
 @Resource
-public class ParserTest extends Object implements Serializable, Closeable {
+public class ParserTest implements Serializable, Closeable {
+
+    public ParserTest() {
+
+    }
 
     private void m1(String a, int b) {
         System.out.println(a);
@@ -105,5 +110,63 @@ public class ParserTest extends Object implements Serializable, Closeable {
     @Override
     public void close() throws IOException {
 
+    }
+
+//    @Test
+    public void testTmp() {
+        String code = "/*\n" +
+                " * Decompiled with CFR 0.152.\n" +
+                " */\n" +
+                "package com.fasterxml.jackson.core;\n" +
+                "\n" +
+                "import com.fasterxml.jackson.core.JsonGenerator;\n" +
+                "import com.fasterxml.jackson.core.JsonLocation;\n" +
+                "import com.fasterxml.jackson.core.JsonProcessingException;\n" +
+                "\n" +
+                "public class JsonGenerationException\n" +
+                "extends JsonProcessingException {\n" +
+                "\n" +
+                "    @Deprecated\n" +
+                "    public JsonGenerationException(Throwable rootCause) {\n" +
+                "        super(rootCause);\n" +
+                "    }\n" +
+                "\n" +
+                "    @Deprecated\n" +
+                "    public JsonGenerationException(String msg) {\n" +
+                "        super(msg, (JsonLocation)null);\n" +
+                "    }\n" +
+                "\n" +
+                "    @Deprecated\n" +
+                "    public JsonGenerationException(String msg, Throwable rootCause) {\n" +
+                "        super(msg, null, rootCause);\n" +
+                "    }\n" +
+                "\n" +
+                "    public JsonGenerationException(Throwable rootCause, JsonGenerator g) {\n" +
+                "        super(rootCause);\n" +
+                "        this._processor = g;\n" +
+                "    }\n" +
+                "\n" +
+                "    public JsonGenerationException(String msg, JsonGenerator g) {\n" +
+                "        super(msg, (JsonLocation)null);\n" +
+                "        this._processor = g;\n" +
+                "    }\n" +
+                "\n" +
+                "    public JsonGenerationException(String msg, Throwable rootCause, JsonGenerator g) {\n" +
+                "        super(msg, null, rootCause);\n" +
+                "        this._processor = g;\n" +
+                "    }\n" +
+                "\n" +
+                "    public JsonGenerationException withGenerator(JsonGenerator g) {\n" +
+                "        this._processor = g;\n" +
+                "        return this;\n" +
+                "    }\n" +
+                "\n" +
+                "    @Override\n" +
+                "    public JsonGenerator getProcessor() {\n" +
+                "        return this._processor;\n" +
+                "    }\n" +
+                "}\n";
+        JavaAST javaAST = CompilerUtil.parseAST(code);
+        System.out.println(javaAST.getSourceCode());
     }
 }

@@ -49,7 +49,17 @@ public class Class implements Node {
 
     private List<Member> members;
 
+    private List<Method> constructors;
+
     private List<Method> methods;
+
+    public List<Method> getConstructors() {
+        return constructors;
+    }
+
+    public void setConstructors(List<Method> constructors) {
+        this.constructors = constructors;
+    }
 
     public Class(String className) {
         this.className = className;
@@ -145,6 +155,7 @@ public class Class implements Node {
                 + (implementClasses == null || implementClasses.size() == 0 ? ""
                     : " implements " + String.join(", ", implementClasses))
                 + " {"
+                + GrammarUtil.getLinesCode(constructors)
                 + GrammarUtil.getLinesCode(methods)
                 + "}"
                 ;
