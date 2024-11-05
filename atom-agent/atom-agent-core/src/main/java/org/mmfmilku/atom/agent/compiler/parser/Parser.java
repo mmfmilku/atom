@@ -630,15 +630,22 @@ public class Parser {
          * 解析表达式
          * */
         private Expression parseExpression() {
-            // TODO 支持 括号包裹的表达式
             Token token = tokens.get(curr);
             if (token.getType() == TokenType.LParen) {
                 // 左括号
-                // 1.表达式括号包裹
-                // TODO 支持 类型强转
-                // TODO
+                if (isNext(2, TokenType.RParen, TokenType.RParen.getFixValue())) {
+                    // 1.括号直接仅包裹一个单词，类型强转
+                    // TODO 泛形处理
+                    String typeName = needNext(TokenType.Words).getValue();
+                    needNext(TokenType.RParen);
+                    needNext();
+                    return new TypeCast(typeName, parseExpression());
+                }
+                // 2.表达式括号包裹
                 needNext();
-                // 2.类型强转
+                Expression expression = parseExpression();
+                needNext(TokenType.RParen);
+                return parseToEnd(new PriorityExpression(expression));
             }
             if (token.getType() == TokenType.Words) {
                 if ("new".equals(token.getValue())) {
@@ -855,7 +862,14 @@ public class Parser {
          * 判断下一个token，不移动指针
          */
         private boolean isNext(TokenType type, String value) {
-            Token next = peekNext();
+            return isNext(1, type, value);
+        }
+
+        /**
+         * 判断下n个token，不移动指针
+         */
+        private boolean isNext(int n, TokenType type, String value) {
+            Token next = peekNext(n);
             return next != null && next.getType() == type && value.equals(next.getValue());
         }
 
@@ -863,7 +877,14 @@ public class Parser {
          * 窥探下一个token，不移动指针
          */
         private Token peekNext() {
-            int peekPoint = curr + 1;
+            return peekNext(1);
+        }
+
+        /**
+         * 窥探下一个token，不移动指针
+         */
+        private Token peekNext(int n) {
+            int peekPoint = curr + n;
             if (peekPoint < tokens.size()) {
                 return tokens.get(peekPoint);
             }
