@@ -122,10 +122,6 @@ public class ParserTest implements Serializable, Closeable {
      * */
     @Test
     public void parseTestFile1() {
-        String javaText = TestUtil.getJavaText(TestFile1.class);
-        JavaAST javaAST = CompilerUtil.parseAST(javaText);
-        String sourceCode = javaAST.getSourceCode();
-        System.out.println(sourceCode);
-        assertEquals(javaText, sourceCode);
+        TestUtil.compareParsedText(TestFile1.class);
     }
 }
