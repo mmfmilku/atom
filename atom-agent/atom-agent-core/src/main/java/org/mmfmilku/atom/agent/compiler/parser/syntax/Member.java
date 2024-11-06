@@ -1,8 +1,8 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Attribute;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AttributePeek;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.ModifierPeek;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.ImportUse;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
 
@@ -11,17 +11,17 @@ import java.util.Map;
 /**
  * 类成员变量
  * */
-public class Member implements Node, ImportUse, AttributePeek {
+public class Member implements Node, ImportUse, ModifierPeek {
 
-    private Attribute attribute;
+    private Modifier modifier;
 
     public Member(VarDefineStatement varDefineStatement) {
-        this.attribute = Attribute.DEFAULT;
+        this.modifier = Modifier.DEFAULT;
         this.varDefineStatement = varDefineStatement;
     }
 
-    public Member(Attribute attribute, VarDefineStatement varDefineStatement) {
-        this.attribute = attribute;
+    public Member(Modifier modifier, VarDefineStatement varDefineStatement) {
+        this.modifier = modifier;
         this.varDefineStatement = varDefineStatement;
     }
 
@@ -40,8 +40,8 @@ public class Member implements Node, ImportUse, AttributePeek {
     }
 
     @Override
-    public Attribute getAttribute() {
-        return attribute;
+    public Modifier getModifier() {
+        return modifier;
     }
 
 }

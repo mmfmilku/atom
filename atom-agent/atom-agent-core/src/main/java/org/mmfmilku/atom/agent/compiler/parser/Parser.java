@@ -7,11 +7,13 @@ import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -98,15 +100,15 @@ public class Parser {
                     // TODO final,abstract 关键字待支持
                     dealToken = tokens.get(curr);
                     value = dealToken.getValue();
-                    Modifier modifier = Modifier.DEFAULT;
+                    AccessPrivilege accessPrivilege = AccessPrivilege.DEFAULT;
                     if (isModifier(dealToken)) {
-                        modifier = Modifier.of(dealToken.getValue());
+                        accessPrivilege = AccessPrivilege.of(dealToken.getValue());
                         Token next = needNext(TokenType.Words, "class");
                         value = next.getValue();
                     }
                     if ("class".equals(value)) {
                         Class clazz = parseClass();
-                        clazz.setModifier(modifier);
+                        clazz.setAccessPrivilege(accessPrivilege);
                         clazz.setAnnotations(annotations);
                         clazz.setClassFullName(javaAST.getPackageNode().getValue()
                                 + "." + clazz.getClassName());
@@ -190,19 +192,9 @@ public class Parser {
             return paramDefines;
         }
 
-        private Modifier getModifierAndNext() {
-            Modifier modifier = Modifier.of(tokens.get(curr));
-            if (modifier == null) {
-                modifier = Modifier.DEFAULT;
-            } else {
-                curr++;
-            }
-            return modifier;
-        }
-
         private boolean isModifier(Token dealToken) {
-            Modifier modifier = Modifier.of(dealToken.getValue());
-            return modifier != null;
+            AccessPrivilege accessPrivilege = AccessPrivilege.of(dealToken.getValue());
+            return accessPrivilege != null;
         }
 
         private Package parsePackage() {
@@ -288,8 +280,7 @@ public class Parser {
             Token token;
             while ((token = readNext()) != null && token.getType() != TokenType.RBrace) {
                 List<Annotation> annotations = getAnnotations();
-                // todo 添加 static,final
-                Modifier modifier = getModifierAndNext();
+                Modifier modifier = parseModifier();
                 // 此时，curr指针指向 方法返回类型
                 Method method;
                 if (isCurr(TokenType.Words, className.getValue())) {
@@ -311,6 +302,32 @@ public class Parser {
                 throw new RuntimeException("缺少" + TokenType.RBrace + "值 " + TokenType.RBrace.getFixValue());
             }
             return clazz;
+        }
+
+        private Modifier parseModifier() {
+            Modifier modifier = new Modifier();
+            AccessPrivilege accessPrivilege = getAccessPrivilegeAndNext();
+            modifier.setAccessPrivilege(accessPrivilege);
+
+            List<String> modifierWord = Arrays.asList("static", "abstract", "final",
+                    "synchronized", "transient", "volatile");
+            String value = tokens.get(curr).getValue();
+            // TODO
+//            while (modifierWord.contains(value)) {
+//
+//            }
+
+            return modifier;
+        }
+
+        private AccessPrivilege getAccessPrivilegeAndNext() {
+            AccessPrivilege accessPrivilege = AccessPrivilege.of(tokens.get(curr));
+            if (accessPrivilege == null) {
+                accessPrivilege = AccessPrivilege.DEFAULT;
+            } else {
+                curr++;
+            }
+            return accessPrivilege;
         }
 
         private void parseImplements(Class clazz) {

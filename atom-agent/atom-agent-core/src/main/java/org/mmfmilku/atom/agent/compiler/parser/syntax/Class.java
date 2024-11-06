@@ -2,7 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.ClassType;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
 import org.mmfmilku.atom.util.StringUtils;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public class Class implements Node {
     /**
      * 访问权限
      * */
-    private Modifier modifier;
+    private AccessPrivilege accessPrivilege;
 
     /**
      * 继承类
@@ -99,12 +99,12 @@ public class Class implements Node {
         this.classType = classType;
     }
 
-    public Modifier getModifier() {
-        return modifier;
+    public AccessPrivilege getAccessPrivilege() {
+        return accessPrivilege;
     }
 
-    public void setModifier(Modifier modifier) {
-        this.modifier = modifier;
+    public void setAccessPrivilege(AccessPrivilege accessPrivilege) {
+        this.accessPrivilege = accessPrivilege;
     }
 
     public String getSuperClass() {
@@ -151,7 +151,7 @@ public class Class implements Node {
     public String getSourceCode() {
         return GrammarUtil.getLinesCode(annotations)
                 + "\n"
-                + modifier.getSourceCode() + " class " + getClassName()
+                + accessPrivilege.getSourceCode() + " class " + getClassName()
                 + (StringUtils.isEmpty(superClass) ? ""
                     : " extends " + superClass)
                 + (implementClasses == null || implementClasses.size() == 0 ? ""

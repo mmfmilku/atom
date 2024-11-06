@@ -1,40 +1,106 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.deco;
 
-import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 
-public enum Modifier implements Node {
+/**
+ * 描述了一些关键字修饰：
+ * 修饰符、同步、静态等
+ * public static final synchronized
+ * */
+public class Modifier implements Node {
 
-    PUBLIC("public"),
-    PROTECT("protect"),
-    DEFAULT(""),
-    PRIVATE("private");
+    public static final Modifier DEFAULT = new Modifier();
 
-    private String keyword;
+    private AccessPrivilege accessPrivilege = AccessPrivilege.DEFAULT;
 
-    Modifier(String keyword) {
-        this.keyword = keyword;
+    /**
+     * static 关键字修饰
+     * */
+    private boolean staticDeco;
+
+    /**
+     * abstract 关键字修饰
+     * */
+    private boolean abstractDeco;
+
+    /**
+     * final 关键字修饰
+     * */
+    private boolean finalDeco;
+
+    /**
+     * synchronized 关键字修饰
+     * */
+    private boolean synchronizedDeco;
+
+    /**
+     * transient 关键字修饰
+     * */
+    private boolean transientDeco;
+
+    /**
+     * volatile 关键字修饰
+     * */
+    private boolean volatileDeco;
+
+    public AccessPrivilege getAccessPrivilege() {
+        return accessPrivilege;
     }
 
-    public String getKeyword() {
-        return keyword;
+    public void setAccessPrivilege(AccessPrivilege accessPrivilege) {
+        this.accessPrivilege = accessPrivilege;
     }
 
-    public static Modifier of(String keyword) {
-        for (Modifier type : values()) {
-            if (type.getKeyword().equals(keyword)) {
-                return type;
-            }
-        }
-        return null;
+    public boolean isStaticDeco() {
+        return staticDeco;
     }
 
-    public static Modifier of(Token token) {
-        return of(token.getValue());
+    public void setStaticDeco(boolean staticDeco) {
+        this.staticDeco = staticDeco;
+    }
+
+    public boolean isAbstractDeco() {
+        return abstractDeco;
+    }
+
+    public void setAbstractDeco(boolean abstractDeco) {
+        this.abstractDeco = abstractDeco;
+    }
+
+    public boolean isFinalDeco() {
+        return finalDeco;
+    }
+
+    public void setFinalDeco(boolean finalDeco) {
+        this.finalDeco = finalDeco;
+    }
+
+    public boolean isSynchronizedDeco() {
+        return synchronizedDeco;
+    }
+
+    public void setSynchronizedDeco(boolean synchronizedDeco) {
+        this.synchronizedDeco = synchronizedDeco;
+    }
+
+    public boolean isTransientDeco() {
+        return transientDeco;
+    }
+
+    public void setTransientDeco(boolean transientDeco) {
+        this.transientDeco = transientDeco;
+    }
+
+    public boolean isVolatileDeco() {
+        return volatileDeco;
+    }
+
+    public void setVolatileDeco(boolean volatileDeco) {
+        this.volatileDeco = volatileDeco;
     }
 
     @Override
     public String getSourceCode() {
-        return getKeyword();
+        return accessPrivilege.getSourceCode();
     }
 }
