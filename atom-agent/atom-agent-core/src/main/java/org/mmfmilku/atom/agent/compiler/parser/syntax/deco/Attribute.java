@@ -1,7 +1,5 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.deco;
 
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Modifier;
-
 /**
  * 描述了一些关键字属性如：
  * 修饰符、同步、静态等

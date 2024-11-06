@@ -3,6 +3,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax;
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Attribute;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AttributePeek;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.ImportUse;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
 
 import java.util.Map;

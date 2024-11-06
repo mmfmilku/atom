@@ -1,7 +1,5 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.deco;
 
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Modifier;
-
 /**
  * 对Attribute各项属性的访问
  * */

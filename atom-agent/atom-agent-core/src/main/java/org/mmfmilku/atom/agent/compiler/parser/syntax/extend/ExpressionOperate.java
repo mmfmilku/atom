@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax;
+package org.mmfmilku.atom.agent.compiler.parser.syntax.extend;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 

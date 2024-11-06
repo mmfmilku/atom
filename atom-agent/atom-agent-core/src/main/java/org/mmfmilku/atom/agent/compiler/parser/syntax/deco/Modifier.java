@@ -1,6 +1,7 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax;
+package org.mmfmilku.atom.agent.compiler.parser.syntax.deco;
 
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 
 public enum Modifier implements Node {
 
