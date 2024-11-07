@@ -13,7 +13,6 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -271,31 +270,46 @@ public class Parser {
             }
 
             needNext(TokenType.LBrace);
-
+            // 成员变量
+            List<Member> members = new ArrayList<>();
+            clazz.setMembers(members);
+            // 构造器
             List<Method> constructors = new ArrayList<>();
             clazz.setConstructors(constructors);
-
+            // 方法
             List<Method> methods = new ArrayList<>();
             clazz.setMethods(methods);
+
             Token token;
             while ((token = readNext()) != null && token.getType() != TokenType.RBrace) {
+                // 解析注解
                 List<Annotation> annotations = getAnnotations();
+                // 解析修饰符 如：public static synchronized
                 Modifier modifier = parseModifier();
-                // 此时，curr指针指向 方法返回类型
-                Method method;
-                if (isCurr(TokenType.Words, className.getValue())) {
-                    // 解析构造器
-                    method = parseConstructor();
-                    constructors.add(method);
+                if (isNext(TokenType.LParen) ||
+                        isNext(2, TokenType.LParen, TokenType.LParen.getFixValue())) {
+                    // 后一位或后两位是括号，则为方法定义
+                    // TODO 抽象方法
+                    Method method;
+                    if (isCurr(TokenType.Words, className.getValue())) {
+                        // 解析构造器
+                        method = parseConstructor();
+                        constructors.add(method);
+                    } else {
+                        // 解析方法
+                        method = parseMethod();
+                        methods.add(method);
+                    }
+
+                    method.setModifier(modifier);
+                    method.setAnnotations(annotations);
                 } else {
-                    // 解析方法
-                    method = parseMethod();
-                    methods.add(method);
+                    // 解析成员变量
+                    // TODO 成员注解
+                    Member member = parseMember(modifier);
+                    members.add(member);
                 }
 
-                method.setModifier(modifier);
-                method.setAnnotations(annotations);
-                // TODO 解析成员变量
                 // TODO 解析静态代码块
             }
             if (token == null) {
@@ -304,18 +318,21 @@ public class Parser {
             return clazz;
         }
 
+        private Member parseMember(Modifier modifier) {
+            VarDefineStatement varDefine = parseVarDefineAndAssign();
+            return new Member(modifier, varDefine);
+        }
+
         private Modifier parseModifier() {
             Modifier modifier = new Modifier();
             AccessPrivilege accessPrivilege = getAccessPrivilegeAndNext();
             modifier.setAccessPrivilege(accessPrivilege);
 
-            List<String> modifierWord = Arrays.asList("static", "abstract", "final",
-                    "synchronized", "transient", "volatile");
-            String value = tokens.get(curr).getValue();
-            // TODO
-//            while (modifierWord.contains(value)) {
-//
-//            }
+            for (String value = tokens.get(curr).getValue();modifier.accept(value);) {
+                // 匹配到修饰符，指针加一
+                curr++;
+                value = tokens.get(curr).getValue();
+            }
 
             return modifier;
         }

@@ -30,8 +30,7 @@ public class Member implements Node, ImportUse, ModifierPeek {
 
     @Override
     public String getSourceCode() {
-        GrammarUtil.notSupport();
-        return null;
+        return modifier.getSourceCode() + " " + varDefineStatement.getSourceCode();
     }
 
     @Override

@@ -6,7 +6,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 public enum AccessPrivilege implements Node {
 
     PUBLIC("public", 0b1000),
-    PROTECT("protect", 0b0100),
+    PROTECTED("protected", 0b0100),
     DEFAULT("", 0b0010),
     PRIVATE("private", 0b0001);
 

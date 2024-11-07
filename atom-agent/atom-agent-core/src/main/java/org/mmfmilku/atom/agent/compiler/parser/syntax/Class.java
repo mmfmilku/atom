@@ -157,6 +157,7 @@ public class Class implements Node {
                 + (implementClasses == null || implementClasses.size() == 0 ? ""
                     : " implements " + String.join(", ", implementClasses))
                 + " {"
+                + GrammarUtil.getLinesCode(members)
                 + GrammarUtil.getLinesCode(constructors)
                 + GrammarUtil.getLinesCode(methods)
                 + "}"

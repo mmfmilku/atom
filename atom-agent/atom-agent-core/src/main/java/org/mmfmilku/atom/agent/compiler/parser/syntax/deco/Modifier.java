@@ -2,6 +2,13 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.deco;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * 描述了一些关键字修饰：
  * 修饰符、同步、静态等
@@ -12,6 +19,64 @@ public class Modifier implements Node {
     public static final Modifier DEFAULT = new Modifier();
 
     private AccessPrivilege accessPrivilege = AccessPrivilege.DEFAULT;
+
+    public enum ModifierEnum {
+
+        STATIC("static", modifier -> modifier.setStaticDeco(true),
+                modifier -> modifier.isStaticDeco() ? "static" : ""),
+        ABSTRACT("abstract", modifier -> modifier.setAbstractDeco(true),
+                modifier -> modifier.isAbstractDeco() ? "abstract" : ""),
+        FINAL("final", modifier -> modifier.setFinalDeco(true),
+                modifier -> modifier.isFinalDeco() ? "final" : ""),
+        VOLATILE("volatile", modifier -> modifier.setVolatileDeco(true),
+                modifier -> modifier.isVolatileDeco() ? "volatile" : ""),
+        SYNCHRONIZED("synchronized", modifier -> modifier.setSynchronizedDeco(true),
+                modifier -> modifier.isSynchronizedDeco() ? "synchronized" : ""),
+        TRANSIENT("transient", modifier -> modifier.setTransientDeco(true),
+                modifier -> modifier.isTransientDeco() ? "transient" : "");
+
+        ModifierEnum(String keyword,
+                     Consumer<Modifier> acceptHandle,
+                     Function<Modifier, String> sourceHandle) {
+            this.keyword = keyword;
+            this.acceptHandle = acceptHandle;
+            this.sourceHandle = sourceHandle;
+        }
+
+        private String keyword;
+        private Consumer<Modifier> acceptHandle;
+        private Function<Modifier, String> sourceHandle;
+
+        public String getKeyword() {
+            return keyword;
+        }
+
+        public Consumer<Modifier> getAcceptHandle() {
+            return acceptHandle;
+        }
+
+        public Function<Modifier, String> getSourceHandle() {
+            return sourceHandle;
+        }
+
+        public static ModifierEnum of(String keyword) {
+            for (ModifierEnum modifierEnum : values()) {
+                if (modifierEnum.getKeyword().equals(keyword)) {
+                    return modifierEnum;
+                }
+            }
+            return null;
+        }
+    }
+
+    public boolean accept(String keyword) {
+        ModifierEnum modifierEnum = ModifierEnum.of(keyword);
+        if (modifierEnum != null) {
+            modifierEnum.getAcceptHandle().accept(this);
+            return true;
+        }
+        return false;
+    }
 
     /**
      * static 关键字修饰
@@ -101,6 +166,9 @@ public class Modifier implements Node {
 
     @Override
     public String getSourceCode() {
-        return accessPrivilege.getSourceCode();
+        String modifierSource = Stream.of(ModifierEnum.values())
+                .map(modifierEnum -> modifierEnum.getSourceHandle().apply(this))
+                .collect(Collectors.joining(" "));
+        return accessPrivilege.getSourceCode() + " " + modifierSource;
     }
 }
