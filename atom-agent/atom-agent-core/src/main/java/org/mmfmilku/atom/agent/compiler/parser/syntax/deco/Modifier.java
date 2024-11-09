@@ -1,11 +1,11 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.deco;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
+import org.mmfmilku.atom.util.StringUtils;
 
-import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -168,7 +168,8 @@ public class Modifier implements Node {
     public String getSourceCode() {
         String modifierSource = Stream.of(ModifierEnum.values())
                 .map(modifierEnum -> modifierEnum.getSourceHandle().apply(this))
+                .filter(s -> !StringUtils.isEmpty(s))
                 .collect(Collectors.joining(" "));
-        return accessPrivilege.getSourceCode() + " " + modifierSource;
+        return GrammarUtil.getSentenceCode(accessPrivilege.getSourceCode(), modifierSource);
     }
 }

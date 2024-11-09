@@ -11,6 +11,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
+import org.mmfmilku.atom.exception.SystemException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,6 +56,7 @@ public class Parser {
     private class ParserHandle {
         List<Token> tokens;
         int curr = 0;
+        Integer saveCurr = null;
         JavaAST javaAST;
 
         private ParserHandle() {
@@ -62,6 +64,27 @@ public class Parser {
                     .stream()
                     .filter(token -> token.getType() != TokenType.BlockComment && token.getType() != TokenType.Comment)
                     .collect(Collectors.toList());
+        }
+
+        /**
+         * 存档指针，仅支持保存一次
+         * */
+        public void saveIdx() {
+            if (saveCurr != null) {
+                throw new SystemException("parser already saveIdx = " + saveCurr);
+            }
+            saveCurr = curr;
+        }
+
+        /**
+         * 读取指针，读取前需要保存，仅支持读取一次
+         * */
+        public void readIdx() {
+            if (saveCurr == null) {
+                throw new SystemException("parser idx did not save");
+            }
+            curr = saveCurr;
+            saveCurr = null;
         }
 
         private JavaAST execute() {
@@ -285,9 +308,15 @@ public class Parser {
                 // 解析注解
                 List<Annotation> annotations = getAnnotations();
                 // 解析修饰符 如：public static synchronized
-                Modifier modifier = parseModifier();
+                Modifier modifier = parseModifierAndNext();
+                saveIdx();
+                // 判断是成员变量还是方法或构造器
+                // 1.解析 parseWordsPoint 前存档，因为解析构造器和方法时会再次执行parseWordsPoint
+                // 2.调用 parseWordsPoint 后再判断是因为 如 com.xx.xxx 会影响判断
+                parseWordsPoint();
                 if (isNext(TokenType.LParen) ||
                         isNext(2, TokenType.LParen, TokenType.LParen.getFixValue())) {
+                    readIdx();
                     // 后一位或后两位是括号，则为方法定义
                     // TODO 抽象方法
                     Method method;
@@ -304,6 +333,7 @@ public class Parser {
                     method.setModifier(modifier);
                     method.setAnnotations(annotations);
                 } else {
+                    readIdx();
                     // 解析成员变量
                     // TODO 成员注解
                     Member member = parseMember(modifier);
@@ -323,7 +353,7 @@ public class Parser {
             return new Member(modifier, varDefine);
         }
 
-        private Modifier parseModifier() {
+        private Modifier parseModifierAndNext() {
             Modifier modifier = new Modifier();
             AccessPrivilege accessPrivilege = getAccessPrivilegeAndNext();
             modifier.setAccessPrivilege(accessPrivilege);

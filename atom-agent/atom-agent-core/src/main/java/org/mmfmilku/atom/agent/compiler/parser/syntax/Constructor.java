@@ -39,8 +39,9 @@ public class Constructor extends Method implements Node {
                 .collect(Collectors.joining(", "))
                 + ")"
                 + (throwList == null || throwList.size() == 0 ? ""
-                : "throws " + String.join(", ", throwList)
+                    : "throws " + String.join(", ", throwList)
                     )
+                + " "
                 + GrammarUtil.getLinesCode(codeBlock);
     }
 

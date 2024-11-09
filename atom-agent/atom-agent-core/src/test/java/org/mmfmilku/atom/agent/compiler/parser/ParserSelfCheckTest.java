@@ -10,14 +10,14 @@ import static org.junit.Assert.*;
 @Resource()
 
 public class ParserSelfCheckTest extends Object implements Serializable {
-public ParserSelfCheckTest (){}
+public ParserSelfCheckTest() {}
 
 
-public void testNo (){}
+public void testNo() {}
 
 @Test()
 
-public void selfCheck1 ()throws IOException{String s = FileUtils.readText(System.getProperty("user.dir") + "\\src\\test\\java\\org\\mmfmilku\\atom\\agent\\compiler\\parser\\ParserSelfCheckTest.java");
+public void selfCheck1()throws IOException {String s = FileUtils.readText(System.getProperty("user.dir") + "\\src\\test\\java\\org\\mmfmilku\\atom\\agent\\compiler\\parser\\ParserSelfCheckTest.java");
 String s1 = "ss".concat("3") + "ff".trim();
 Node execute = org.mmfmilku.atom.agent.compiler.CompilerUtil.parseAST(s);
 System.out.println(execute);
@@ -40,7 +40,7 @@ assertEquals(s.trim(), execute.getSourceCode().trim().concat("").trim().trim().c
 }
 
 
-public String ifTestCase (Integer integer){int a = 1;
+public String ifTestCase(Integer integer) {int a = 1;
 int b = 2;
 int c = 3;
 if (c > 0){System.out.println("c大于0");

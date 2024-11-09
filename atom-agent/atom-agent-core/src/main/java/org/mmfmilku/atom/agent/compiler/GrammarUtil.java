@@ -2,9 +2,11 @@ package org.mmfmilku.atom.agent.compiler;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
+import org.mmfmilku.atom.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GrammarUtil {
 
@@ -71,19 +73,20 @@ public class GrammarUtil {
         return builder.toString();
     }
 
-    public static String getSentenceCode(Node ...nodes) {
-        StringBuilder builder = new StringBuilder();
-        for (Node node : nodes) {
-            builder.append(node.getSourceCode()).append(" ");
-        }
-        return builder.toString();
-    }
+//    public static String getSentenceCode(Node ...nodes) {
+//        StringBuilder builder = new StringBuilder();
+//        for (Node node : nodes) {
+//            builder.append(node.getSourceCode()).append(" ");
+//        }
+//        return builder.toString();
+//    }
 
+    /**
+     * 语句拼接，通过空格分隔
+     * */
     public static String getSentenceCode(String ...strings) {
-        StringBuilder builder = new StringBuilder();
-        for (String string : strings) {
-            builder.append(string).append(" ");
-        }
-        return builder.toString();
+        return Stream.of(strings)
+                .filter(StringUtils::isNotEmpty)
+                .collect(Collectors.joining(" "));
     }
 }

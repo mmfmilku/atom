@@ -35,6 +35,7 @@ public class Method implements Node, ImportUse {
                 + (throwList == null || throwList.size() == 0 ? ""
                     : "throws " + String.join(", ", throwList)
                     )
+                + " "
                 + GrammarUtil.getLinesCode(codeBlock);
     }
 
