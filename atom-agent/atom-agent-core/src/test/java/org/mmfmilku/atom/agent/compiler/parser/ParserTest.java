@@ -26,11 +26,16 @@ import static org.junit.Assert.*;
 @Resource
 public class ParserTest implements Serializable, Closeable {
 
-    public ParserTest() {
+    int a = 1;
+    String b = "";
 
+    public ParserTest() {
+        this.a = 0;
+        this.b.equals("");
     }
 
     private void m1(String a, int b) {
+        this.b = a;
         System.out.println(a);
         if (b == 0) {
             System.out.println("b等于零");

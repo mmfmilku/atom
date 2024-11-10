@@ -67,12 +67,9 @@ public class Parser {
         }
 
         /**
-         * 存档指针，仅支持保存一次
+         * 存档指针，仅保存一次的
          * */
         public void saveIdx() {
-            if (saveCurr != null) {
-                throw new SystemException("parser already saveIdx = " + saveCurr);
-            }
             saveCurr = curr;
         }
 
@@ -473,12 +470,15 @@ public class Parser {
                 if (isKeywords(token)) {
                     return parseKeyword();
                 }
+                saveIdx();
+                String wordsPoint = parseWordsPoint();
                 if (isNext(TokenType.Words)) {
+                    readIdx();
                     // 变量定义
                     return parseVarDefineAndAssign();
                 }
                 if (isNext(TokenType.Symbol)) {
-                    String varName = token.getValue();
+                    String varName = wordsPoint;
                     if (isNext(TokenType.Symbol, EQUAL)) {
                         // 变量赋值
                         // 指向等于号后面的字符
@@ -487,28 +487,19 @@ public class Parser {
                         Expression expression = parseExpression();
                         needNext(TokenType.Symbol, SEMICOLONS);
                         return new VarAssignStatement(varName, expression);
-                    } else if (isNext(TokenType.Symbol, POINT)) {
-                        int saveIndex = curr;
-                        parseWordsPoint();
-                        if (isNext(TokenType.Words)) {
-                            // 下标回溯
-                            curr = saveIndex;
-                            // 变量定义
-                            return parseVarDefineAndAssign();
-                        } else {
-                            // 下标回溯
-                            curr = saveIndex;
-                            // 链式调用表达式语句
-                            Expression expression = parseExpression();
-                            needNext(TokenType.Symbol, SEMICOLONS);
-                            return new ExpStatement(expression);
-                        }
+                    } else if (isNext(TokenType.LParen)) {
+                        // 下标回溯
+                        readIdx();
+                        // 链式调用表达式语句，方法调用
+                        Expression expression = parseExpression();
+                        needNext(TokenType.Symbol, SEMICOLONS);
+                        return new ExpStatement(expression);
                     } else {
                         Token next = needNext();
                         if (isOperator(next)) {
                             String operator = next.getValue();
-                            // 变量赋值 a += exp
                             if (isNext(TokenType.Symbol, EQUAL)) {
+                                // 变量赋值 a += exp
                                 needNext();
                                 needNext();
                                 Expression expression = parseExpression();
@@ -537,6 +528,7 @@ public class Parser {
                 }
                 if (isNext(TokenType.LParen)) {
                     // 表达式，方法调用开头
+                    readIdx();
                     Expression expression = parseExpression();
                     needNext(TokenType.Symbol, SEMICOLONS);
                     return new ExpStatement(expression);
