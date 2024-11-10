@@ -6,6 +6,7 @@ import org.mmfmilku.atom.agent.compiler
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile1;
 import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile2;
+import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile3;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler
         .parser.syntax.express.Expression;
@@ -139,5 +140,25 @@ public class ParserTest implements Serializable, Closeable {
     @Test
     public void parseTestFile2() {
         TestUtil.compareParsedText(TestFile2.class);
+    }
+
+    /**
+     * 测试语法
+     * 1.循环语句解析
+     * */
+    @Test
+    public void parseTestFile3() {
+        String a = "package org.mmfmilku.atom.agent.compiler.parser.aa;\n" +
+                "public final class TestFile3 implements Serializable {\n" +
+                "    public void forCase1() {\n" +
+                "        int b = 0;\n" +
+                "        for (int i = 0; i < 10; i++;) {\n" +
+                "            System.out.println(\"for\");\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+        JavaAST javaAST = CompilerUtil.parseAST(a);
+        System.out.println(javaAST.getSourceCode());
+        TestUtil.compareParsedText(TestFile3.class);
     }
 }

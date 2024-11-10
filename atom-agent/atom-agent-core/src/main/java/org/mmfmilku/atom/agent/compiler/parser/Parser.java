@@ -656,15 +656,22 @@ public class Parser {
         private Statement parseFor() {
             needNext(TokenType.LParen);
             needNext();
-            parseStatement();
+            // parseStatement已经包含读取分号
+            Statement beforeStatement = parseStatement();
+            needNext();
+            Expression loopCondition = parseExpression();
             needNext(TokenType.Symbol, SEMICOLONS);
-            // TODO 布尔表达式
-            parseExpression();
-            needNext(TokenType.Symbol, SEMICOLONS);
-            parseStatement();
+            needNext();
+            // TODO parseStatement已经包含读取分号，此处需要处理
+            Statement afterStatement = parseStatement();
             needNext(TokenType.RParen);
-            parseCodeBlock();
-            return null;
+            needNext(TokenType.LBrace);
+            CodeBlock loopBody = parseCodeBlock();
+            ForStatement forStatement = new ForStatement(beforeStatement, afterStatement,
+                    loopCondition, loopBody);
+            forStatement.setBeforeStatement(beforeStatement);
+            forStatement.setAfterStatement(afterStatement);
+            return forStatement;
         }
 
         private Expression parseObjectNew() {

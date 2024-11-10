@@ -7,7 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WhileStatement implements Statement {
+public class WhileStatement extends LoopStatement {
+
+    public WhileStatement(Expression loopCondition, CodeBlock loopBody) {
+        super(loopCondition, loopBody);
+    }
+
     @Override
     public String getStatementSource() {
         // TODO
