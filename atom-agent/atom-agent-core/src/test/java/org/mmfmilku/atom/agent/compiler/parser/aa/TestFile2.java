@@ -2,7 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser.aa;
 import org.mmfmilku.atom.util.StringUtils;
 import java.io.Serializable;
 
-public class TestFile2 implements Serializable {static String a;
+public final class TestFile2 implements Serializable {static String a;
 public static final String b = "bb";
 protected final transient String c = "ccc";
 private volatile transient int d = 4444;

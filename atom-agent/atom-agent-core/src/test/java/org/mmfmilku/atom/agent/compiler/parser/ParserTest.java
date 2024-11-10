@@ -134,6 +134,7 @@ public class ParserTest implements Serializable, Closeable {
     /**
      * 测试语法
      * 1.成员变量解析
+     * 1.修饰符解析解析
      * */
     @Test
     public void parseTestFile2() {

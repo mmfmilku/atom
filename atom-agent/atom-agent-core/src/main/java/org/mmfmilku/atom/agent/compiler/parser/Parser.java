@@ -117,17 +117,12 @@ public class Parser {
                     }
                     List<Annotation> annotations = getAnnotations();
                     // TODO final,abstract 关键字待支持
+                    Modifier modifier = parseModifierAndNext();
                     dealToken = tokens.get(curr);
                     value = dealToken.getValue();
-                    AccessPrivilege accessPrivilege = AccessPrivilege.DEFAULT;
-                    if (isModifier(dealToken)) {
-                        accessPrivilege = AccessPrivilege.of(dealToken.getValue());
-                        Token next = needNext(TokenType.Words, "class");
-                        value = next.getValue();
-                    }
                     if ("class".equals(value)) {
                         Class clazz = parseClass();
-                        clazz.setAccessPrivilege(accessPrivilege);
+                        clazz.setModifier(modifier);
                         clazz.setAnnotations(annotations);
                         clazz.setClassFullName(javaAST.getPackageNode().getValue()
                                 + "." + clazz.getClassName());
@@ -140,6 +135,9 @@ public class Parser {
             }
         }
 
+        /**
+         * 解析注解，并指向下一位
+         * */
         private List<Annotation> getAnnotations() {
             List<Annotation> annotations = new ArrayList<>();
             while (curr < tokens.size()) {
@@ -209,11 +207,6 @@ public class Parser {
             }
             needNext(TokenType.RParen);
             return paramDefines;
-        }
-
-        private boolean isModifier(Token dealToken) {
-            AccessPrivilege accessPrivilege = AccessPrivilege.of(dealToken.getValue());
-            return accessPrivilege != null;
         }
 
         private Package parsePackage() {

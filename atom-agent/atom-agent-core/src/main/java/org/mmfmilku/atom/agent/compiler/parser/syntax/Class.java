@@ -3,6 +3,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax;
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.ClassType;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.util.StringUtils;
 
 import java.util.List;
@@ -30,9 +31,9 @@ public class Class implements Node {
     private ClassType classType;
 
     /**
-     * 访问权限
+     * 修饰符
      * */
-    private AccessPrivilege accessPrivilege;
+    private Modifier modifier;
 
     /**
      * 继承类
@@ -54,6 +55,14 @@ public class Class implements Node {
     private List<Method> constructors;
 
     private List<Method> methods;
+
+    public Modifier getModifier() {
+        return modifier;
+    }
+
+    public void setModifier(Modifier modifier) {
+        this.modifier = modifier;
+    }
 
     public List<Method> getConstructors() {
         return constructors;
@@ -97,14 +106,6 @@ public class Class implements Node {
 
     public void setClassType(ClassType classType) {
         this.classType = classType;
-    }
-
-    public AccessPrivilege getAccessPrivilege() {
-        return accessPrivilege;
-    }
-
-    public void setAccessPrivilege(AccessPrivilege accessPrivilege) {
-        this.accessPrivilege = accessPrivilege;
     }
 
     public String getSuperClass() {
@@ -151,7 +152,7 @@ public class Class implements Node {
     public String getSourceCode() {
         return GrammarUtil.getLinesCode(annotations)
                 + "\n"
-                + accessPrivilege.getSourceCode() + " class " + getClassName()
+                + GrammarUtil.getSentenceCode(modifier.getSourceCode(), "class", getClassName())
                 + (StringUtils.isEmpty(superClass) ? ""
                     : " extends " + superClass)
                 + (implementClasses == null || implementClasses.size() == 0 ? ""
