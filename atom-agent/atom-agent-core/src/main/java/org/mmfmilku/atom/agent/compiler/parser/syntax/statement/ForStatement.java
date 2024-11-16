@@ -4,10 +4,16 @@ import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * for循环语句
+ *
+ * for (beforeStatement, loopCondition, afterStatement)
+ *     loopBody
+ *
+ * */
 public class ForStatement extends LoopStatement {
 
     private Statement beforeStatement;
@@ -15,10 +21,10 @@ public class ForStatement extends LoopStatement {
     private Statement afterStatement;
 
     public ForStatement(Statement beforeStatement, Statement afterStatement,
-                        Expression loopCondition, CodeBlock loopBody) {
-        super(loopCondition, loopBody);
+                        Expression loopCondition) {
         this.beforeStatement = beforeStatement;
         this.afterStatement = afterStatement;
+        this.loopCondition = loopCondition;
     }
 
     public Statement getBeforeStatement() {
@@ -41,17 +47,12 @@ public class ForStatement extends LoopStatement {
     public String getStatementSource() {
         return GrammarUtil.getSentenceCode("for",
                 "(",
-                beforeStatement.getSourceCode(),
+                beforeStatement.getStatementSource(), ";",
                 loopCondition.getSourceCode(), ";",
-                afterStatement.getSourceCode(),
+                afterStatement.getStatementSource(),
                 ")",
                 loopBody.getSourceCode()
         );
-    }
-
-    @Override
-    public String getSourceCode() {
-        return getStatementSource();
     }
 
     @Override

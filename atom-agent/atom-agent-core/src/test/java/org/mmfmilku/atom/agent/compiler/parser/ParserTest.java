@@ -148,6 +148,6 @@ public class ParserTest implements Serializable, Closeable {
      * */
     @Test
     public void parseTestFile3() {
-//        TestUtil.compareParsedText(TestFile3.class);
+        TestUtil.compareParsedText(TestFile3.class);
     }
 }

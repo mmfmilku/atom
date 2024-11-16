@@ -12,6 +12,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.exception.SystemException;
+import org.mmfmilku.atom.util.AssertUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +29,8 @@ import java.util.stream.Collectors;
 public class Parser {
 
     private static final String SEMICOLONS = ";";
+
+    private static final String COLON = ":";
 
     private static final String COMMA = ",";
 
@@ -561,12 +564,8 @@ public class Parser {
         }
 
         private VarDefineStatement parseVarDefineAndAssign() {
-            Token token;
             VarDefineStatement varDefine = parseVarDefine();
-            if (isNext(TokenType.Symbol, SEMICOLONS)) {
-                // 仅定义变量
-                // nop
-            } else if (isNext(TokenType.Symbol, EQUAL)) {
+            if (isNext(TokenType.Symbol, EQUAL)) {
                 // 变量定义并且赋值
                 // 指向等号后一位
                 needNext();
@@ -575,7 +574,6 @@ public class Parser {
                 varDefine.setAssignExpression(expression);
             } else {
                 // todo 多变量定义 int a,b;
-                throwIllegalToken(peekNext().getValue());
             }
             return varDefine;
         }
@@ -664,20 +662,35 @@ public class Parser {
             needNext(TokenType.LParen);
             needNext();
             // parseStatement已经包含读取分号
-            Statement beforeStatement = parseStatement();
-            needNext();
-            Expression loopCondition = parseExpression();
-            needNext(TokenType.Symbol, SEMICOLONS);
-            needNext();
-            Statement afterStatement = parseStatementLine();
+            Statement beforeStatement = parseStatementLine();
+            LoopStatement loopStatement;
+            if (isNext(TokenType.Symbol, SEMICOLONS)) {
+                // 普通for循环
+                needNext();
+                needNext();
+                Expression loopCondition = parseExpression();
+                needNext(TokenType.Symbol, SEMICOLONS);
+                Statement afterStatement;
+                if (isNext(TokenType.RParen)) {
+                    afterStatement = EMPTY;
+                } else {
+                    needNext();
+                    afterStatement = parseStatementLine();
+                }
+                loopStatement = new ForStatement(beforeStatement, afterStatement, loopCondition);
+            } else {
+                needNext(TokenType.Symbol, COLON);
+                Token token = needNext(TokenType.Words);
+                AssertUtil.isTrue(beforeStatement instanceof VarDefineStatement,
+                        "is not var define:" + beforeStatement.getStatementSource());
+                loopStatement = new EnhanceForStatement((VarDefineStatement) beforeStatement,
+                        new Identifier(token.getValue()));
+            }
             needNext(TokenType.RParen);
             needNext(TokenType.LBrace);
             CodeBlock loopBody = parseCodeBlock();
-            ForStatement forStatement = new ForStatement(beforeStatement, afterStatement,
-                    loopCondition, loopBody);
-            forStatement.setBeforeStatement(beforeStatement);
-            forStatement.setAfterStatement(afterStatement);
-            return forStatement;
+            loopStatement.setLoopBody(loopBody);
+            return loopStatement;
         }
 
         private Expression parseObjectNew() {

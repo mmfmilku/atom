@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TryStatement implements Statement {
+public class TryStatement implements SpecialStatement {
     @Override
     public String getStatementSource() {
         // TODO

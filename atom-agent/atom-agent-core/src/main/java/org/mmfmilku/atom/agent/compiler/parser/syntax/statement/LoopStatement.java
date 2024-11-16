@@ -1,17 +1,19 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
-import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class LoopStatement implements Statement {
+public abstract class LoopStatement implements SpecialStatement {
 
-    protected Expression loopCondition;
+    Expression loopCondition;
 
-    protected CodeBlock loopBody;
+    CodeBlock loopBody;
+
+    public LoopStatement() {
+    }
 
     public LoopStatement(Expression loopCondition, CodeBlock loopBody) {
         this.loopCondition = loopCondition;
