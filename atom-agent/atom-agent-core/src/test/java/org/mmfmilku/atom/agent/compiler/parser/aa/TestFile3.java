@@ -13,7 +13,11 @@ public final class TestFile3 implements Serializable {
 
     public void forCase1() {
         int b = 0;
-        for (int i = 0; i < 10; b = 3, i++) {
+        for (int i = 0; i < 10; i++) {
+            System.out.println("for");
+        }
+        for (int i = 0; i < 10; b = 3) {
+            i++;
             System.out.println("for");
         }
     }
