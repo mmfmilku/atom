@@ -31,4 +31,10 @@ for ( Object integer : list ) {System.out.println(integer);
 }
 }
 
+
+public void forCase4() {int i = 10;
+while ( i > 0 ) {System.out.println(i--);
+}
+}
+
 }

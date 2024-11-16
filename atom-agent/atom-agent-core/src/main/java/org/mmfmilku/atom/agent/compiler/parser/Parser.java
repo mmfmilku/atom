@@ -601,6 +601,9 @@ public class Parser {
             if ("while".equals(value)) {
                 return parseWhile();
             }
+            if ("do".equals(value)) {
+                return parseDoWhile();
+            }
             // TODO do while
             if ("new".equals(value)) {
                 Expression expression = parseExpression();
@@ -658,6 +661,18 @@ public class Parser {
             needNext(TokenType.RParen);
             needNext(TokenType.LBrace);
             CodeBlock loopBody = parseCodeBlock();
+            return new WhileStatement(condition, loopBody);
+        }
+
+        private Statement parseDoWhile() {
+            needNext(TokenType.LBrace);
+            CodeBlock loopBody = parseCodeBlock();
+            needNext(TokenType.Words, "while");
+            needNext(TokenType.LParen);
+            needNext();
+            Expression condition = parseExpression();
+            needNext(TokenType.RParen);
+            needNext(TokenType.Symbol, SEMICOLONS);
             return new WhileStatement(condition, loopBody);
         }
 

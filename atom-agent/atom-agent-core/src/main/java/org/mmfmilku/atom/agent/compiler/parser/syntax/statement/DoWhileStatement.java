@@ -4,26 +4,27 @@ import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 /**
- * while 循环语句
+ * do while 循环语句
  *
- * while (loopCondition)
- *     loopBody
+ * do
+ *      loopBody
+ * while (loopCondition);
  *
  * */
-public class WhileStatement extends LoopStatement {
+public class DoWhileStatement extends LoopStatement {
 
-    public WhileStatement(Expression loopCondition, CodeBlock loopBody) {
+    public DoWhileStatement(Expression loopCondition, CodeBlock loopBody) {
         super(loopCondition, loopBody);
     }
 
     @Override
     public String getStatementSource() {
-        return GrammarUtil.getSentenceCode("while",
+        return GrammarUtil.getSentenceCode("do",
+                loopBody.getSourceCode(),
+                "while",
                 "(",
                 loopCondition.getSourceCode(),
-                ")",
-                loopBody.getSourceCode()
+                ");"
         );
     }
-
 }

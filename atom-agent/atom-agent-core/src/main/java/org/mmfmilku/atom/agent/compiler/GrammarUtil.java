@@ -35,6 +35,7 @@ public class GrammarUtil {
         // TODO  do {} while() , synchronized, return
         return "for".equals(value)
                 || "while".equals(value)
+                || "do".equals(value)
                 || "if".equals(value)
                 || "new".equals(value)
                 || "return".equals(value)
