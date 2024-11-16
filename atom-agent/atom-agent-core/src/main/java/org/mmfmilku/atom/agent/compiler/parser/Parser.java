@@ -601,6 +601,7 @@ public class Parser {
             if ("while".equals(value)) {
                 return parseWhile();
             }
+            // TODO do while
             if ("new".equals(value)) {
                 Expression expression = parseExpression();
                 needNext(TokenType.Symbol, SEMICOLONS);
@@ -652,10 +653,12 @@ public class Parser {
 
         private Statement parseWhile() {
             needNext(TokenType.LParen);
-            parseExpression();
+            needNext();
+            Expression condition = parseExpression();
             needNext(TokenType.RParen);
-            parseCodeBlock();
-            return null;
+            needNext(TokenType.LBrace);
+            CodeBlock loopBody = parseCodeBlock();
+            return new WhileStatement(condition, loopBody);
         }
 
         private Statement parseFor() {

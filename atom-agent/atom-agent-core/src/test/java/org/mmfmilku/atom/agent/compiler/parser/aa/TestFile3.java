@@ -22,4 +22,13 @@ for ( Object integer : list ) {System.out.println("enhance for");
 }
 }
 
+
+public void forCase3() {int i = 10;
+while ( i > 0 ) {System.out.println(i--);
+List list = Arrays.asList(4, 6, 8);
+for ( Object integer : list ) {System.out.println(integer);
+}
+}
+}
+
 }

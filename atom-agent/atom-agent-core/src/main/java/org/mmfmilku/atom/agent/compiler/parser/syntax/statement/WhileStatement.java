@@ -3,10 +3,6 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class WhileStatement extends LoopStatement {
 
     public WhileStatement(Expression loopCondition, CodeBlock loopBody) {
@@ -15,19 +11,12 @@ public class WhileStatement extends LoopStatement {
 
     @Override
     public String getStatementSource() {
-        // TODO
-        GrammarUtil.notSupport();
-        return null;
+        return GrammarUtil.getSentenceCode("while",
+                "(",
+                loopCondition.getSourceCode(),
+                ")",
+                loopBody.getSourceCode()
+        );
     }
 
-    @Override
-    public List<Expression> getAllExpression() {
-        GrammarUtil.notSupport();
-        return null;
-    }
-
-    @Override
-    public void useImports(Map<String, String> importsMap) {
-        GrammarUtil.notSupport();
-    }
 }
