@@ -10,6 +10,10 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.handle.ParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.handle.TryParser;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.handle.VarDefineAssignParser;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.handle.VarDefineParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.exception.SystemException;
 import org.mmfmilku.atom.util.AssertUtil;
@@ -28,16 +32,6 @@ import java.util.stream.Collectors;
  */
 public class Parser {
 
-    private static final String SEMICOLONS = ";";
-
-    private static final String COLON = ":";
-
-    private static final String COMMA = ",";
-
-    private static final String POINT = ".";
-
-    private static final String EQUAL = "=";
-
     private static Statement EMPTY = new CodeBlock();
 
     private Lexer lexer;
@@ -47,22 +41,23 @@ public class Parser {
     }
 
     public JavaAST execute() {
-        ParserHandle handle = new ParserHandle();
-        return handle.execute();
+        ParserHelper handle = new ParserHelper();
+        return handle.parse(null);
     }
 
     public Expression getExpression() {
-        ParserHandle handle = new ParserHandle();
+        ParserHelper handle = new ParserHelper();
         return handle.getExpression();
     }
 
-    private class ParserHandle {
+    private class ParserHelper implements ParserHandle {
         List<Token> tokens;
         int curr = 0;
         Integer saveCurr = null;
         JavaAST javaAST;
+        ParserIterator iterator = new ParserIterator(this);
 
-        private ParserHandle() {
+        private ParserHelper() {
             tokens = lexer.getTokens()
                     .stream()
                     .filter(token -> token.getType() != TokenType.BlockComment && token.getType() != TokenType.Comment)
@@ -87,7 +82,7 @@ public class Parser {
             saveCurr = null;
         }
 
-        private JavaAST execute() {
+        public JavaAST parse(ParserIterator iterator) {
             javaAST = new JavaAST();
             curr = 0;
             while (curr < tokens.size()) {
@@ -564,18 +559,7 @@ public class Parser {
         }
 
         private VarDefineStatement parseVarDefineAndAssign() {
-            VarDefineStatement varDefine = parseVarDefine();
-            if (isNext(TokenType.Symbol, EQUAL)) {
-                // 变量定义并且赋值
-                // 指向等号后一位
-                needNext();
-                needNext();
-                Expression expression = parseExpression();
-                varDefine.setAssignExpression(expression);
-            } else {
-                // todo 多变量定义 int a,b;
-            }
-            return varDefine;
+            return new VarDefineAssignParser().parse(iterator);
         }
 
         private boolean isOperator(Token token) {
@@ -584,9 +568,7 @@ public class Parser {
         }
 
         private VarDefineStatement parseVarDefine() {
-            String varType = parseWordsPoint();
-            Token varName = needNext(TokenType.Words);
-            return new VarDefineStatement(varType, varName.getValue());
+            return new VarDefineParser().parse(iterator);
         }
 
         private Statement parseKeywordStatement() {
@@ -604,7 +586,6 @@ public class Parser {
             if ("do".equals(value)) {
                 return parseDoWhile();
             }
-            // TODO do while
             if ("new".equals(value)) {
                 Expression expression = parseExpression();
                 needNext(TokenType.Symbol, SEMICOLONS);
@@ -622,6 +603,11 @@ public class Parser {
                 needNext(TokenType.Symbol, SEMICOLONS);
                 return new ReturnStatement(expression);
             }
+            if ("try".equals(value)) {
+                TryParser tryParser = new TryParser();
+                return tryParser.parse(iterator);
+            }
+            throwIllegalToken(value);
             return null;
         }
 
@@ -1104,5 +1090,99 @@ public class Parser {
             System.out.println(parsed.toString());
         }
 
+    }
+
+    public class ParserIterator {
+        ParserHelper helper;
+
+        public ParserIterator(ParserHelper helper) {
+            this.helper = helper;
+        }
+
+        public Expression parseExpression() {
+            return helper.parseExpression();
+        }
+
+        public CodeBlock parseBlock() {
+            return helper.parseCodeBlock();
+        }
+
+        /**
+         * 获取如 xx.xx.xx 的字符
+         * */
+        public String parseWordsPoint() {
+            return helper.parseWordsPoint();
+        }
+
+        public Token getCurr() {
+            return helper.tokens.get(helper.curr);
+        }
+
+        public boolean isCurr(TokenType type, String value) {
+            return helper.isCurr(type, value);
+        }
+
+        /**
+         * 判断下一个token，不移动指针
+         */
+        public boolean isNext(TokenType type) {
+            return helper.isNext(type);
+        }
+
+        /**
+         * 判断下一个token，不移动指针
+         */
+        public boolean isNext(TokenType type, String value) {
+            return helper.isNext(1, type, value);
+        }
+
+        /**
+         * 判断下n个token，不移动指针
+         */
+        public boolean isNext(int n, TokenType type, String value) {
+            return helper.isNext(n, type, value);
+        }
+
+        /**
+         * 窥探下一个token，不移动指针
+         */
+        public Token peekNext() {
+            return helper.peekNext(1);
+        }
+
+        /**
+         * 窥探下一个token，不移动指针
+         */
+        public Token peekNext(int n) {
+            return helper.peekNext(n);
+        }
+
+        /**
+         * 读取下一个token，移动指针
+         */
+        public Token readNext() {
+            return helper.readNext();
+        }
+
+        /**
+         * 需要的下一个token，移动指针
+         */
+        public Token needNext() {
+            return helper.needNext();
+        }
+
+        /**
+         * 需要的下一个token，移动指针，判断类型
+         */
+        public Token needNext(TokenType type) {
+            return helper.needNext(type);
+        }
+
+        /**
+         * 需要的下一个token，移动指针，判断类型
+         */
+        public Token needNext(TokenType type, String value) {
+            return helper.needNext(type, value);
+        }
     }
 }

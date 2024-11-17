@@ -32,13 +32,14 @@ public class GrammarUtil {
      * 语句关键字
      * */
     public static boolean isCodeKeywords(String value) {
-        // TODO  do {} while() , synchronized, return
         return "for".equals(value)
                 || "while".equals(value)
                 || "do".equals(value)
                 || "if".equals(value)
                 || "new".equals(value)
                 || "return".equals(value)
+                || "try".equals(value)
+                || "synchronized".equals(value)
                 ;
     }
 
