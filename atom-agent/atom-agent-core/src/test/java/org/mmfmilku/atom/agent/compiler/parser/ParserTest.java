@@ -7,6 +7,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile1;
 import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile2;
 import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile3;
+import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile4;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler
         .parser.syntax.express.Expression;
@@ -144,10 +145,19 @@ public class ParserTest implements Serializable, Closeable {
 
     /**
      * 测试语法
-     * 1.循环语句解析
+     * 循环语句解析
      * */
     @Test
     public void parseTestFile3() {
         TestUtil.compareParsedText(TestFile3.class);
+    }
+
+    /**
+     * 测试语法
+     * try catch 语句解析
+     * */
+    @Test
+    public void parseTestFile4() {
+        TestUtil.compareParsedText(TestFile4.class);
     }
 }

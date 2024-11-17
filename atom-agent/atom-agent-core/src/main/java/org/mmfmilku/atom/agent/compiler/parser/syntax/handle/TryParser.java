@@ -54,6 +54,7 @@ public class TryParser implements ParserHandle {
             String varName = iterator.needNext(TokenType.Words).getValue();
             TryStatement.ThrowableCatch throwableCatch =
                     new TryStatement.ThrowableCatch(throwableTypes, varName);
+            iterator.needNext(TokenType.RParen);
 
             // 解析catch代码块
             iterator.needNext(TokenType.LBrace);

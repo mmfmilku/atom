@@ -5,6 +5,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.util.StringUtils;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -91,4 +92,9 @@ public class GrammarUtil {
                 .filter(StringUtils::isNotEmpty)
                 .collect(Collectors.joining(" "));
     }
+
+    public static String emptyWrap(boolean empty, Supplier<String> supplier) {
+        return empty ? "" : supplier.get();
+    }
+
 }

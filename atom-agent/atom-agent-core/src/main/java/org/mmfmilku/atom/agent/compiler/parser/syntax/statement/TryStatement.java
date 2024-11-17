@@ -91,9 +91,20 @@ public class TryStatement implements SpecialStatement {
 
     @Override
     public String getStatementSource() {
-        // TODO
-        GrammarUtil.notSupport();
-        return null;
+        return GrammarUtil.getSentenceCode(
+                "try",
+                GrammarUtil.emptyWrap(
+                        autoCloseDefines.isEmpty(),
+                        () -> "(" + GrammarUtil.getLinesCode(autoCloseDefines) + ")"),
+                tryBody.getSourceCode(),
+                GrammarUtil.emptyWrap(
+                        throwableCatches.isEmpty(),
+                        // TODO
+                        () -> GrammarUtil.getSentenceCode("catch", throwableCatches.toString())),
+                GrammarUtil.emptyWrap(
+                        finallyBody == null,
+                        () -> GrammarUtil.getSentenceCode("finally", finallyBody.getSourceCode()))
+        );
     }
 
     @Override
