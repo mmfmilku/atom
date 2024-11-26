@@ -26,6 +26,9 @@ public class TryParser implements ParserHandle {
             varDefines.add(varDefineParser.parse(iterator));
             while (iterator.isNext(TokenType.Symbol, SEMICOLONS)) {
                 iterator.needNext();
+                if (iterator.isNext(TokenType.RParen)) {
+                    break;
+                }
                 iterator.needNext(TokenType.Words);
                 varDefines.add(varDefineParser.parse(iterator));
             }

@@ -4,6 +4,7 @@ import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * try 语句
@@ -19,25 +20,28 @@ public class TryStatement implements SpecialStatement {
     /**
      * try with resource,AutoCloseable var define
      * */
-    List<VarDefineStatement> autoCloseDefines = Collections.emptyList();
+    private List<VarDefineStatement> autoCloseDefines = Collections.emptyList();
 
-    CodeBlock tryBody;
+    private CodeBlock tryBody;
 
     /**
      * catch块映射
      * k : 捕获的异常
      * v : 对应捕获异常的代码块
      * */
-    Map<ThrowableCatch, CodeBlock> throwableCatches = new HashMap<>();
+    private Map<ThrowableCatch, CodeBlock> throwableCatches = new LinkedHashMap<>();
 
-    CodeBlock finallyBody;
+    private CodeBlock finallyBody;
 
     public static class ThrowableCatch implements Statement {
 
         List<String> throwableTypes;
 
-        public ThrowableCatch(List<String> throwableTypes, String varName) {
+        String throwableName;
+
+        public ThrowableCatch(List<String> throwableTypes, String throwableName) {
             this.throwableTypes = throwableTypes;
+            this.throwableName = throwableName;
         }
 
         @Override
@@ -92,19 +96,35 @@ public class TryStatement implements SpecialStatement {
     @Override
     public String getStatementSource() {
         return GrammarUtil.getSentenceCode(
+                // try 部分
                 "try",
                 GrammarUtil.emptyWrap(
                         autoCloseDefines.isEmpty(),
                         () -> "(" + GrammarUtil.getLinesCode(autoCloseDefines) + ")"),
                 tryBody.getSourceCode(),
+                // catch 部分
                 GrammarUtil.emptyWrap(
                         throwableCatches.isEmpty(),
-                        // TODO
-                        () -> GrammarUtil.getSentenceCode("catch", throwableCatches.toString())),
+                        () -> {
+                            StringBuilder catchesBuilder = new StringBuilder();
+                            throwableCatches.forEach((throwableCatch, codeBlock) -> {
+                                catchesBuilder.append(
+                                        GrammarUtil.getSentenceCode(
+                                                " catch",
+                                                "(" + String.join(" | ", throwableCatch.throwableTypes),
+                                                throwableCatch.throwableName + ")",
+                                                codeBlock.getSourceCode()
+                                        )
+                                );
+                            });
+                            // 移除第一个catch开头的空格，因为外部getSentenceCode会拼接空格
+                            return catchesBuilder.substring(1);
+                        }),
+                // finally 部分
                 GrammarUtil.emptyWrap(
                         finallyBody == null,
                         () -> GrammarUtil.getSentenceCode("finally", finallyBody.getSourceCode()))
-        );
+        ) + "\n";
     }
 
     @Override
