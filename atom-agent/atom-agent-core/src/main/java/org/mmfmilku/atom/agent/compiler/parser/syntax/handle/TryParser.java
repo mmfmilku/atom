@@ -2,7 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.handle;
 
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
-import org.mmfmilku.atom.agent.compiler.parser.Parser;
+import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.TryStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
@@ -13,7 +13,7 @@ import java.util.List;
 public class TryParser implements ParserHandle {
 
     @Override
-    public TryStatement parse(Parser.ParserIterator iterator) {
+    public TryStatement parse(ParserDispatcher.ParserIterator iterator) {
         iterator.isCurr(TokenType.Words, "try");
         TryStatement tryStatement = new TryStatement();
         if (iterator.isNext(TokenType.LParen)) {

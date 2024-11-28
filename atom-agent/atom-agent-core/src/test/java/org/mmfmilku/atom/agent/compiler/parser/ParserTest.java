@@ -8,7 +8,6 @@ import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile1;
 import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile2;
 import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile3;
 import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile4;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler
         .parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.util.TestUtil;
@@ -59,7 +58,7 @@ public class ParserTest implements Serializable, Closeable {
 //        System.out
 //                .println(lexer.showCode(true, true));
         org.mmfmilku.atom.agent.compiler
-                .parser.syntax.Node execute = new Parser(lexer)
+                .parser.syntax.Node execute = new ParserDispatcher(lexer)
                 .execute();
         System.out.println(execute);
         int a = 1;

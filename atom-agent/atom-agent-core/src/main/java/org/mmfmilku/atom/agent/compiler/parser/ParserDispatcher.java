@@ -30,13 +30,13 @@ import java.util.stream.Collectors;
  * @author chenxp
  * @date 2024/8/8:16:34
  */
-public class Parser {
+public class ParserDispatcher {
 
     private static Statement EMPTY = new CodeBlock();
 
     private Lexer lexer;
 
-    public Parser(Lexer lexer) {
+    public ParserDispatcher(Lexer lexer) {
         this.lexer = lexer;
     }
 
