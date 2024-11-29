@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax.handle;
+package org.mmfmilku.atom.agent.compiler.parser.handle;
 
 import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;

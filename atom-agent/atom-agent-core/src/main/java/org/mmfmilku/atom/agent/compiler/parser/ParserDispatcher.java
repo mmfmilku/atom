@@ -10,10 +10,10 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.handle.ParserHandle;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.handle.TryParser;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.handle.VarDefineAssignParser;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.handle.VarDefineParser;
+import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.handle.TryParser;
+import org.mmfmilku.atom.agent.compiler.parser.handle.VarDefineAssignParser;
+import org.mmfmilku.atom.agent.compiler.parser.handle.VarDefineParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.exception.SystemException;
 import org.mmfmilku.atom.util.AssertUtil;
@@ -1105,6 +1105,10 @@ public class ParserDispatcher {
 
         public CodeBlock parseBlock() {
             return helper.parseCodeBlock();
+        }
+
+        public Statement parseStatement() {
+            return helper.parseStatement();
         }
 
         /**

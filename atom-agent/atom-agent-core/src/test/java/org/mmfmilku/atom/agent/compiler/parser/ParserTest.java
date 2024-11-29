@@ -4,10 +4,7 @@ import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler
         .CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
-import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile1;
-import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile2;
-import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile3;
-import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile4;
+import org.mmfmilku.atom.agent.compiler.parser.aa.*;
 import org.mmfmilku.atom.agent.compiler
         .parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.util.TestUtil;
@@ -159,4 +156,14 @@ public class ParserTest implements Serializable, Closeable {
     public void parseTestFile4() {
         TestUtil.compareParsedText(TestFile4.class);
     }
+
+    /**
+     * 测试语法
+     * 静态代码块、同步代码块
+     * */
+    @Test
+    public void parseTestFile5() {
+        TestUtil.compareParsedText(TestFile5.class);
+    }
+
 }

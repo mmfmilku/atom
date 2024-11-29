@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 public class CodeBlock implements SpecialStatement {
 
+    public static CodeBlock EMPTY = new CodeBlock();
+
     private List<Statement> statements = new ArrayList<>();
 
     public List<Statement> getStatements() {

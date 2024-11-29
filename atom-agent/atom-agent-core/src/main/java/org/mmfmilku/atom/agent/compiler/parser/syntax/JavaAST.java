@@ -53,6 +53,7 @@ public class JavaAST implements Node {
             return;
         }
         Map<String, String> importsMap = imports.stream()
+                .filter(imports -> !imports.getValue().endsWith("*"))
                 .collect(Collectors.toMap(data -> {
                     String value = data.getValue();
                     return value.substring(value.lastIndexOf(".") + 1);
