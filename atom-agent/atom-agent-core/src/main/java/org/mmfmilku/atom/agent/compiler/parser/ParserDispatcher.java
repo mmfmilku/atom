@@ -4,16 +4,13 @@ import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
+import org.mmfmilku.atom.agent.compiler.parser.handle.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
-import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
-import org.mmfmilku.atom.agent.compiler.parser.handle.TryParser;
-import org.mmfmilku.atom.agent.compiler.parser.handle.VarDefineAssignParser;
-import org.mmfmilku.atom.agent.compiler.parser.handle.VarDefineParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.exception.SystemException;
 import org.mmfmilku.atom.util.AssertUtil;
@@ -89,6 +86,11 @@ public class ParserDispatcher {
                 parseProgram();
             }
             return javaAST;
+        }
+
+        @Override
+        public int parseScope() {
+            return 0;
         }
 
         private Expression getExpression() {
@@ -297,6 +299,13 @@ public class ParserDispatcher {
                 List<Annotation> annotations = getAnnotations();
                 // 解析修饰符 如：public static synchronized
                 Modifier modifier = parseModifierAndNext();
+                if (isCurr(TokenType.LBrace)) {
+                    // 若为大括号，解析静态代码块
+                    CodeBlock codeBlock = parseCodeBlock();
+                    codeBlock.setModifier(modifier);
+                    clazz.setStaticCodeBlock(codeBlock);
+                    continue;
+                }
                 saveIdx();
                 // 判断是成员变量还是方法或构造器
                 // 1.解析 parseWordsPoint 前存档，因为解析构造器和方法时会再次执行parseWordsPoint
@@ -328,7 +337,6 @@ public class ParserDispatcher {
                     members.add(member);
                 }
 
-                // TODO 解析静态代码块
             }
             if (token == null) {
                 throw new RuntimeException("缺少" + TokenType.RBrace + "值 " + TokenType.RBrace.getFixValue());
@@ -606,6 +614,10 @@ public class ParserDispatcher {
             if ("try".equals(value)) {
                 TryParser tryParser = new TryParser();
                 return tryParser.parse(iterator);
+            }
+            if ("synchronized".equals(value)) {
+                SyncCodeBlockParser parser = new SyncCodeBlockParser();
+                return parser.parse(iterator);
             }
             throwIllegalToken(value);
             return null;
@@ -923,7 +935,15 @@ public class ParserDispatcher {
         }
 
         /**
-         * 判断下一个token，不移动指针
+         * 判断当前token，不移动指针
+         */
+        private boolean isCurr(TokenType type) {
+            Token currToken = tokens.get(this.curr);
+            return currToken != null && currToken.getType() == type;
+        }
+
+        /**
+         * 判断当前token，不移动指针
          */
         private boolean isCurr(TokenType type, String value) {
             Token currToken = tokens.get(this.curr);
@@ -1124,6 +1144,19 @@ public class ParserDispatcher {
 
         public boolean isCurr(TokenType type, String value) {
             return helper.isCurr(type, value);
+        }
+
+        public void checkCurr(TokenType type, String value) {
+            Token token = getCurr();
+            if (token == null) {
+                helper.throwParserErr(type, value);
+            }
+            if (token.getType() != type) {
+                helper.throwParserErr(type, token.getType(), value, token.getValue());
+            }
+            if (!token.getValue().equals(value)) {
+                helper.throwParserErr(type, token.getType(), value, token.getValue());
+            }
         }
 
         /**

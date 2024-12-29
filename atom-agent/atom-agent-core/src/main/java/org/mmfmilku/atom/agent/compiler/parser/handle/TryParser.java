@@ -14,7 +14,7 @@ public class TryParser implements ParserHandle {
 
     @Override
     public TryStatement parse(ParserDispatcher.ParserIterator iterator) {
-        iterator.isCurr(TokenType.Words, "try");
+        iterator.checkCurr(TokenType.Words, "try");
         TryStatement tryStatement = new TryStatement();
         if (iterator.isNext(TokenType.LParen)) {
             // 解析try with resource中的变量定义
@@ -73,5 +73,10 @@ public class TryParser implements ParserHandle {
             tryStatement.setFinallyBody(iterator.parseBlock());
         }
         return tryStatement;
+    }
+
+    @Override
+    public int parseScope() {
+        return HandleScope.assembly(HandleScope.IN_CODE_BLOCK);
     }
 }

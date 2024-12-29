@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
@@ -12,6 +13,16 @@ public class CodeBlock implements SpecialStatement {
     public static CodeBlock EMPTY = new CodeBlock();
 
     private List<Statement> statements = new ArrayList<>();
+
+    private Modifier modifier = Modifier.DEFAULT;
+
+    public Modifier getModifier() {
+        return modifier;
+    }
+
+    public void setModifier(Modifier modifier) {
+        this.modifier = modifier;
+    }
 
     public List<Statement> getStatements() {
         return statements;

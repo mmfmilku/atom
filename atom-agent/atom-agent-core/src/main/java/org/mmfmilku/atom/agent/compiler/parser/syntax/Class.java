@@ -2,8 +2,8 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.ClassType;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.util.StringUtils;
 
 import java.util.List;
@@ -48,13 +48,22 @@ public class Class implements Node {
     // TODO 内部类,静态非静态？
     private List<String> innerClasses;
 
-    // TODO 静态代码块
+    // 静态代码块
+    private CodeBlock staticCodeBlock;
 
     private List<Member> members;
 
     private List<Method> constructors;
 
     private List<Method> methods;
+
+    public CodeBlock getStaticCodeBlock() {
+        return staticCodeBlock;
+    }
+
+    public void setStaticCodeBlock(CodeBlock staticCodeBlock) {
+        this.staticCodeBlock = staticCodeBlock;
+    }
 
     public Modifier getModifier() {
         return modifier;
