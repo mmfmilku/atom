@@ -8,8 +8,14 @@ const vmInfo = {
 
 let pageEdit = document.getElementById('page-edit')
 
+// 获取类列表
+let listClass = () => {
+    let fileListDom = pageEdit.querySelector('.edit-file-list')
+    fileListDom.innerHTML = '<div >tttttttttt</div>'
+}
+
+// 获取重写列表
 let listFile = () => {
-    // 获取文件列表
     post('config/listOrd?appName=' + vmInfo.displayName)
         .then(res => {
             let fileListDom = pageEdit.querySelector('.edit-file-list')
@@ -19,6 +25,12 @@ let listFile = () => {
                     `
             ).join('')
         })
+}
+
+// 获取策略列表
+let listStrategy = () => {
+    let fileListDom = pageEdit.querySelector('.edit-file-list')
+    fileListDom.innerHTML = ''
 }
 
 let addFile = () => {
@@ -92,9 +104,6 @@ post('agent/vmInfo?vmId=' + vmId).then(res => {
     }
     vmInfo.displayName = res.displayName
     pageEdit.querySelector('.edit-title').innerText = vmInfo.displayName
-
-    // 获取文件列表
-    listFile()
 })
 
 let loadFile = () => {
