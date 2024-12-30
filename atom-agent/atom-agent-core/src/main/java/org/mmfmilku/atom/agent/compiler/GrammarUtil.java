@@ -68,6 +68,9 @@ public class GrammarUtil {
         return builder.toString();
     }
 
+    /**
+     * 多行代码拼接
+     * */
     public static String getLinesCode(List<? extends Node> nodes) {
         StringBuilder builder = new StringBuilder();
         for (Node node : nodes) {

@@ -303,7 +303,12 @@ public class ParserDispatcher {
                     // 若为大括号，解析静态代码块
                     CodeBlock codeBlock = parseCodeBlock();
                     codeBlock.setModifier(modifier);
-                    clazz.setStaticCodeBlock(codeBlock);
+                    List<CodeBlock> staticBlocks = clazz.getStaticBlocks();
+                    if (staticBlocks == null) {
+                        staticBlocks = new ArrayList<>();
+                        clazz.setStaticBlocks(staticBlocks);
+                    }
+                    staticBlocks.add(codeBlock);
                     continue;
                 }
                 saveIdx();

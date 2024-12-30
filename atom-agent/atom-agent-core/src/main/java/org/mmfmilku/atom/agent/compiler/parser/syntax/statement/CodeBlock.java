@@ -34,6 +34,9 @@ public class CodeBlock implements SpecialStatement {
 
     @Override
     public String getStatementSource() {
+        if (modifier != null && modifier.isStaticDeco()) {
+            return "static {" + GrammarUtil.getLinesCode(statements) + "}";
+        }
         return "{" + GrammarUtil.getLinesCode(statements) + "}";
     }
 

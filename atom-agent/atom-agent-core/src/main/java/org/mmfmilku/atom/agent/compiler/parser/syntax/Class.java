@@ -49,7 +49,7 @@ public class Class implements Node {
     private List<String> innerClasses;
 
     // 静态代码块
-    private CodeBlock staticCodeBlock;
+    private List<CodeBlock> staticBlocks;
 
     private List<Member> members;
 
@@ -57,12 +57,12 @@ public class Class implements Node {
 
     private List<Method> methods;
 
-    public CodeBlock getStaticCodeBlock() {
-        return staticCodeBlock;
+    public List<CodeBlock> getStaticBlocks() {
+        return staticBlocks;
     }
 
-    public void setStaticCodeBlock(CodeBlock staticCodeBlock) {
-        this.staticCodeBlock = staticCodeBlock;
+    public void setStaticBlocks(List<CodeBlock> staticBlocks) {
+        this.staticBlocks = staticBlocks;
     }
 
     public Modifier getModifier() {
@@ -167,6 +167,8 @@ public class Class implements Node {
                 + (implementClasses == null || implementClasses.size() == 0 ? ""
                     : " implements " + String.join(", ", implementClasses))
                 + " {"
+                + GrammarUtil.emptyWrap(staticBlocks == null || staticBlocks.isEmpty(),
+                    () -> GrammarUtil.getLinesCode(staticBlocks))
                 + GrammarUtil.getLinesCode(members)
                 + GrammarUtil.getLinesCode(constructors)
                 + GrammarUtil.getLinesCode(methods)
