@@ -20,9 +20,16 @@ h3 {
 }
 .vm-list-block {
     border: 2px solid #2196F3;
-    margin-top: 5px;
-    margin-left: 50px;
+    background-color: #eff6fe;
+    height: 80px;
+    width: 80%;
+    margin-top: 10px;
+    margin-left: 10%;
     margin-right: 50px;
+}
+/* 鼠标悬停时添加阴影 */
+.vm-list-block:hover {
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* 水平偏移 垂直偏移 模糊半径 颜色 */
 }
 .vm-field {
     display: flex;

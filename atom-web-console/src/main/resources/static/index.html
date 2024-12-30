@@ -19,20 +19,20 @@
     post('agent/listVm', {})
         .then(res => {
             console.log(res)
+            // <div class="vm-button-container">
+            //     <button onclick="configPage('${e.vmId}', '${e.displayName}')">ord文件</button>
+            //     <button onclick="attach('${e.vmId}', '${e.displayName}')">attach</button>
+            //     </div>
             let listHtml = res.map(e => 
                 `
-                <div class="vm-list-block">
-                    <div onclick="atom.SPA.loadPage('edit?vmId=${e.vmId}')" class="vm-field">
+                <div class="vm-list-block" onclick="atom.SPA.loadPage('edit?vmId=${e.vmId}')">
+                    <div class="vm-field">
                         <label class="vm-field-label">应用名称:</label>
                         <div class="vm-field-value">${e.displayName}</div>
                     </div>
                     <div class="vm-field">
                         <label class="vm-field-label">id:</label>
                         <div class="vm-field-value">${e.vmId}</div>
-                    </div>
-                    <div class="vm-button-container">
-                        <button onclick="configPage('${e.vmId}', '${e.displayName}')">ord文件</button>
-                        <button onclick="attach('${e.vmId}', '${e.displayName}')">attach</button>
                     </div>
                 </div>
                 `
