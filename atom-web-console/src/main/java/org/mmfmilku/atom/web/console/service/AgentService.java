@@ -23,10 +23,6 @@ public class AgentService implements IAgentService {
     @Autowired
     IAgentConfigService agentConfigService;
 
-    // TODO 临时测试
-    @Value("${test.app-base-package}")
-    String testAppPackage;
-
     @Override
     public boolean loadAgent(String vmId, String appName) {
         AgentConfig config = agentConfigService.getConfigByName(appName);
@@ -40,8 +36,9 @@ public class AgentService implements IAgentService {
                             // 需要拓展的类加载器
                             + ";app-classloader=" + customClassloader
                             // 可重写class的包路径
-                            // TODO 如何配置
-                            + ";app-base-package=" + testAppPackage
+                            + ";app-base-package=" +
+                                config.getConfigData()
+                                .getOrDefault("app-base-package", "com")
                             // ferver监听路径
                             + ";app-fserver-dir=" + config.getFDir()
             );

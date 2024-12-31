@@ -5,6 +5,7 @@ import org.mmfmilku.atom.web.console.domain.OrdFile;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IAgentConfigService
@@ -16,7 +17,7 @@ public interface IAgentConfigService {
 
     Collection<AgentConfig> list();
 
-    AgentConfig getConfig(String vmId);
+    void saveConfig(String appName, Map<String, String> saveData);
 
     AgentConfig getConfigByName(String appName);
 

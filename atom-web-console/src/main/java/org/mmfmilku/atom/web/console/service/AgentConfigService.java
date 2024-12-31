@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -17,6 +19,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -54,8 +58,23 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public AgentConfig getConfig(String vmId) {
-        return null;
+    public void saveConfig(String appName, Map<String, String> saveData) {
+        // 仅覆盖map
+        AgentConfig configByName = getConfigByName(appName);
+        configByName.getConfigData().clear();
+        configByName.getConfigData().putAll(saveData);
+        StringBuilder saveText = new StringBuilder();
+        saveData.forEach((k, v) ->
+                saveText.append(k)
+                .append("=")
+                .append(v));
+        try (OutputStream os = Files.newOutputStream(Paths.get(configByName.getConfFile()))) {
+            os.write(saveText.toString().getBytes(StandardCharsets.UTF_8));
+            configMap.put(appName, configByName);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("保存配置失败");
+        }
     }
 
     @Override
@@ -80,10 +99,22 @@ public class AgentConfigService implements IAgentConfigService {
         agentConfig.setFDir(agentConfig.getAppBaseDir() + File.separator + "fserver");
         agentConfig.setOrdDir(agentConfig.getAppBaseDir() + File.separator + "ord");
         agentConfig.setTmpDir(agentConfig.getAppBaseDir() + File.separator + "tmp");
+        agentConfig.setConfFile(agentConfig.getAppBaseDir() + File.separator + ".conf");
+
         try {
             Files.createDirectories(Paths.get(agentConfig.getAppBaseDir()));
             Files.createDirectories(Paths.get(agentConfig.getOrdDir()));
             Files.createDirectories(Paths.get(agentConfig.getTmpDir()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("init agent config fail");
+        }
+
+        try (InputStream in = Files.newInputStream(
+                Files.createFile(Paths.get(agentConfig.getConfFile())))) {
+            Properties properties = new Properties();
+            properties.load(in);
+            properties.forEach((k, v) -> agentConfig.getConfigData().put((String) k, (String) v));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("init agent config fail");

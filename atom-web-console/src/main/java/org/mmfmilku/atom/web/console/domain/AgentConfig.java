@@ -1,5 +1,8 @@
 package org.mmfmilku.atom.web.console.domain;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * AgentConfig
  *
@@ -32,6 +35,28 @@ public class AgentConfig {
      * 应用缓存文件
      * */
     private String tmpDir;
+
+    /**
+     * 应用配置文件
+     * */
+    private String confFile;
+
+    /**
+     * 可修改配置
+     * */
+    private Map<String, String> configData = new HashMap<>();
+
+    public Map<String, String> getConfigData() {
+        return configData;
+    }
+
+    public String getConfFile() {
+        return confFile;
+    }
+
+    public void setConfFile(String confFile) {
+        this.confFile = confFile;
+    }
 
     public String getTmpDir() {
         return tmpDir;

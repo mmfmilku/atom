@@ -8,14 +8,23 @@ const vmInfo = {
 
 let pageEdit = document.getElementById('page-edit')
 
+let btnClickChange = clickDom => {
+    let className = 'button-container-select'
+    let oldSelect = pageEdit.querySelector(`.${className}`)
+    oldSelect && oldSelect.classList.remove(className)
+    clickDom.classList.add(className)
+}
+
 // 获取类列表
-let listClass = () => {
+let listClass = clickDom => {
+    btnClickChange(clickDom)
     let fileListDom = pageEdit.querySelector('.edit-file-list')
     fileListDom.innerHTML = '<div >tttttttttt</div>'
 }
 
 // 获取重写列表
-let listFile = () => {
+let listFile = clickDom => {
+    btnClickChange(clickDom)
     post('config/listOrd?appName=' + vmInfo.displayName)
         .then(res => {
             let fileListDom = pageEdit.querySelector('.edit-file-list')
@@ -28,7 +37,8 @@ let listFile = () => {
 }
 
 // 获取策略列表
-let listStrategy = () => {
+let listStrategy = clickDom => {
+    btnClickChange(clickDom)
     let fileListDom = pageEdit.querySelector('.edit-file-list')
     fileListDom.innerHTML = ''
 }

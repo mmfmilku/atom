@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * AgentConfigController
@@ -27,6 +28,12 @@ public class AgentConfigController {
     @RequestMapping("getConfig")
     public AgentConfig getConfig(@RequestParam String appName) {
         return agentConfigService.getConfigByName(appName);
+    }
+
+    @RequestMapping("saveConfig")
+    public String saveConfig(@RequestParam String appName, @RequestBody Map<String, String> saveData) {
+        agentConfigService.saveConfig(appName, saveData);
+        return "success";
     }
 
     @RequestMapping("listOrd")
