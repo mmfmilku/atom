@@ -1,5 +1,18 @@
 const UI = {
 
+    // 弹窗打开新页面
+    openPageWin: (pagePath, title) => {
+        return new Promise((resolve, reject) => {
+            atom.SPA.loadHtml(pagePath + '.html')
+                .then(showHtml => UI.openDialog(showHtml, title))
+                .then((pageDom => {
+                        resolve(atom.getInputData(pageDom))
+                    }
+                ))
+        })
+    },
+
+    // 弹窗展示
     newDialog: (showHtml = '') => {
         let dialog = document.createElement("dialog")
         document.body.appendChild(dialog)
@@ -12,6 +25,7 @@ const UI = {
         return dialog
     },
 
+    // 弹窗展示，显示确认关闭按钮
     openDialog: (showHtml = '', title = '') => {
         let dialog = document.createElement("dialog")
         document.body.appendChild(dialog)
@@ -46,9 +60,11 @@ const UI = {
         return new Promise((resolve, reject) => {
             UI.openDialog('<input name="dialogInput"/>', title)
                 .then((dialog) => {
+                    // 点击确认的回调
                     resolve && resolve(dialog.querySelector("input[name=dialogInput]").value)
                 })
                 .catch((dialog) => {
+                    // 点击取消的回调
                     reject && reject()
                 })
         })
@@ -63,7 +79,7 @@ const UI = {
         popup.classList.add('atom-popup')
         popup.innerText = message
         document.body.appendChild(popup)
-        setTimeout(function() {
+        setTimeout(function () {
             document.body.removeChild(popup)
         }, 5000);
     },
@@ -120,6 +136,15 @@ const atom = {
         }
     },
 
+    getInputData: pageDom => {
+        let allInput = pageDom.querySelectorAll('input')
+        let formData = {}
+        allInput.forEach(item => {
+            formData[item.name] = item.value
+        })
+        return formData
+    },
+
     SPA: {
 
         routers: [],
@@ -139,7 +164,7 @@ const atom = {
             }))
         },
 
-        loadJS: (path, param) => {
+        loadJS: (path, dom) => {
             let _body = document.getElementsByTagName('body')[0];
             let scriptEle = document.createElement('script');
             scriptEle.type = 'text/javascript';
@@ -148,11 +173,11 @@ const atom = {
             scriptEle.onload = function () {
 
             }
-            _body.appendChild(scriptEle);
+            dom.appendChild(scriptEle);
             return scriptEle;
         },
 
-        loadPage: (pagePath, param) => {
+        route: (pagePath, param) => {
             let pathData = atom.getPathParam(pagePath)
             let page = pathData.page
             let htmlPath = '/page/' + page + '/' + page + '.html'
@@ -162,7 +187,7 @@ const atom = {
                     // 页面加载成功修改hash
                     location.hash = '#' + pagePath
                     // 最后加载js
-                    let jsDom = atom.SPA.loadJS(jsPath)
+                    let jsDom = atom.SPA.loadJS(jsPath, document.getElementById('app'))
                 })
         },
 

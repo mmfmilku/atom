@@ -136,15 +136,25 @@ let loadAgent = () => {
 }
 
 
+// 顶部按钮事件
+
+let configView = () => {
+    UI.openPageWin('/page/edit/configView', '设置')
+        .then(formData => post(`config/saveConfig?appName=${vmInfo.displayName}`, formData)
+        ).then(res => {
+            UI.showMessage(res)
+        })
+}
+
 let nextJavaOffset = 1
 let lastSearch = ''
 
 let listJavaFile = () => {
     let dialog = UI.newDialog('<div class="javaList">'
-            + '<div class="flex-column"></div>'
-            + '<button>更多</button>'
-            + '<button>关闭</button>'
-            + '<input/>'
+        + '<div class="flex-column"></div>'
+        + '<button>更多</button>'
+        + '<button>关闭</button>'
+        + '<input/>'
         + '</div>'
     )
 
@@ -185,7 +195,6 @@ let listJavaFile = () => {
     })
     dialog.querySelectorAll('button')[0].click()
 }
-
 
 
 let genCode = () => {

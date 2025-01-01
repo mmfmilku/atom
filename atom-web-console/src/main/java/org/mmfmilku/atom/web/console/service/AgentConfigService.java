@@ -67,7 +67,9 @@ public class AgentConfigService implements IAgentConfigService {
         saveData.forEach((k, v) ->
                 saveText.append(k)
                 .append("=")
-                .append(v));
+                .append(v)
+                .append("\n")
+        );
         try (OutputStream os = Files.newOutputStream(Paths.get(configByName.getConfFile()))) {
             os.write(saveText.toString().getBytes(StandardCharsets.UTF_8));
             configMap.put(appName, configByName);

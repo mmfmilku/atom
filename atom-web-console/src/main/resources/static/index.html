@@ -25,7 +25,7 @@
             //     </div>
             let listHtml = res.map(e => 
                 `
-                <div class="vm-list-block" onclick="atom.SPA.loadPage('edit?vmId=${e.vmId}')">
+                <div class="vm-list-block" onclick="atom.SPA.route('edit?vmId=${e.vmId}')">
                     <div class="vm-field">
                         <label class="vm-field-label">应用名称:</label>
                         <div class="vm-field-value">${e.displayName}</div>
