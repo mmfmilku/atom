@@ -139,11 +139,12 @@ let loadAgent = () => {
 // 顶部按钮事件
 
 let configView = () => {
-    UI.openPageWin('/page/edit/configView', '设置')
-        .then(formData => post(`config/saveConfig?appName=${vmInfo.displayName}`, formData)
-        ).then(res => {
-            UI.showMessage(res)
-        })
+    post(`config/getConfig?appName=${vmInfo.displayName}`)
+        .then(data =>
+            UI.openPageWin('/page/edit/configView', '设置', data.configData)
+        ).then(formData =>
+            post(`config/saveConfig?appName=${vmInfo.displayName}`, formData)
+        ).then(res => UI.showMessage(res))
 }
 
 let nextJavaOffset = 1

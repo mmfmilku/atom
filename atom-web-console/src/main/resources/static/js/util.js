@@ -1,9 +1,9 @@
 const UI = {
 
     // 弹窗打开新页面
-    openPageWin: (pagePath, title) => {
+    openPageWin: (pagePath, title, param) => {
         return new Promise((resolve, reject) => {
-            atom.SPA.loadHtml(pagePath + '.html')
+            atom.SPA.loadHtml(pagePath + '.html', null, param)
                 .then(showHtml => UI.openDialog(showHtml, title))
                 .then((pageDom => {
                         resolve(atom.getInputData(pageDom))
@@ -149,14 +149,14 @@ const atom = {
 
         routers: [],
 
-        loadHtml: (path, dom) => {
+        loadHtml: (path, dom, param = {}) => {
             return new Promise(((resolve, reject) => {
                 fetch(path)
                     .then(response => response.text())
                     .then(data => {
-                        // document.getElementById('yourElementId').innerHTML = data
-                        dom && (dom.innerHTML = data)
-                        resolve(data)
+                        let showHtml = eval('`' + data + '`')
+                        dom && (dom.innerHTML = showHtml)
+                        resolve(showHtml)
                     })
                     .catch(error => {
                         reject(error)
