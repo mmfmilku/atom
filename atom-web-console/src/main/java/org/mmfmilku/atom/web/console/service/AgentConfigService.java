@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
@@ -113,7 +114,8 @@ public class AgentConfigService implements IAgentConfigService {
         }
 
         try (InputStream in = Files.newInputStream(
-                Files.createFile(Paths.get(agentConfig.getConfFile())))) {
+                Paths.get(agentConfig.getConfFile()), StandardOpenOption.CREATE)) {
+            // TODO fix中文读取乱码
             Properties properties = new Properties();
             properties.load(in);
             properties.forEach((k, v) -> agentConfig.getConfigData().put((String) k, (String) v));

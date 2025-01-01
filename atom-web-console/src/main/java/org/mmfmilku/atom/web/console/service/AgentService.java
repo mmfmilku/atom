@@ -2,8 +2,10 @@ package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.agent.client.AgentClient;
 import org.mmfmilku.atom.api.AppInfoApi;
+import org.mmfmilku.atom.api.dto.RunInfo;
 import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.util.AssertUtil;
+import org.mmfmilku.atom.util.StringUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IAgentService;
@@ -49,6 +51,15 @@ public class AgentService implements IAgentService {
 
         AppInfoApi infoApi = FRPCFactory.getService(AppInfoApi.class, config.getFDir());
         infoApi.ping();
+
+        RunInfo runInfo = infoApi.runInfo();
+        System.out.println(runInfo);
+
+        // TODO
+        String basePath = config.getConfigData().get("basePath");
+        if (StringUtils.isEmpty(basePath)) {
+            config.getConfigData().put("basePath", runInfo.getStartClass());
+        }
 
         return true;
     }
