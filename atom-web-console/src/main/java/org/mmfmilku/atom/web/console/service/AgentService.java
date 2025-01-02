@@ -40,7 +40,7 @@ public class AgentService implements IAgentService {
                             // 可重写class的包路径
                             + ";app-base-package=" +
                                 config.getConfigData()
-                                .getOrDefault("app-base-package", "com")
+                                .getOrDefault("basePackage", "com")
                             // ferver监听路径
                             + ";app-fserver-dir=" + config.getFDir()
             );

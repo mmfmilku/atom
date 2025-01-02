@@ -108,6 +108,7 @@ public class AgentConfigService implements IAgentConfigService {
             Files.createDirectories(Paths.get(agentConfig.getAppBaseDir()));
             Files.createDirectories(Paths.get(agentConfig.getOrdDir()));
             Files.createDirectories(Paths.get(agentConfig.getTmpDir()));
+            Paths.get(agentConfig.getConfFile()).toFile().createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("init agent config fail");

@@ -624,6 +624,10 @@ public class ParserDispatcher {
                 SyncCodeBlockParser parser = new SyncCodeBlockParser();
                 return parser.parse(iterator);
             }
+            if ("throw".equals(value)) {
+                ThrowParser parser = new ThrowParser();
+                return parser.parse(iterator);
+            }
             throwIllegalToken(value);
             return null;
         }

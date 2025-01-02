@@ -41,6 +41,7 @@ public class GrammarUtil {
                 || "return".equals(value)
                 || "try".equals(value)
                 || "synchronized".equals(value)
+                || "throw".equals(value)
                 ;
     }
 

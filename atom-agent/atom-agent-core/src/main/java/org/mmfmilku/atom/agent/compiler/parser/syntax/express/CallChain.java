@@ -1,6 +1,5 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,15 +43,19 @@ public class CallChain implements Expression {
     @Override
     public void useImports(Map<String, String> importsMap) {
         if (next instanceof MethodCall) {
+            // Arrays.toString()    var.method()    get().len()
             // TODO 内部类的情况
             first.useImports(importsMap);
             next.useImports(importsMap);
         } else if (next instanceof CallChain) {
+            // Collections.emptyList.size()
             // TODO 内部类的情况
-            if (!(first instanceof Identifier)) {
-                first.useImports(importsMap);
-            }
+            // TODO 变量名与类名相同的情况
+//            if (!(first instanceof Identifier)) {
+            first.useImports(importsMap);
+//            }
             CallChain callChain = (CallChain) next;
+            // 链式调用，标识符中只有第一位需要导入
             importNoneIdentifier(callChain, importsMap);
         } else {
             first.useImports(importsMap);

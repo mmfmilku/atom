@@ -9,6 +9,7 @@ const vmInfo = {
 let pageEdit = document.getElementById('page-edit')
 
 let btnClickChange = clickDom => {
+    if (!clickDom) return
     let className = 'button-container-select'
     let oldSelect = pageEdit.querySelector(`.${className}`)
     oldSelect && oldSelect.classList.remove(className)

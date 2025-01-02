@@ -14,8 +14,9 @@ public class JavaUtil {
 
     public static String getStartClass() {
         String command = System.getProperty("sun.java.command");
-        if (command.contains(".jar")) {
-            ProtectionDomain protectionDomain = Thread.class.getProtectionDomain();
+        if (StringUtils.isEmpty(command) || command.contains(".jar")) {
+            ProtectionDomain protectionDomain = Thread.currentThread()
+                    .getContextClassLoader().getClass().getProtectionDomain();
             CodeSource codeSource = protectionDomain.getCodeSource();
             URI location = null;
             try {

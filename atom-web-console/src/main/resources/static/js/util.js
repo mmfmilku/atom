@@ -92,6 +92,7 @@ const UI = {
 
 const atom = {
 
+    // TODO fix 特殊字符转义
     post: (path, data) => {
         return new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest()
