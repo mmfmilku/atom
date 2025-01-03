@@ -43,7 +43,7 @@ let listClass = clickDom => {
 
 // 获取重写列表
 let listFile = clickDom => {
-    btnClickChange(clickDom)
+    btnClickChange(pageEdit.querySelector('.listFileBtn'))
     onlyShow('listFile')
     post('config/listOrd?appName=' + vmInfo.displayName)
         .then(res => {
@@ -62,6 +62,14 @@ let listStrategy = clickDom => {
     onlyShow('listStrategy')
     let fileListDom = pageEdit.querySelector('.listStrategy')
     fileListDom.innerHTML = 'fff'
+}
+
+let classToFile = () => {
+    let ordFileName = contextTarget.innerText + '.java'
+    UI.openConfirmDialog('确认添加' + ordFileName)
+        .then(() => {
+            doAddFile(ordFileName)
+        })
 }
 
 let addFile = () => {
@@ -118,18 +126,9 @@ let saveText = () => {
 }
 
 let deleteFile = () => {
-    if (pageEdit.querySelector('#ordFileText').readOnly) {
-        UI.showError('不可编辑')
-        return
-    }
-    let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
-    if (!ordFileName) {
-        UI.showError('请先选择文件')
-        return
-    }
-    UI.openConfirmDialog('确认删除' + ordFileName)
+    UI.openConfirmDialog('确认删除' + contextTarget.innerText)
         .then(() => {
-            post(`config/deleteOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
+            post(`config/deleteOrd?appName=${vmInfo.displayName}&ordFileName=${contextTarget.innerText}`)
                 .then(res => {
                     UI.showMessage(res)
                     listFile()
@@ -234,7 +233,9 @@ let genCode = (javaName) => {
         })
 }
 
-// 初始化执行
+
+// -------------------------------初始化执行-----------------------------
+
 post('agent/vmInfo?vmId=' + vmId).then(res => {
     if (!res.vmId) {
         alert('进程不存在:' + vmId)
@@ -246,3 +247,51 @@ post('agent/vmInfo?vmId=' + vmId).then(res => {
     listClass()
 })
 
+let contextmenu
+let fileRightMenu
+let classRightMenu
+let contextTarget
+
+atom.SPA.loadHtml('/page/edit/fileRightMenu.html')
+    .then(html => {
+        fileRightMenu = html
+    })
+atom.SPA.loadHtml('/page/edit/classRightMenu.html')
+    .then(html => {
+        classRightMenu = html
+    })
+
+let openBlock = (event, blockHtml) => {
+    if (contextmenu) {
+        document.body.removeChild(contextmenu)
+        contextmenu = null
+        contextTarget = null
+    }
+    contextTarget = event.target
+    contextmenu = UI.showBlock(blockHtml)
+    contextmenu.style.left = event.pageX + 'px';
+    contextmenu.style.top = event.pageY + 'px';
+    contextmenu.style.display = 'block';
+}
+
+document.addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+    let parentClassList = event.target.parentNode.classList
+    if (parentClassList.contains('listFile')) {
+        // 在重写文件上右键
+        openBlock(event, fileRightMenu)
+    } else if (parentClassList.contains('listClass')) {
+        // 在类文件上右键
+        openBlock(event, classRightMenu)
+    }
+})
+
+
+
+// 隐藏菜单当用户点击其他地方
+document.addEventListener('click', function(event) {
+    if (contextmenu) {
+        document.body.removeChild(contextmenu)
+        contextmenu = null
+    }
+})

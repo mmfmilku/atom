@@ -95,8 +95,12 @@ const UI = {
     },
 
     // 右键菜单
-    showBlock: () => {
-
+    showBlock: (blockHtml) => {
+        let block = document.createElement("div")
+        block.classList.add('atom-op-block')
+        block.innerHTML = blockHtml
+        document.body.appendChild(block)
+        return block
     }
 
 }
@@ -161,6 +165,7 @@ const atom = {
 
         routers: [],
 
+        // 读取html
         loadHtml: (path, dom, param = {}) => {
             return new Promise(((resolve, reject) => {
                 fetch(path)
@@ -189,6 +194,7 @@ const atom = {
             return scriptEle;
         },
 
+        // 页面路由
         route: (pagePath, param) => {
             let pathData = atom.getPathParam(pagePath)
             let page = pathData.page

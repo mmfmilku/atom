@@ -73,12 +73,8 @@
             <div class="edit-operate-bar">
                 <div class="vm-button-container">
                     <button onclick="configView()">设置</button>
-<!--                    <button onclick="listJavaFile()">java文件</button>-->
-<!--                    <button onclick="genCode()">源码</button>-->
                     <button onclick="saveText()">保存</button>
-                    <button onclick="addFile()">创建</button>
-                    <button onclick="deleteFile()">删除</button>
-                    <button onclick="loadFile()">重写</button>
+<!--                    <button onclick="loadFile()">重写</button>-->
                     <button onclick="loadAgent()">连接</button>
                 </div>
             </div>
@@ -86,9 +82,9 @@
                 <div class="flex-column edit-left-bar">
                     <div class="edit-left-bar-operate">
                         <div class="button-container-center">
-                            <div class="button-container-btn button-container-select" onclick="listClass(this)">类列表</div>
-                            <div class="button-container-btn" onclick="listFile(this)">重写列表</div>
-                            <div class="button-container-btn" onclick="listStrategy(this)">重写策略</div>
+                            <div class="button-container-btn button-container-select listClassBtn" onclick="listClass(this)">类列表</div>
+                            <div class="button-container-btn listFileBtn" onclick="listFile(this)">重写列表</div>
+                            <div class="button-container-btn listStrategyBtn" onclick="listStrategy(this)">重写策略</div>
                         </div>
                     </div>
                     <div class="edit-left-bar-content scrollable-y">
