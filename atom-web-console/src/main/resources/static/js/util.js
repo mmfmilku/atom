@@ -76,7 +76,7 @@ const UI = {
 
     showMessage: (message) => {
         let popup = document.createElement("div")
-        popup.classList.add('atom-popup')
+        popup.classList.add('atom-tip')
         popup.innerText = message
         document.body.appendChild(popup)
         setTimeout(function () {
@@ -85,8 +85,19 @@ const UI = {
     },
 
     showError: (message) => {
-        alert(message)
+        let popup = document.createElement("div")
+        popup.classList.add('atom-error')
+        popup.innerText = message
+        document.body.appendChild(popup)
+        setTimeout(function () {
+            document.body.removeChild(popup)
+        }, 5000);
     },
+
+    // 右键菜单
+    showBlock: () => {
+
+    }
 
 }
 

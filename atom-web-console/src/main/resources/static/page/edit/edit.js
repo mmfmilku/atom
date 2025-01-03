@@ -91,6 +91,7 @@ let readText = (ordFileName, clickDom) => {
 
             // 文件标题反显
             pageEdit.querySelector('.edit-code-title').innerText = ordFileName
+            pageEdit.querySelector('#ordFileText').readOnly = false
 
             // 文件内容反显
             pageEdit.querySelector('#ordFileText').value = res.text
@@ -98,9 +99,13 @@ let readText = (ordFileName, clickDom) => {
 }
 
 let saveText = () => {
+    if (pageEdit.querySelector('#ordFileText').readOnly) {
+        UI.showError('不可编辑')
+        return
+    }
     let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
     if (!ordFileName) {
-        UI.showMessage('请先选择文件')
+        UI.showError('请先选择文件')
         return
     }
     let ordText = pageEdit.querySelector('#ordFileText').value
@@ -113,9 +118,13 @@ let saveText = () => {
 }
 
 let deleteFile = () => {
+    if (pageEdit.querySelector('#ordFileText').readOnly) {
+        UI.showError('不可编辑')
+        return
+    }
     let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
     if (!ordFileName) {
-        UI.showMessage('请先选择文件')
+        UI.showError('请先选择文件')
         return
     }
     UI.openConfirmDialog('确认删除' + ordFileName)
@@ -128,14 +137,6 @@ let deleteFile = () => {
         })
 }
 
-post('agent/vmInfo?vmId=' + vmId).then(res => {
-    if (!res.vmId) {
-        alert('进程不存在:' + vmId)
-        return
-    }
-    vmInfo.displayName = res.displayName
-    pageEdit.querySelector('.edit-title').innerText = vmInfo.displayName
-})
 
 let loadFile = () => {
     let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
@@ -171,53 +172,52 @@ let configView = () => {
 let nextJavaOffset = 1
 let lastSearch = ''
 
-let listJavaFile = () => {
-    let dialog = UI.newDialog('<div class="javaList">'
-        + '<div class="flex-column"></div>'
-        + '<button>更多</button>'
-        + '<button>关闭</button>'
-        + '<input/>'
-        + '</div>'
-    )
-
-    let listDivDom = dialog.querySelector('.javaList > div')
-    listDivDom.addEventListener("click", event => {
-        doAddFile(event.target.innerText + '.java')
-        nextJavaOffset = 1
-        document.body.removeChild(dialog)
-    })
-
-    let searchDom = dialog.querySelector('input')
-
-    dialog.querySelectorAll('button')[0].addEventListener("click", () => {
-        if (lastSearch !== searchDom.value) {
-            // 重新搜索
-            lastSearch = searchDom.value
-            nextJavaOffset = 1
-            listDivDom.innerHTML = ''
-        }
-        if (!nextJavaOffset) {
-            UI.showMessage('没有更多了')
-            return;
-        }
-        post(`agent/listClass?appName=${vmInfo.displayName}&offset=${nextJavaOffset}&classShortNameLike=${lastSearch}`)
-            .then(res => {
-                nextJavaOffset += (res.length || -nextJavaOffset)
-                let showHtml = res.map(e =>
-                    `
-                    <div >${e}</div>
-                    `
-                ).join('')
-                listDivDom.innerHTML += showHtml
-            })
-    })
-    dialog.querySelectorAll('button')[1].addEventListener("click", () => {
-        nextJavaOffset = 1
-        document.body.removeChild(dialog)
-    })
-    dialog.querySelectorAll('button')[0].click()
-}
-
+// let listJavaFile = () => {
+//     let dialog = UI.newDialog('<div class="javaList">'
+//         + '<div class="flex-column"></div>'
+//         + '<button>更多</button>'
+//         + '<button>关闭</button>'
+//         + '<input/>'
+//         + '</div>'
+//     )
+//
+//     let listDivDom = dialog.querySelector('.javaList > div')
+//     listDivDom.addEventListener("click", event => {
+//         doAddFile(event.target.innerText + '.java')
+//         nextJavaOffset = 1
+//         document.body.removeChild(dialog)
+//     })
+//
+//     let searchDom = dialog.querySelector('input')
+//
+//     dialog.querySelectorAll('button')[0].addEventListener("click", () => {
+//         if (lastSearch !== searchDom.value) {
+//             // 重新搜索
+//             lastSearch = searchDom.value
+//             nextJavaOffset = 1
+//             listDivDom.innerHTML = ''
+//         }
+//         if (!nextJavaOffset) {
+//             UI.showMessage('没有更多了')
+//             return;
+//         }
+//         post(`agent/listClass?appName=${vmInfo.displayName}&offset=${nextJavaOffset}&classShortNameLike=${lastSearch}`)
+//             .then(res => {
+//                 nextJavaOffset += (res.length || -nextJavaOffset)
+//                 let showHtml = res.map(e =>
+//                     `
+//                     <div >${e}</div>
+//                     `
+//                 ).join('')
+//                 listDivDom.innerHTML += showHtml
+//             })
+//     })
+//     dialog.querySelectorAll('button')[1].addEventListener("click", () => {
+//         nextJavaOffset = 1
+//         document.body.removeChild(dialog)
+//     })
+//     dialog.querySelectorAll('button')[0].click()
+// }
 
 let genCode = (javaName) => {
     // let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
@@ -228,7 +228,21 @@ let genCode = (javaName) => {
     post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${javaName}`)
         .then(res => {
             // 文件标题反显
-            pageEdit.querySelector('.edit-code-title').innerText = javaName
+            pageEdit.querySelector('.edit-code-title').innerText = `${javaName} [readonly]`
+            pageEdit.querySelector('#ordFileText').readOnly = true
             pageEdit.querySelector('#ordFileText').value = res
         })
 }
+
+// 初始化执行
+post('agent/vmInfo?vmId=' + vmId).then(res => {
+    if (!res.vmId) {
+        alert('进程不存在:' + vmId)
+        return
+    }
+    vmInfo.displayName = res.displayName
+    pageEdit.querySelector('.edit-title').innerText = vmInfo.displayName
+
+    listClass()
+})
+
