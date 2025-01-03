@@ -16,19 +16,38 @@ let btnClickChange = clickDom => {
     clickDom.classList.add(className)
 }
 
+let onlyShow = showClass => {
+    let all = pageEdit.querySelectorAll('.edit-file-list')
+    all && all.forEach(e => {
+        e.classList.add('hide')
+    })
+    pageEdit.querySelector('.' + showClass).classList.remove('hide')
+}
+
 // 获取类列表
 let listClass = clickDom => {
     btnClickChange(clickDom)
-    let fileListDom = pageEdit.querySelector('.edit-file-list')
-    fileListDom.innerHTML = '<div >tttttttttt</div>'
+    onlyShow('listClass')
+    post(`agent/listClass?appName=${vmInfo.displayName}&offset=1`)
+        .then(res => {
+            let fileListDom = pageEdit.querySelector('.listClass')
+            let showHtml = res.map(e =>
+                `
+                    <div onclick="genCode('${e}', this)" class="edit-file text-wrap">${e}</div>
+                    `
+            ).join('')
+            fileListDom.innerHTML = showHtml
+        })
+
 }
 
 // 获取重写列表
 let listFile = clickDom => {
     btnClickChange(clickDom)
+    onlyShow('listFile')
     post('config/listOrd?appName=' + vmInfo.displayName)
         .then(res => {
-            let fileListDom = pageEdit.querySelector('.edit-file-list')
+            let fileListDom = pageEdit.querySelector('.listFile')
             fileListDom.innerHTML = res.map(e =>
                 `
                     <div onclick="readText('${e}', this)" class="edit-file text-wrap">${e}</div>
@@ -40,8 +59,9 @@ let listFile = clickDom => {
 // 获取策略列表
 let listStrategy = clickDom => {
     btnClickChange(clickDom)
-    let fileListDom = pageEdit.querySelector('.edit-file-list')
-    fileListDom.innerHTML = ''
+    onlyShow('listStrategy')
+    let fileListDom = pageEdit.querySelector('.listStrategy')
+    fileListDom.innerHTML = 'fff'
 }
 
 let addFile = () => {
@@ -199,16 +219,16 @@ let listJavaFile = () => {
 }
 
 
-let genCode = () => {
-    let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
-    if (!ordFileName || !ordFileName.endsWith('.java')) {
-        UI.showMessage('请选择java文件')
-        return
-    }
-    let className = ordFileName.substring(0, ordFileName.length - 5)
-    post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${className}`)
+let genCode = (javaName) => {
+    // let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
+    // if (!ordFileName || !ordFileName.endsWith('.java')) {
+    //     UI.showMessage('请选择java文件')
+    //     return
+    // }
+    post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${javaName}`)
         .then(res => {
+            // 文件标题反显
+            pageEdit.querySelector('.edit-code-title').innerText = javaName
             pageEdit.querySelector('#ordFileText').value = res
-            console.log(res)
         })
 }
