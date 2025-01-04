@@ -60,7 +60,7 @@ public class AgentController {
     @RequestMapping("listAllClass")
     @ResponseBody
     public List<String> listAllClass(@RequestParam String appName) {
-        return instrumentService.listClassForPage(appName, 1, Integer.MIN_VALUE);
+        return instrumentService.listClassForPage(appName, 1, Integer.MAX_VALUE);
     }
 
     @RequestMapping("listClass")

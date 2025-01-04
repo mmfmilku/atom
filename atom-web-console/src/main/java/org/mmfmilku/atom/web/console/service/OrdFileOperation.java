@@ -38,7 +38,7 @@ public class OrdFileOperation implements IOrdFileOperation {
         ordFile.setOrdId(config.getId());
         File file = new File(config.getOrdDir(), ordFile.getFileName());
         if (!file.exists()) {
-            ordFile.setText("");
+//            ordFile.setText("");
             return ordFile;
         }
         // TODO @chenxp 2024/7/31 添加util

@@ -61,30 +61,60 @@ let listStrategy = clickDom => {
     btnClickChange(clickDom)
     onlyShow('listStrategy')
     let fileListDom = pageEdit.querySelector('.listStrategy')
-    fileListDom.innerHTML = 'fff'
+    fileListDom.innerHTML = '待支持'
 }
 
 let classToFile = () => {
     let ordFileName = contextTarget.innerText + '.java'
-    UI.openConfirmDialog('确认添加' + ordFileName)
-        .then(() => {
-            doAddFile(ordFileName)
+    // 避免已存在重写文件被覆盖，先查询
+    post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
+        .then(res => {
+            if (res.text == null) {
+                UI.openConfirmDialog('新建重写' + ordFileName)
+                    .then(() => {
+                        // 首次新建，使用反编译源码
+                        return post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${contextTarget.innerText}`)
+                    })
+                    .then(text => {
+                        doAddFile(ordFileName, text)
+                    })
+            } else {
+                // 已存在直接读取
+                readText(ordFileName)
+                listFile()
+            }
         })
+
 }
 
-let addFile = () => {
-    UI.openInputDialog()
-        .then(ordFileName => {
-            doAddFile(ordFileName)
-        })
+// 设置编辑类型，同时设置是否可编辑
+let typeArr = [
+    {
+        type: '',
+        desc: '类(只读)'
+    },
+    {
+        type: 'file',
+        desc: '<button onclick="saveText()">保存</button>'
+    },
+    {
+        type: 'strategy',
+        desc: '<button onclick="saveText()">保存</button>'
+    }
+]
+let setType = (typeIdx) => {
+    // class 类型不可编辑
+    pageEdit.querySelector('#ordFileText').readOnly = !typeIdx
+    pageEdit.querySelector('.edit-code-desc').innerHTML = typeArr[typeIdx]['desc']
 }
 
-let doAddFile = ordFileName => {
+let doAddFile = (ordFileName, text = '') => {
     post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`
-        , {fileName: ordFileName, text: ''}
+        , {fileName: ordFileName, text: text}
     )
         .then(res => {
             UI.showMessage(res)
+            readText(ordFileName)
             listFile()
         })
 }
@@ -95,11 +125,11 @@ let readText = (ordFileName, clickDom) => {
             // 文件选中
             let oldSelect = pageEdit.querySelector('.edit-file-select')
             oldSelect && oldSelect.classList.remove('edit-file-select')
-            clickDom.classList.add('edit-file-select')
+            clickDom && clickDom.classList.add('edit-file-select')
 
             // 文件标题反显
             pageEdit.querySelector('.edit-code-title').innerText = ordFileName
-            pageEdit.querySelector('#ordFileText').readOnly = false
+            setType(1)
 
             // 文件内容反显
             pageEdit.querySelector('#ordFileText').value = res.text
@@ -137,7 +167,7 @@ let deleteFile = () => {
 }
 
 
-let loadFile = () => {
+let executeOrd = () => {
     let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
     if (!ordFileName) {
         UI.showMessage('请先选择文件')
@@ -147,6 +177,10 @@ let loadFile = () => {
         .then(res => {
             UI.showMessage(res)
         })
+}
+
+let stopOrd = () => {
+
 }
 
 let loadAgent = () => {
@@ -218,17 +252,16 @@ let lastSearch = ''
 //     dialog.querySelectorAll('button')[0].click()
 // }
 
-let genCode = (javaName) => {
-    // let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
-    // if (!ordFileName || !ordFileName.endsWith('.java')) {
-    //     UI.showMessage('请选择java文件')
-    //     return
-    // }
+let genCode = (javaName, clickDom) => {
+    // 文件选中
+    let oldSelect = pageEdit.querySelector('.edit-file-select')
+    oldSelect && oldSelect.classList.remove('edit-file-select')
+    clickDom.classList.add('edit-file-select')
     post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${javaName}`)
         .then(res => {
             // 文件标题反显
-            pageEdit.querySelector('.edit-code-title').innerText = `${javaName} [readonly]`
-            pageEdit.querySelector('#ordFileText').readOnly = true
+            setType(0)
+            pageEdit.querySelector('.edit-code-title').innerText = javaName
             pageEdit.querySelector('#ordFileText').value = res
         })
 }
@@ -285,8 +318,6 @@ document.addEventListener('contextmenu', function(event) {
         openBlock(event, classRightMenu)
     }
 })
-
-
 
 // 隐藏菜单当用户点击其他地方
 document.addEventListener('click', function(event) {

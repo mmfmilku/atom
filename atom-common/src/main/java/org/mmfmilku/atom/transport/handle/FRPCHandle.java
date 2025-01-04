@@ -31,6 +31,7 @@ public class FRPCHandle extends RRModeServerHandle {
             }
 
             FRPCReturn frpcReturn = serviceMapping.execute(frpcParam.getApiName(), frpcParam);
+            // TODO 超长数据，分批写入
             ctx.write(encode(frpcReturn));
         } catch (Throwable e) {
             e.printStackTrace();

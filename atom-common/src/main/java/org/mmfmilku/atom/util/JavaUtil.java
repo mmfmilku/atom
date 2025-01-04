@@ -2,10 +2,6 @@ package org.mmfmilku.atom.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -15,17 +11,11 @@ public class JavaUtil {
     public static String getStartClass() {
         String command = System.getProperty("sun.java.command");
         if (StringUtils.isEmpty(command) || command.contains(".jar")) {
-            ProtectionDomain protectionDomain = Thread.currentThread()
-                    .getContextClassLoader().getClass().getProtectionDomain();
-            CodeSource codeSource = protectionDomain.getCodeSource();
-            URI location = null;
+            String path = System.getProperty("java.class.path");
             try {
-                location = codeSource != null ? codeSource.getLocation().toURI() : null;
-                String path = location != null ? location.getSchemeSpecificPart() : null;
-                if (path == null) {
+                if (StringUtils.isEmpty(path)) {
                     throw new IllegalStateException("Unable to determine code source archive");
                 } else {
-                    path = path.substring(0, path.indexOf("!"));
                     File root = new File(path);
                     if (!root.exists()) {
                         String path2 = Thread.currentThread()
@@ -33,7 +23,7 @@ public class JavaUtil {
                         root = new File(path2);
                     }
                     if (!root.exists()) {
-                        throw new IllegalStateException("Unable to determine code source archive from " + root);
+                        return "input_your_app_base_path";
                     } else {
                         JarFile jarFile = new JarFile(root);
                         Manifest manifest = jarFile.getManifest();
@@ -47,7 +37,7 @@ public class JavaUtil {
                         return mainAttributes.getValue("Main-Class");
                     }
                 }
-            } catch (URISyntaxException | IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException("getStartClass fail");
             }

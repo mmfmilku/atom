@@ -46,15 +46,32 @@
         padding: 0 3%;
     }
 
+    .edit-file:hover {
+        background-color: #767676;
+    }
+
     .edit-file-select {
-        background-color: #545454;
+        background-color: #545454!important;
     }
 
     .edit-code-title {
         text-align: center;
+        width: 90%;
         height: 5%;
         color: #50802a;
         font-weight: 800;
+    }
+
+    .edit-code-desc {
+        color: red;
+        width: 10%;
+        display: flex;
+        justify-content: end;
+    }
+
+    .edit-code-desc > button {
+        color: red;
+        width: 60px;
     }
 
     .edit-code-box {
@@ -73,8 +90,6 @@
             <div class="edit-operate-bar">
                 <div class="vm-button-container">
                     <button onclick="configView()">设置</button>
-                    <button onclick="saveText()">保存</button>
-<!--                    <button onclick="loadFile()">重写</button>-->
                     <button onclick="loadAgent()">连接</button>
                 </div>
             </div>
@@ -94,7 +109,11 @@
                     </div>
                 </div>
                 <div class="edit-code-box">
-                    <div class="edit-code-title" for="ordFileText"></div>
+                    <div class="flex-row">
+                        <div class="edit-code-title" for="ordFileText"></div>
+                        <div class="edit-code-desc">
+                        </div>
+                    </div>
                     <textarea id="ordFileText"></textarea>
                 </div>
             </div>
