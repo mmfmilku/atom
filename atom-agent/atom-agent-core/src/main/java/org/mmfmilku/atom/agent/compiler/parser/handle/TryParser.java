@@ -47,8 +47,10 @@ public class TryParser implements ParserHandle {
             iterator.needNext(TokenType.LParen);
 
             List<String> throwableTypes = new ArrayList<>();
-            Token throwType = iterator.needNext(TokenType.Words);
-            throwableTypes.add(throwType.getValue());
+            iterator.needNext(TokenType.Words);
+            String exceptionType = iterator.parseWordsPoint();
+
+            throwableTypes.add(exceptionType);
             while (iterator.isNext(TokenType.Symbol, "|")) {
                 iterator.needNext();
                 throwableTypes.add(

@@ -3,7 +3,6 @@ package org.mmfmilku.atom.agent.compiler.parser;
 import org.mmfmilku.atom.util.JavaUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
@@ -23,15 +22,16 @@ public class QuickCode {
                 String path;
                 path = codeSource.getLocation().toURI().getSchemeSpecificPart();
                 if (path == null) {
-                    throw new IllegalStateException("Unable to determine code source archive");
+//                    throw new IllegalStateException("Unable to determine code source archive");
                 }
-                File root = new File(path = path.substring(0, path.indexOf("!")));
+                path = path.substring(0, path.indexOf("!"));
+                File root = new File(path);
                 if (!root.exists()) {
                     String path2 = Thread.currentThread().getContextClassLoader().getResource(path).getFile();
                     root = new File(path2);
                 }
                 if (!root.exists()) {
-                    throw new IllegalStateException("Unable to determine code source archive from " + root);
+//                    throw new IllegalStateException("Unable to determine code source archive from " + root);
                 }
                 JarFile jarFile = new JarFile(root);
                 Manifest manifest = jarFile.getManifest();
@@ -40,7 +40,7 @@ public class QuickCode {
                 String mainClass = manifest.getMainAttributes().getValue("Main-Class");
                 return startClass;
             }
-            catch (IOException | URISyntaxException e) {
+            catch (java.io.IOException | URISyntaxException e) {
                 e.printStackTrace();
                 return "error";
             }

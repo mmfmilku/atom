@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser.handle;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
@@ -9,6 +10,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 public class ThrowParser implements ParserHandle {
     @Override
     public Statement parse(ParserDispatcher.ParserIterator iterator) {
+        GrammarUtil.notSupport();
         // TODO
         return null;
     }

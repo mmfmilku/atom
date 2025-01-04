@@ -56,7 +56,9 @@ public class TryStatement implements SpecialStatement {
 
         @Override
         public void useImports(Map<String, String> importsMap) {
-
+            this.throwableTypes = throwableTypes.stream()
+                    .map(throwableType -> importsMap.getOrDefault(throwableType, throwableType))
+                    .collect(Collectors.toList());
         }
 
     }
@@ -135,6 +137,14 @@ public class TryStatement implements SpecialStatement {
 
     @Override
     public void useImports(Map<String, String> importsMap) {
-        GrammarUtil.notSupport();
+        autoCloseDefines.forEach(varDefineStatement -> varDefineStatement.useImports(importsMap));
+        tryBody.useImports(importsMap);
+        throwableCatches.forEach((throwableCatch, catchBlock) -> {
+            throwableCatch.useImports(importsMap);
+            catchBlock.useImports(importsMap);
+        });
+        if (finallyBody != null) {
+            finallyBody.useImports(importsMap);
+        }
     }
 }
