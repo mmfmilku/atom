@@ -57,6 +57,12 @@ public class AgentController {
         return String.valueOf(success);
     }
 
+    @RequestMapping("listAllClass")
+    @ResponseBody
+    public List<String> listAllClass(@RequestParam String appName) {
+        return instrumentService.listClassForPage(appName, 1, Integer.MIN_VALUE);
+    }
+
     @RequestMapping("listClass")
     @ResponseBody
     public List<String> listClass(@RequestParam String appName, @RequestParam int offset,

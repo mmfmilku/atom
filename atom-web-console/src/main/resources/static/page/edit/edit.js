@@ -28,7 +28,7 @@ let onlyShow = showClass => {
 let listClass = clickDom => {
     btnClickChange(clickDom)
     onlyShow('listClass')
-    post(`agent/listClass?appName=${vmInfo.displayName}&offset=1`)
+    post(`agent/listAllClass?appName=${vmInfo.displayName}&offset=1`)
         .then(res => {
             let fileListDom = pageEdit.querySelector('.listClass')
             let showHtml = res.map(e =>
