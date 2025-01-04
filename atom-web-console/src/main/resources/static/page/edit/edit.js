@@ -187,6 +187,8 @@ let loadAgent = () => {
     post(`agent/loadAgent?appName=${vmInfo.displayName}&vmId=${vmInfo.vmId}`)
         .then(res => {
             UI.showMessage(res)
+            pageEdit.querySelector('.edit-left-bar-operate').classList.remove('hide')
+            listClass()
         })
 }
 
@@ -276,8 +278,6 @@ post('agent/vmInfo?vmId=' + vmId).then(res => {
     }
     vmInfo.displayName = res.displayName
     pageEdit.querySelector('.edit-title').innerText = vmInfo.displayName
-
-    listClass()
 })
 
 let contextmenu
