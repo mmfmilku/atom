@@ -25,7 +25,7 @@ public class StopOrdTransformer implements ClassFileTransformer {
         String fullClassName = className.replace("/", ".");
         if (fullClassName.equals(stopFullClassName)) {
             System.out.println("do StopOrdTransformer class:" + className);
-            InstrumentationContext.addOrdClass(fullClassName);
+            InstrumentationContext.removeOrdClass(fullClassName);
             return null;
         } else {
             return classfileBuffer;

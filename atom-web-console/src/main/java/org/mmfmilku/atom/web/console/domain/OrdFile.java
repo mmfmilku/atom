@@ -25,6 +25,15 @@ public class OrdFile {
     private String ordId;
     private String fileName;
     private String text;
+    private String running;
+
+    public String getRunning() {
+        return running;
+    }
+
+    public void setRunning(String running) {
+        this.running = running;
+    }
 
     public String getOrdId() {
         return ordId;

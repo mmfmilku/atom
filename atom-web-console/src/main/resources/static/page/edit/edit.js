@@ -92,22 +92,24 @@ let classToFile = () => {
 let typeArr = [
     {
         type: '',
-        desc: '类(只读)'
+        '0': '类(只读)'
     },
     {
         type: 'file',
-        desc: '<button onclick="saveText()">保存</button>' +
-            '<button onclick="executeOrd()">执行</button>'
+        '0': '<button onclick="saveText()">保存</button>' +
+            '<button onclick="executeOrd()">执行</button>',
+        '1': '<button onclick="saveText()">保存</button>' +
+            '<button onclick="stopOrd()">终止</button>'
     },
     {
         type: 'strategy',
-        desc: '<button onclick="saveText()">保存</button>'
+        '0': '<button onclick="saveText()">保存</button>'
     }
 ]
-let setType = (typeIdx) => {
+let setType = (typeIdx, prop = '0') => {
     // class 类型不可编辑
     pageEdit.querySelector('#ordFileText').readOnly = !typeIdx
-    pageEdit.querySelector('.edit-code-desc').innerHTML = typeArr[typeIdx]['desc']
+    pageEdit.querySelector('.edit-code-desc').innerHTML = typeArr[typeIdx][prop]
 }
 
 let doAddFile = (ordFileName, text = '') => {
@@ -131,7 +133,7 @@ let readText = (ordFileName, clickDom) => {
 
             // 文件标题反显
             pageEdit.querySelector('.edit-code-title').innerText = ordFileName
-            setType(1)
+            setType(1, res.running)
 
             // 文件内容反显
             pageEdit.querySelector('#ordFileText').value = res.text
@@ -178,12 +180,24 @@ let executeOrd = () => {
     post(`agent/loadOrdFile?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
         .then(res => {
             UI.showMessage(res)
+            readText(ordFileName)
             listFile()
         })
 }
 
 let stopOrd = () => {
-
+    let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
+    if (!ordFileName) {
+        UI.showMessage('请先选择文件')
+        return
+    }
+    let fullClassName = ordFileName.substring(0, ordFileName.length - 5)
+    post(`agent/stopClassOrd?appName=${vmInfo.displayName}&fullClassName=${fullClassName}`)
+        .then(res => {
+            UI.showMessage(res)
+            readText(ordFileName)
+            listFile()
+        })
 }
 
 let loadAgent = () => {
