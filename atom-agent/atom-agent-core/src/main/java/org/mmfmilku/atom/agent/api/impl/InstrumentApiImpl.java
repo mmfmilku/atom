@@ -127,7 +127,9 @@ public class InstrumentApiImpl implements InstrumentApi {
         try {
             Class<?> stopClazz = InstrumentationContext.searchClass(stopFullClassName);
             System.out.println("retransformClasses：" + stopClazz);
-            InstrumentationContext.retransformClasses(stopClazz);
+            if (stopClazz != null) {
+                InstrumentationContext.retransformClasses(stopClazz);
+            }
         } catch (UnmodifiableClassException e) {
             e.printStackTrace();
             throw new BizException(e.getMessage());
