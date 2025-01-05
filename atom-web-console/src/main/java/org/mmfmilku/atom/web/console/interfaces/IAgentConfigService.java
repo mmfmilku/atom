@@ -2,6 +2,7 @@ package org.mmfmilku.atom.web.console.interfaces;
 
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
+import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +22,7 @@ public interface IAgentConfigService {
 
     AgentConfig getConfigByName(String appName);
 
-    List<String> listOrd(String appName);
+    List<OrdRunInfo> listOrd(String appName);
 
     void deleteOrd(String appName, String ordFileName);
     

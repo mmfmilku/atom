@@ -9,12 +9,12 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Map;
 
-public class LoadOrdTransformer implements ClassFileTransformer {
+public class StopOrdTransformer implements ClassFileTransformer {
 
-    private Map<String, ClassORDDefine> defineMap;
+    private String stopFullClassName;
 
-    public LoadOrdTransformer(Map<String, ClassORDDefine> defineMap) {
-        this.defineMap = defineMap;
+    public StopOrdTransformer(String stopFullClassName) {
+        this.stopFullClassName = stopFullClassName;
     }
 
     @Override
@@ -23,15 +23,12 @@ public class LoadOrdTransformer implements ClassFileTransformer {
             return classfileBuffer;
         }
         String fullClassName = className.replace("/", ".");
-        if (!defineMap.containsKey(fullClassName)) {
+        if (fullClassName.equals(stopFullClassName)) {
+            System.out.println("do StopOrdTransformer class:" + className);
+            InstrumentationContext.addOrdClass(fullClassName);
+            return null;
+        } else {
             return classfileBuffer;
         }
-        ClassORDDefine classOrdDefine = defineMap.get(fullClassName);
-        if (classOrdDefine != null) {
-            System.out.println("do LoadOrdTransformer class:" + className);
-            InstrumentationContext.addOrdClass(fullClassName);
-            return ByteCodeUtils.redefineClass(classfileBuffer, classOrdDefine);
-        }
-        return classfileBuffer;
     }
 }

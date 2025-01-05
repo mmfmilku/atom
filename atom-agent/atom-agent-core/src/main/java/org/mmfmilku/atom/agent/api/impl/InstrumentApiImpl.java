@@ -7,6 +7,7 @@ import org.mmfmilku.atom.agent.config.ClassORDDefine;
 import org.mmfmilku.atom.agent.config.OverrideBodyHolder;
 import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.agent.instrument.transformer.LoadOrdTransformer;
+import org.mmfmilku.atom.agent.instrument.transformer.StopOrdTransformer;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 import org.mmfmilku.atom.api.InstrumentApi;
 import org.mmfmilku.atom.exception.BizException;
@@ -112,6 +113,21 @@ public class InstrumentApiImpl implements InstrumentApi {
             Class[] classes = defineMap.keySet().stream().map(InstrumentationContext::searchClass).toArray(Class[]::new);
             System.out.println("retransformClasses：" + Arrays.toString(classes));
             InstrumentationContext.retransformClasses(classes);
+        } catch (UnmodifiableClassException e) {
+            e.printStackTrace();
+            throw new BizException(e.getMessage());
+        }
+        InstrumentationContext.removeTransformer(ordTransformer);
+    }
+
+    @Override
+    public void stopOrd(String stopFullClassName) {
+        StopOrdTransformer ordTransformer = new StopOrdTransformer(stopFullClassName);
+        InstrumentationContext.addTransformer(ordTransformer);
+        try {
+            Class<?> stopClazz = InstrumentationContext.searchClass(stopFullClassName);
+            System.out.println("retransformClasses：" + stopClazz);
+            InstrumentationContext.retransformClasses(stopClazz);
         } catch (UnmodifiableClassException e) {
             e.printStackTrace();
             throw new BizException(e.getMessage());

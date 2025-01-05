@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.web.console.service;
 
+import org.mmfmilku.atom.api.AppInfoApi;
 import org.mmfmilku.atom.api.InstrumentApi;
 import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.util.AssertUtil;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 /**
  * InstrumentService
@@ -33,6 +35,11 @@ public class InstrumentService implements IInstrumentService {
     private InstrumentApi getApi(String appName) {
         AgentConfig config = agentConfigService.getConfigByName(appName);
         return FRPCFactory.getService(InstrumentApi.class, config.getFDir());
+    }
+
+    private <T> T getApi(String appName, Class<T> apiClass) {
+        AgentConfig config = agentConfigService.getConfigByName(appName);
+        return FRPCFactory.getService(apiClass, config.getFDir());
     }
 
     @Override
@@ -90,6 +97,16 @@ public class InstrumentService implements IInstrumentService {
     public void loadOrdFile(String appName, String file) {
         AgentConfig config = agentConfigService.getConfigByName(appName);
         getApi(appName).loadOrdFile(Paths.get(config.getOrdDir(), file).toString());
+    }
+
+    @Override
+    public void stopClassOrd(String appName, String fullClassName) {
+        getApi(appName).stopOrd(fullClassName);
+    }
+
+    @Override
+    public Map<String, Object> getRunningOrdClass(String appName) {
+        return getApi(appName, AppInfoApi.class).getRunningOrd();
     }
 
 }

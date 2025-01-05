@@ -1,9 +1,12 @@
 package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.consts.CodeConst;
+import org.mmfmilku.atom.util.CodeUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
+import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
+import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * AgentConfigService
@@ -41,6 +45,9 @@ public class AgentConfigService implements IAgentConfigService {
     public static final String ORD_SUFFIX = ".ord";
 
     private static MessageDigest sha1;
+
+    @Autowired
+    IInstrumentService instrumentService;
 
     static {
         try {
@@ -138,9 +145,17 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public List<String> listOrd(String appName) {
+    public List<OrdRunInfo> listOrd(String appName) {
+        Map<String, Object> runningOrdClass = instrumentService.getRunningOrdClass(appName);
         AgentConfig config = getConfigByName(appName);
-        return ordFileOperation.listFiles(config);
+        List<OrdRunInfo> ordRunInfoList = ordFileOperation.listFiles(config).stream().map(ordFileName -> {
+            OrdRunInfo ordRunInfo = new OrdRunInfo();
+            ordRunInfo.setOrdName(ordFileName);
+            ordRunInfo.setRunning(
+                    runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
+            return ordRunInfo;
+        }).collect(Collectors.toList());
+        return ordRunInfoList;
     }
 
     @Override

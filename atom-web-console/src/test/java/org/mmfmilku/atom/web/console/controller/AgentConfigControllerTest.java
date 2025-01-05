@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
+import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -38,15 +39,14 @@ public class AgentConfigControllerTest {
 
     @Test
     public void listOrd() {
-        List<String> listOrd = configController.listOrd(appName);
-        System.out.println(listOrd);
+        System.out.println(configController.listOrd(appName));
     }
 
     @Test
     public void testCase() {
-        List<String> listOrd = configController.listOrd(appName);
-        for (String ord : listOrd) {
-            configController.deleteOrd(appName, ord);
+        List<OrdRunInfo> listOrd = configController.listOrd(appName);
+        for (OrdRunInfo ord : listOrd) {
+            configController.deleteOrd(appName, ord.getOrdName());
         }
         // 删除后为0
         assertEquals(0, configController.listOrd(appName).size());
@@ -71,8 +71,8 @@ public class AgentConfigControllerTest {
         assertEquals("this is test ord text2", readOrd.getText().trim());
 
         listOrd = configController.listOrd(appName);
-        for (String ord : listOrd) {
-            configController.deleteOrd(appName, ord);
+        for (OrdRunInfo ord : listOrd) {
+            configController.deleteOrd(appName, ord.getOrdName());
         }
         // 测试删除
         assertEquals(0, configController.listOrd(appName).size());

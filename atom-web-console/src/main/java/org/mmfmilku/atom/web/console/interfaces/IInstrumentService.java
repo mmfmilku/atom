@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.web.console.interfaces;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * InstrumentService
@@ -19,5 +20,12 @@ public interface IInstrumentService {
     void retransformClass(String appName, String fullClassName);
 
     void loadOrdFile(String appName, String file);
+
+    void stopClassOrd(String appName, String fullClassName);
+
+    /**
+     * 获取被重写的类
+     * */
+    Map<String, Object> getRunningOrdClass(String appName);
 
 }

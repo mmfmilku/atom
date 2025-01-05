@@ -50,7 +50,8 @@ let listFile = clickDom => {
             let fileListDom = pageEdit.querySelector('.listFile')
             fileListDom.innerHTML = res.map(e =>
                 `
-                    <div onclick="readText('${e}', this)" class="edit-file text-wrap">${e}</div>
+                    <div onclick="readText('${e.ordName}', this)" 
+                    class="edit-file text-wrap ${e.running === '1' ? 'ord-running' : ''}">${e.ordName}</div>
                     `
             ).join('')
         })
@@ -177,6 +178,7 @@ let executeOrd = () => {
     post(`agent/loadOrdFile?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
         .then(res => {
             UI.showMessage(res)
+            listFile()
         })
 }
 

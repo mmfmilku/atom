@@ -4,7 +4,10 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * InstrumentationUtils
@@ -19,6 +22,9 @@ public class InstrumentationContext {
     private static InstrumentationContext instance;
     
     private Set<ClassFileTransformer> addedTransformer;
+
+    // 重写的类记录
+    private ConcurrentMap<String, Object> ordClassMap = new ConcurrentHashMap<>();
     
     private InstrumentationContext (Instrumentation inst) {
         this.inst = inst;
@@ -50,6 +56,21 @@ public class InstrumentationContext {
             return instance;
         }
         throw new RuntimeException("InstrumentationContext have not init");
+    }
+
+    public static void addOrdClass(String ordClass) {
+        InstrumentationContext instance = getInstance();
+        instance.ordClassMap.putIfAbsent(ordClass, "");
+    }
+
+    public static void removeOrdClass(String ordClass) {
+        InstrumentationContext instance = getInstance();
+        instance.ordClassMap.remove(ordClass);
+    }
+
+    public static Map<String, Object> getOrdList() {
+        InstrumentationContext instance = getInstance();
+        return instance.ordClassMap;
     }
     
     public static void addTransformer(ClassFileTransformer transformer) {

@@ -25,4 +25,9 @@ public interface InstrumentApi {
      * */
     void loadOrdFile(String file);
 
+    /**
+     * 指定类取消重写
+     * */
+    void stopOrd(String stopFullClassName);
+
 }

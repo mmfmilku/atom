@@ -89,5 +89,12 @@ public class AgentController {
         instrumentService.loadOrdFile(appName, ordFileName);
         return "success";
     }
+
+    @RequestMapping("stopClassOrd")
+    public String stopClassOrd(@RequestParam String appName, @RequestParam String fullClassName) {
+        instrumentService.stopClassOrd(appName, fullClassName);
+        return "success";
+    }
+
     
 }

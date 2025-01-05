@@ -1,11 +1,13 @@
 package org.mmfmilku.atom.agent.api.impl;
 
 import org.mmfmilku.atom.agent.config.AgentProperties;
+import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.api.AppInfoApi;
 import org.mmfmilku.atom.api.dto.RunInfo;
 import org.mmfmilku.atom.transport.frpc.FRPCService;
 import org.mmfmilku.atom.util.JavaUtil;
 
+import java.util.List;
 import java.util.Map;
 
 @FRPCService
@@ -26,5 +28,10 @@ public class AppInfoApiImpl implements AppInfoApi {
         RunInfo runInfo = new RunInfo();
         runInfo.setStartClass(startClass);
         return runInfo;
+    }
+
+    @Override
+    public Map<String, Object> getRunningOrd() {
+        return InstrumentationContext.getOrdList();
     }
 }
