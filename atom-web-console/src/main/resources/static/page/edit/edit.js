@@ -95,7 +95,8 @@ let typeArr = [
     },
     {
         type: 'file',
-        desc: '<button onclick="saveText()">保存</button>'
+        desc: '<button onclick="saveText()">保存</button>' +
+            '<button onclick="executeOrd()">执行</button>'
     },
     {
         type: 'strategy',
