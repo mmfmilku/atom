@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.transport.client;
+package org.mmfmilku.atom.transport.protocol.client;
 
 public interface ClientSession<T> {
 

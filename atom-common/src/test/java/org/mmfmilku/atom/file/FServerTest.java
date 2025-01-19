@@ -1,7 +1,8 @@
 package org.mmfmilku.atom.file;
 
 import org.junit.Test;
-import org.mmfmilku.atom.transport.MessageUtils;
+import org.mmfmilku.atom.transport.protocol.MessageUtils;
+import org.mmfmilku.atom.transport.protocol.frame.FFrame;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -21,6 +22,13 @@ public class FServerTest {
         } catch (Exception ignored) {
 
         }
+    }
+
+    @Test
+    public void testPack() {
+        long l = System.currentTimeMillis();
+        System.out.println(l);
+        System.out.println((byte)l);
     }
 
 }

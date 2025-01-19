@@ -1,17 +1,18 @@
 package org.mmfmilku.atom.transport.protocol.file;
 
-import org.mmfmilku.atom.transport.ConnectContext;
-import org.mmfmilku.atom.transport.handle.file.FHandle;
-import org.mmfmilku.atom.transport.handle.ServerHandle;
+import org.mmfmilku.atom.transport.protocol.Connector;
+import org.mmfmilku.atom.transport.protocol.frame.FFrame;
+import org.mmfmilku.atom.transport.protocol.handle.HandleManager;
+import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -31,74 +32,57 @@ public class FServer {
     /**
      * 用于标记已经处理过的连接
      * */
-    private static final ConnectContext ACCEPTED_CTX = new ConnectContext(
+    private static final Connector ACCEPTED_CTX = new Connector(
             null, null, null);
 
     /**
      * 用于标记连接失败的连接
      * */
-    private static final ConnectContext FAILED_CTX = new ConnectContext(
+    private static final Connector FAILED_CTX = new Connector(
             null, null, null);
 
     private String listenPath;
 
-    private Map<String, ConnectContext> ctxMap = new ConcurrentHashMap<>();
+    private Map<String, Connector> ctxMap = new ConcurrentHashMap<>();
 
-    private ServerHandle<String> handle;
-
-    private List<ServerHandle> handles = new ArrayList<>();
+    private HandleManager handleManager;
 
     private OutputStream listenStream;
 
-    private ScheduledExecutorService bossExecutor = Executors.newScheduledThreadPool(3,
-            new ThreadFactory() {
-                private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private int boosThreadSize;
+    private int workerThreadSize;
+    // 最大客户端连接数
+    private int maxConnect;
+    // 检测连接间隔毫秒时间
+    private long connectDelay;
+    // 接收消息间隔毫秒时间
+    private long receiveDelay;
+    // 清理断开连接的通信文件时间间隔，秒
+    private long clearDelay;
 
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread t = new Thread(Thread.currentThread().getThreadGroup(), r,
-                            "pool-fserver-boss-thread-" + threadNumber.getAndIncrement(),
-                            0);
-                    t.setDaemon(true);
-                    if (t.getPriority() != Thread.NORM_PRIORITY)
-                        t.setPriority(Thread.NORM_PRIORITY);
-                    return t;
-                }
-            });
+    // 读取完整帧超时时间，毫秒
+    private long readTimeOutMillis;
 
-    private ExecutorService workerExecutor = new ThreadPoolExecutor(2, 2,
-            0L, TimeUnit.MILLISECONDS,
-            // 队列长度等于最大连接数
-            new ArrayBlockingQueue<>(10),
-            new ThreadFactory() {
-                private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private ScheduledExecutorService bossExecutor;
 
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread t = new Thread(Thread.currentThread().getThreadGroup(), r,
-                            "pool-fserver-worker-thread-" + threadNumber.getAndIncrement(),
-                            0);
-                    t.setDaemon(true);
-                    if (t.getPriority() != Thread.NORM_PRIORITY)
-                        t.setPriority(Thread.NORM_PRIORITY);
-                    return t;
-                }
-            },
-            (r, executor) -> System.out.println("连接拒绝")
-    );
+    private ExecutorService workerExecutor;
 
     public FServer(String listenPath) {
         this.listenPath = listenPath;
-        handle = new FHandle();
+        this.boosThreadSize = 3;
+        this.workerThreadSize = 2;
+        this.maxConnect = 10;
+        this.connectDelay = 300;
+        this.receiveDelay = 100;
+        this.clearDelay = 5;
+        this.readTimeOutMillis = 2000;
+
+        handleManager = new HandleManager();
+        handleManager.setReadTimeOutMillis(readTimeOutMillis);
     }
 
-    public FServer(String listenPath, ServerHandle<String> handle) {
-        this.listenPath = listenPath;
-        this.handle = handle;
-    }
-
-    public FServer addHandle(ServerHandle<String> handle) {
-        handles.add(handle);
+    public FServer addHandle(ServerHandle handle) {
+        handleManager.addHandle(handle);
         return this;
     }
 
@@ -127,6 +111,8 @@ public class FServer {
                         .forEach(File::delete);
             }
             listen.mkdirs();
+            // 初始化线程池
+            init();
             // 监听连接
             listener(listen);
             // 处理消息
@@ -140,9 +126,24 @@ public class FServer {
         }
     }
 
+    private void init() {
+        bossExecutor = Executors.newScheduledThreadPool(boosThreadSize,
+                new DaemonThreadFactory("pool-fserver-boss-thread"));
+
+        workerExecutor = new ThreadPoolExecutor(workerThreadSize, workerThreadSize,
+                0L, TimeUnit.MILLISECONDS,
+                // 队列长度等于最大连接数
+                new ArrayBlockingQueue<>(maxConnect),
+                new DaemonThreadFactory("pool-fserver-worker-thread"),
+                (r, executor) -> System.out.println("连接拒绝")
+        );
+    }
+
     private void listener(File listen) throws IOException {
         Path occupyPath = new File(listen, LISTEN_FILE).toPath();
         listenStream = new FileOutputStream(occupyPath.toFile());
+        String runtimeStr = Runtime.getRuntime().toString();
+        listenStream.write(runtimeStr.getBytes(StandardCharsets.UTF_8));
 
         ScheduledFuture<?> scheduledFuture = bossExecutor.scheduleAtFixedRate(() -> {
             File[] requestFiles = listen.listFiles((dir, name) -> !ctxMap.containsKey(name)
@@ -152,8 +153,8 @@ public class FServer {
                     accept(requestFile);
                 }
             }
-            // 500ms执行一次
-        }, 0, 300, TimeUnit.MILLISECONDS);
+            // 执行一次的时间
+        }, 0, connectDelay, TimeUnit.MILLISECONDS);
 
     }
 
@@ -164,13 +165,9 @@ public class FServer {
                         .stream()
                         .filter(ctx ->  ctx != ACCEPTED_CTX && !ctx.isClose())
                         .map(ctx -> (Callable<Boolean>) () -> {
-                            if (ctx.canRead()) {
-                                String read = ctx.read();
-                                if (read != null) {
-                                    handle.onReceive(ctx, read);
-                                    // TODO
-                                    handles.forEach(h -> h.onReceive(ctx, read));
-                                }
+                            FFrame read = ctx.tryRead();
+                            if (read != null) {
+                                handleManager.onReceive(ctx, read);
                                 return true;
                             }
                             return false;
@@ -181,18 +178,18 @@ public class FServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, 0, 100, TimeUnit.MILLISECONDS);
+        }, 0, receiveDelay, TimeUnit.MILLISECONDS);
     }
 
     private void cleaner() {
         bossExecutor.scheduleAtFixedRate(() -> {
             try {
-                System.out.println("执行清理任务 " + ctxMap.size());
-                Iterator<Map.Entry<String, ConnectContext>> itr = ctxMap.entrySet().iterator();
+//                System.out.println("执行清理任务 " + ctxMap.size());
+                Iterator<Map.Entry<String, Connector>> itr = ctxMap.entrySet().iterator();
                 while (itr.hasNext()) {
-                    Map.Entry<String, ConnectContext> next = itr.next();
+                    Map.Entry<String, Connector> next = itr.next();
                     // 获取关闭的上下文
-                    ConnectContext ctx = next.getValue();
+                    Connector ctx = next.getValue();
                     if (ctx != ACCEPTED_CTX && ctx.isClose()) {
                         // 删除关闭连接的文件
                         String fileName = next.getKey();
@@ -204,11 +201,11 @@ public class FServer {
                         }
                     }
                 }
-                System.out.println("清理任务结束 " + ctxMap.size());
+//                System.out.println("清理任务结束 " + ctxMap.size());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, 0, 5, TimeUnit.SECONDS);
+        }, 0, clearDelay, TimeUnit.SECONDS);
     }
 
     public void stop() {
@@ -219,7 +216,7 @@ public class FServer {
         listenStream = null;
     }
 
-    public void accept(File requestFile) {
+    private void accept(File requestFile) {
         InputStream inputStream = null;
         OutputStream outputStream = null;
         try {
@@ -228,15 +225,14 @@ public class FServer {
             inputStream = new FileInputStream(requestFile);
             outputStream = new FileOutputStream(
                     new File(requestFile.getAbsolutePath() + RESPONSE));
-            ConnectContext ctx = new ConnectContext(inputStream, outputStream,
+            Connector ctx = new Connector(inputStream, outputStream,
                     o -> System.out.println("关闭" + o)
             );
-            boolean open = handle.onOpen(ctx);
+            boolean open = handleManager.openConnect(ctx);
             if (!open) {
                 throw new RuntimeException("连接建立失败");
             }
             ctxMap.put(requestFile.getName(), ctx);
-            handles.forEach(h -> h.onOpen(ctx));
         } catch (Exception e) {
             // 建立连接失败，关闭流
             e.printStackTrace();

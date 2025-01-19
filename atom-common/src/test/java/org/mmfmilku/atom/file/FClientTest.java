@@ -3,10 +3,10 @@ package org.mmfmilku.atom.file;
 import com.alibaba.fastjson.JSON;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mmfmilku.atom.transport.ConnectContext;
-import org.mmfmilku.atom.transport.client.ClientSession;
-import org.mmfmilku.atom.transport.handle.RRModeServerHandle;
-import org.mmfmilku.atom.transport.protocol.file.FClient;
+import org.mmfmilku.atom.transport.protocol.Connector;
+import org.mmfmilku.atom.transport.protocol.client.ClientSession;
+import org.mmfmilku.atom.transport.protocol.handle.RRModeServerHandle;
+import org.mmfmilku.atom.transport.protocol.client.FClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class FClientTest {
     public static void beforeClass() {
         FServerUtil.runServer(new RRModeServerHandle() {
             @Override
-            public void onReceive(ConnectContext ctx, String data) {
+            public void onReceive(Connector ctx, String data) {
                 ctx.write( "fserver接收到消息:" + data);
             }
         });

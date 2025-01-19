@@ -1,10 +1,7 @@
-package org.mmfmilku.atom.transport.handle;
+package org.mmfmilku.atom.transport.frpc.server;
 
-import org.mmfmilku.atom.transport.ConnectContext;
-import org.mmfmilku.atom.transport.frpc.FRPCException;
-import org.mmfmilku.atom.transport.frpc.FRPCParam;
-import org.mmfmilku.atom.transport.frpc.FRPCReturn;
-import org.mmfmilku.atom.transport.frpc.ServiceMapping;
+import org.mmfmilku.atom.transport.protocol.Connector;
+import org.mmfmilku.atom.transport.protocol.handle.RRModeServerHandle;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.util.Base64;
@@ -19,7 +16,7 @@ public class FRPCHandle extends RRModeServerHandle {
     }
 
     @Override
-    public void onReceive(ConnectContext ctx, String data) {
+    public void onReceive(Connector ctx, String data) {
         try {
             byte[] rawData = Base64.getDecoder().decode(data.trim());
 

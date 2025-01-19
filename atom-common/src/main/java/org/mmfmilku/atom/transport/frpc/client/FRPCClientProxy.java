@@ -1,7 +1,7 @@
 package org.mmfmilku.atom.transport.frpc.client;
 
-import org.mmfmilku.atom.transport.frpc.FRPCParam;
-import org.mmfmilku.atom.transport.frpc.FRPCReturn;
+import org.mmfmilku.atom.transport.frpc.server.FRPCParam;
+import org.mmfmilku.atom.transport.frpc.server.FRPCReturn;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

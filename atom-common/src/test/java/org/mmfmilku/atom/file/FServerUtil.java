@@ -1,8 +1,8 @@
 package org.mmfmilku.atom.file;
 
-import org.mmfmilku.atom.transport.client.ClientSession;
-import org.mmfmilku.atom.transport.handle.ServerHandle;
-import org.mmfmilku.atom.transport.protocol.file.FClient;
+import org.mmfmilku.atom.transport.protocol.client.ClientSession;
+import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
+import org.mmfmilku.atom.transport.protocol.client.FClient;
 import org.mmfmilku.atom.transport.protocol.file.FServer;
 
 public class FServerUtil {

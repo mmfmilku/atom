@@ -1,7 +1,7 @@
 package org.mmfmilku.atom.transport.frpc.client;
 
 import org.junit.Test;
-import org.mmfmilku.atom.transport.frpc.FRPCStarter;
+import org.mmfmilku.atom.transport.frpc.server.FRPCStarter;
 import org.mmfmilku.atom.transport.frpc.api.FRpcServiceOne;
 import org.mmfmilku.atom.transport.frpc.api.FRpcServiceTwo;
 import org.mmfmilku.atom.transport.frpc.api.impl.FRpcServiceOneImpl;

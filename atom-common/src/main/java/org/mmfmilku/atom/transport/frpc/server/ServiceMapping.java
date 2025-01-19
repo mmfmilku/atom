@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.transport.frpc;
+package org.mmfmilku.atom.transport.frpc.server;
 
 import java.util.Map;
 import java.util.function.Function;
