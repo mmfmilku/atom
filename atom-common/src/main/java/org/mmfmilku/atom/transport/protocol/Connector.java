@@ -1,7 +1,7 @@
 package org.mmfmilku.atom.transport.protocol;
 
 import org.mmfmilku.atom.transport.protocol.exception.ConnectException;
-import org.mmfmilku.atom.transport.protocol.frame.FFrame;
+import org.mmfmilku.atom.transport.protocol.base.FFrame;
 
 import java.io.Closeable;
 import java.io.IOException;

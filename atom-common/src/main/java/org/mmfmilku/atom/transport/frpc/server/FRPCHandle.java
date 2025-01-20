@@ -1,13 +1,14 @@
 package org.mmfmilku.atom.transport.frpc.server;
 
 import org.mmfmilku.atom.transport.protocol.Connector;
-import org.mmfmilku.atom.transport.protocol.handle.RRModeServerHandle;
+import org.mmfmilku.atom.transport.protocol.handle.ChannelContext;
+import org.mmfmilku.atom.transport.protocol.handle.RRModeHandle;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.util.Base64;
 import java.util.Map;
 
-public class FRPCHandle extends RRModeServerHandle {
+public class FRPCHandle implements RRModeHandle<String> {
 
     private Map<String, ServiceMapping> mappings;
 
@@ -16,7 +17,7 @@ public class FRPCHandle extends RRModeServerHandle {
     }
 
     @Override
-    public void onReceive(Connector ctx, String data) {
+    public void onReceive(String data, ChannelContext<String> ctx) {
         try {
             byte[] rawData = Base64.getDecoder().decode(data.trim());
 

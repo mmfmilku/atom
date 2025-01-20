@@ -2,7 +2,6 @@ package org.mmfmilku.atom.file;
 
 import org.junit.Test;
 import org.mmfmilku.atom.transport.protocol.MessageUtils;
-import org.mmfmilku.atom.transport.protocol.frame.FFrame;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

@@ -5,7 +5,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mmfmilku.atom.transport.protocol.Connector;
 import org.mmfmilku.atom.transport.protocol.client.ClientSession;
-import org.mmfmilku.atom.transport.protocol.handle.RRModeServerHandle;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
 
 import java.util.ArrayList;

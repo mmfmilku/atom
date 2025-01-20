@@ -3,7 +3,7 @@ package org.mmfmilku.atom.file;
 import org.mmfmilku.atom.transport.protocol.client.ClientSession;
 import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
-import org.mmfmilku.atom.transport.protocol.file.FServer;
+import org.mmfmilku.atom.transport.protocol.base.FServer;
 
 public class FServerUtil {
 

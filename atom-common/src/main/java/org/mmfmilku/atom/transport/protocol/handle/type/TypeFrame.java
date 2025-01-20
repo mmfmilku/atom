@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.transport.protocol.frame;
+package org.mmfmilku.atom.transport.protocol.handle.type;
 
 public class TypeFrame {
 

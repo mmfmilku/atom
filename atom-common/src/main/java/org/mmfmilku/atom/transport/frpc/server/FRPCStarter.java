@@ -1,7 +1,7 @@
 package org.mmfmilku.atom.transport.frpc.server;
 
 import org.mmfmilku.atom.consts.CodeConst;
-import org.mmfmilku.atom.transport.protocol.file.FServer;
+import org.mmfmilku.atom.transport.protocol.base.FServer;
 import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
 

@@ -1,7 +1,6 @@
-package org.mmfmilku.atom.transport.protocol.file;
+package org.mmfmilku.atom.transport.protocol.base;
 
 import org.mmfmilku.atom.transport.protocol.Connector;
-import org.mmfmilku.atom.transport.protocol.frame.FFrame;
 import org.mmfmilku.atom.transport.protocol.handle.HandleManager;
 import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
 import org.mmfmilku.atom.util.IOUtils;

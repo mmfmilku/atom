@@ -1,9 +1,7 @@
 package org.mmfmilku.atom.transport.protocol.client;
 
 import org.mmfmilku.atom.transport.protocol.Connector;
-import org.mmfmilku.atom.transport.protocol.client.ClientSession;
-import org.mmfmilku.atom.transport.protocol.client.SRClientSession;
-import org.mmfmilku.atom.transport.protocol.file.FServer;
+import org.mmfmilku.atom.transport.protocol.base.FServer;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.*;

@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.transport.protocol.frame;
+package org.mmfmilku.atom.transport.protocol.base;
 
 /**
  * 基础通信帧，负责基础的数据传输

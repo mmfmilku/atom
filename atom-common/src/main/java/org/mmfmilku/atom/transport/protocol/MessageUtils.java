@@ -1,6 +1,6 @@
 package org.mmfmilku.atom.transport.protocol;
 
-import org.mmfmilku.atom.transport.protocol.frame.FFrame;
+import org.mmfmilku.atom.transport.protocol.base.FFrame;
 
 import java.util.Arrays;
 
