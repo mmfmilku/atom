@@ -44,6 +44,9 @@ public class Connector implements Closeable {
             if (lenReadSize != tmpLen.length) {
                 // 读取长度数据
                 int read = inputStream.read(tmpLen, lenReadSize, tmpLen.length - lenReadSize);
+                if (read < 1) {
+                    return null;
+                }
                 lenReadSize += read;
                 if (lenReadSize != tmpLen.length) {
                     // 长度数据不完整，读取失败返回
@@ -62,6 +65,9 @@ public class Connector implements Closeable {
             assert tmpData.length == len;
             if (dataReadSize != tmpData.length) {
                 int read = inputStream.read(tmpData, dataReadSize, tmpData.length - dataReadSize);
+                if (read < 1) {
+                    return null;
+                }
                 dataReadSize += read;
                 if (dataReadSize != tmpData.length) {
                     return null;
@@ -78,6 +84,8 @@ public class Connector implements Closeable {
             e.printStackTrace();
             close();
             throw new ConnectException(e);
+        } catch (Exception e) {
+            throw e;
         }
     }
 

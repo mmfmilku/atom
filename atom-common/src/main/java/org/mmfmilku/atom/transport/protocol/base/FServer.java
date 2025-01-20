@@ -6,6 +6,7 @@ import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.*;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -141,8 +142,8 @@ public class FServer {
     private void listener(File listen) throws IOException {
         Path occupyPath = new File(listen, LISTEN_FILE).toPath();
         listenStream = new FileOutputStream(occupyPath.toFile());
-        String runtimeStr = Runtime.getRuntime().toString();
-        listenStream.write(runtimeStr.getBytes(StandardCharsets.UTF_8));
+        String runtimeStr = ManagementFactory.getRuntimeMXBean().getName();
+        listenStream.write(runtimeStr.getBytes());
 
         ScheduledFuture<?> scheduledFuture = bossExecutor.scheduleAtFixedRate(() -> {
             File[] requestFiles = listen.listFiles((dir, name) -> !ctxMap.containsKey(name)
