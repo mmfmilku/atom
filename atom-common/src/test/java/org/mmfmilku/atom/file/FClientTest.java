@@ -6,6 +6,10 @@ import org.junit.Test;
 import org.mmfmilku.atom.transport.protocol.Connector;
 import org.mmfmilku.atom.transport.protocol.client.ClientSession;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
+import org.mmfmilku.atom.transport.protocol.handle.ChannelContext;
+import org.mmfmilku.atom.transport.protocol.handle.RRModeHandle;
+import org.mmfmilku.atom.transport.protocol.handle.string.StringHandle;
+import org.mmfmilku.atom.transport.protocol.handle.type.TypeHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,12 +29,10 @@ public class FClientTest {
 
     @BeforeClass
     public static void beforeClass() {
-        FServerUtil.runServer(new RRModeServerHandle() {
-            @Override
-            public void onReceive(Connector ctx, String data) {
-                ctx.write( "fserver接收到消息:" + data);
-            }
-        });
+        FServerUtil.runServer(
+                new TypeHandler(), new StringHandle(),
+                (RRModeHandle<String>) (data, channelContext) ->
+                        channelContext.write( "fserver接收到消息:" + data));
     }
 
     @Test

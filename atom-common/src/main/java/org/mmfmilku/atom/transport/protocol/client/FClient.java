@@ -1,6 +1,8 @@
 package org.mmfmilku.atom.transport.protocol.client;
 
 import org.mmfmilku.atom.transport.protocol.Connector;
+import org.mmfmilku.atom.transport.protocol.MessageUtils;
+import org.mmfmilku.atom.transport.protocol.base.FFrame;
 import org.mmfmilku.atom.transport.protocol.base.FServer;
 import org.mmfmilku.atom.util.IOUtils;
 
@@ -25,8 +27,12 @@ public class FClient {
 
     private String connectPath;
 
+    // 读取完整帧超时时间，毫秒
+    private long readTimeOutMillis;
+
     public FClient(String connectPath) {
         this.connectPath = connectPath;
+        this.readTimeOutMillis = 2000;
         init();
     }
 
@@ -85,9 +91,10 @@ public class FClient {
             outputStream = new FileOutputStream(requestFile);
             Connector ctx = new Connector(inputStream, outputStream, null);
             // TODO @chenxp 2024/9/30 建立连接
-            String read = ctx.read();
-            if ("PING".equals(read)) {
-                ctx.write("PONG");
+            FFrame ping = ctx.read(readTimeOutMillis);
+            if (ping != null) {
+                byte[] pong = MessageUtils.getPong(ping.getData());
+                ctx.write(MessageUtils.packFFrame(pong));
             } else {
                 throw new RuntimeException("连接失败");
             }

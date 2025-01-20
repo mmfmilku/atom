@@ -5,11 +5,16 @@ import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
 import org.mmfmilku.atom.transport.protocol.base.FServer;
 
+import java.util.Arrays;
+
 public class FServerUtil {
 
-    public static void runServer(ServerHandle serverHandle) {
+    public static void runServer(ServerHandle ...serverHandles) {
         String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
-        FServer fServer = new FServer(path).addHandle(serverHandle);
+        FServer fServer = new FServer(path);
+        for (ServerHandle serverHandle : serverHandles) {
+            fServer.addHandle(serverHandle);
+        }
         fServer.start();
     }
 

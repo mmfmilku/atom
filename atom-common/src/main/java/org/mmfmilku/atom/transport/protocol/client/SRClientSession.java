@@ -1,6 +1,8 @@
 package org.mmfmilku.atom.transport.protocol.client;
 
 import org.mmfmilku.atom.transport.protocol.Connector;
+import org.mmfmilku.atom.transport.protocol.MessageUtils;
+import org.mmfmilku.atom.transport.protocol.base.FFrame;
 
 /**
  * SRClientHandle
@@ -21,7 +23,8 @@ public class SRClientSession implements ClientSession<String> {
     }
 
     public String read() {
-        return ctx.read();
+        FFrame read = ctx.read(2000);
+        return new String(read.getData());
     }
 
     public String sendThenRead(String data) {
