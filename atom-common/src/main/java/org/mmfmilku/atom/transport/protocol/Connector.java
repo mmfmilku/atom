@@ -85,6 +85,7 @@ public class Connector implements Closeable {
             close();
             throw new ConnectException(e);
         } catch (Exception e) {
+            close();
             throw e;
         }
     }

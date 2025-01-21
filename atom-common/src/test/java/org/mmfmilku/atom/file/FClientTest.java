@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.mmfmilku.atom.transport.protocol.Connector;
 import org.mmfmilku.atom.transport.protocol.client.ClientSession;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
+import org.mmfmilku.atom.transport.protocol.exception.ConnectException;
 import org.mmfmilku.atom.transport.protocol.handle.ChannelContext;
 import org.mmfmilku.atom.transport.protocol.handle.RRModeHandle;
 import org.mmfmilku.atom.transport.protocol.handle.string.StringHandle;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 import static org.junit.Assert.*;
@@ -27,9 +29,13 @@ import static org.junit.Assert.*;
  */
 public class FClientTest {
 
+    private static int MAX_CONNECT = 20;
+    private String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
+    private ExecutorService executorService = Executors.newFixedThreadPool(10);
+
     @BeforeClass
     public static void beforeClass() {
-        FServerUtil.runServer(
+        FServerUtil.runServer(MAX_CONNECT,
                 new TypeHandler(), new StringHandle(),
                 (RRModeHandle<String>) (data, channelContext) ->
                         channelContext.write( "fserver接收到消息:" + data));
@@ -37,7 +43,6 @@ public class FClientTest {
 
     @Test
     public void connect() {
-        String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
         FClient fClient = new FClient(path);
         ClientSession<String> connect1 = fClient.connect("1");
         ClientSession<String> connect2 = fClient.connect("2");
@@ -72,55 +77,83 @@ public class FClientTest {
     }
 
     @Test
-    public void testMaxConnect() {
-        String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
-        FClient fClient = new FClient(path);
-        int max = 10;
-        List<ClientSession<String>> connects = new ArrayList<>(max);
-        for (int i = 0; i < max; i++) {
-            ClientSession<String> connect = fClient.connect();
-            connects.add(connect);
-        }
-        for (int i = 0; i < max; i++) {
-            ClientSession<String> connect = connects.get(i);
-            String s = connect.sendThenRead("连接" + i + "发送消息a");
-            System.out.println("连接" + i + "接收：" + s);
-            assertEquals("fserver接收到消息:连接" + i + "发送消息a", s);
+    public void testMaxConnect() throws InterruptedException, ExecutionException {
+        int max = MAX_CONNECT;
+        List<ClientSession<String>> connects = connectToMax();
 
-            s = connect.sendThenRead("连接" + i + "发送消息b");
-            System.out.println("连接" + i + "接收：" + s);
-            assertEquals("fserver接收到消息:连接" + i + "发送消息b", s);
+        List<Future<?>> sendFutures = new ArrayList<>(max);
+        for (int i = 0; i < connects.size(); i++) {
+            int idx = i;
+            Future<?> submit = executorService.submit(() -> {
+                ClientSession<String> connect = connects.get(idx);
+                String s = connect.sendThenRead("连接" + idx + "发送消息a");
+                System.out.println("连接" + idx + "接收：" + s);
+                assertEquals("fserver接收到消息:连接" + idx + "发送消息a", s);
+
+                s = connect.sendThenRead("连接" + idx + "发送消息b");
+                System.out.println("连接" + idx + "接收：" + s);
+                assertEquals("fserver接收到消息:连接" + idx + "发送消息b", s);
+            });
+            sendFutures.add(submit);
+        }
+        for (Future<?> sendFuture : sendFutures) {
+            sendFuture.get();
         }
 
-        for (int i = 0; i < max; i++) {
-            ClientSession<String> connect = connects.get(i);
+        for (ClientSession<String> connect : connects) {
             connect.close();
         }
 
     }
 
     @Test
-    public void testClose() {
-        String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
+    public void testClose() throws InterruptedException {
+        System.out.println("------------------第一次连接至上限--------------");
+        List<ClientSession<String>> connects1 = connectToMax();
+        assertEquals(connects1.size(), MAX_CONNECT);
+        System.out.println("------------------第二次连一定数量--------------");
+        List<ClientSession<String>> connects2 = connect(5);
+        assertEquals(connects2.size(), 0);
+        System.out.println("------------------关闭所有连接--------------");
+        for (ClientSession<String> session : connects1) {
+            session.close();
+        }
+        System.out.println("------------------第三次连接至上限--------------");
+        List<ClientSession<String>> connects3 = connectToMax();
+        assertEquals(connects3.size(), MAX_CONNECT);
+        for (ClientSession<String> session : connects3) {
+            session.close();
+        }
+    }
+
+    private List<ClientSession<String>> connect(int connectNum) throws InterruptedException {
         FClient fClient = new FClient(path);
-        ClientSession<String> connect1 = fClient.connect("c1");
-        ClientSession<String> connect2 = fClient.connect("c2");
-        ClientSession<String> connect3 = fClient.connect("c3");
-        ClientSession<String> connect4 = fClient.connect("c4");
-        ClientSession<String> connect5 = fClient.connect("c5");
+        int max = connectNum;
+        List<ClientSession<String>> connects = new ArrayList<>(max);
+        List<Future<ClientSession<String>>> futures = new ArrayList<>(max);
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < max; i++) {
+            Future<ClientSession<String>> submit =
+                    executorService.submit((Callable<ClientSession<String>>) fClient::connect);
+            futures.add(submit);
+        }
+        for (int i = 0; i < max; i++) {
+            try {
+                ClientSession<String> session = futures.get(i).get();
+                connects.add(session);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("尝试连接：" + max + "," +
+                "连接成功：" + connects.size() + "," +
+                "耗时" + (end - start) + "ms");
+        return connects;
+    }
 
-
-        connect5.send("5555");
-
-        connect1.close();
-        connect2.close();
-        connect3.close();
-        connect4.close();
-        connect5.close();
-
-        ClientSession<String> connect6 = fClient.connect("c6");
-        connect6.close();
-
+    private List<ClientSession<String>> connectToMax() throws InterruptedException {
+        return connect(MAX_CONNECT);
     }
 
     @Test

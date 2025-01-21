@@ -10,12 +10,17 @@ import java.util.List;
 
 public class HandleManager {
 
-    private List<ServerHandle> handles = new ArrayList<>();
+    private final List<ServerHandle> handles = new ArrayList<>();
 
     private long readTimeOutMillis = 0;
 
     public void setReadTimeOutMillis(long readTimeOutMillis) {
         this.readTimeOutMillis = readTimeOutMillis;
+    }
+
+    public void refuse(Connector ctx) {
+        ctx.write(MessageUtils.packFFrame());
+        ctx.close();
     }
 
     public boolean openConnect(Connector ctx) {
@@ -26,8 +31,10 @@ public class HandleManager {
         FFrame read = ctx.read(readTimeOutMillis);
         boolean open = MessageUtils.equals(pongFrame, read);
         if (open) {
+            ctx.write(MessageUtils.packFFrame((byte) 1));
             handles.forEach(h -> h.onOpen(getChannelContext(ctx)));
         } else {
+            ctx.write(MessageUtils.packFFrame((byte) 0));
             handles.forEach(h -> h.onOpenFail(getChannelContext(ctx)));
         }
         return open;

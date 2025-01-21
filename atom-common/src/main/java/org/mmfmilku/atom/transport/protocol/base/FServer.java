@@ -43,25 +43,25 @@ public class FServer {
 
     private String listenPath;
 
-    private Map<String, Connector> ctxMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Connector> ctxMap = new ConcurrentHashMap<>();
 
     private HandleManager handleManager;
 
     private OutputStream listenStream;
 
-    private int boosThreadSize;
-    private int workerThreadSize;
+    private int boosThreadSize = 3;
+    private int workerThreadSize = 3;
     // 最大客户端连接数
-    private int maxConnect;
+    private int maxConnect = 10;
     // 检测连接间隔毫秒时间
-    private long connectDelay;
+    private long connectDelay = 300;
     // 接收消息间隔毫秒时间
-    private long receiveDelay;
+    private long receiveDelay = 100;
     // 清理断开连接的通信文件时间间隔，秒
-    private long clearDelay;
+    private long clearDelay = 3;
 
     // 读取完整帧超时时间，毫秒
-    private long readTimeOutMillis;
+    private long readTimeOutMillis = 2000;
 
     private ScheduledExecutorService bossExecutor;
 
@@ -69,13 +69,15 @@ public class FServer {
 
     public FServer(String listenPath) {
         this.listenPath = listenPath;
-        this.boosThreadSize = 3;
-        this.workerThreadSize = 2;
-        this.maxConnect = 10;
-        this.connectDelay = 300;
-        this.receiveDelay = 100;
-        this.clearDelay = 5;
-        this.readTimeOutMillis = 2000;
+
+        handleManager = new HandleManager();
+        handleManager.setReadTimeOutMillis(readTimeOutMillis);
+    }
+
+    public FServer(String listenPath, int maxConnect) {
+        this.listenPath = listenPath;
+
+        this.maxConnect = maxConnect;
 
         handleManager = new HandleManager();
         handleManager.setReadTimeOutMillis(readTimeOutMillis);
@@ -132,10 +134,10 @@ public class FServer {
 
         workerExecutor = new ThreadPoolExecutor(workerThreadSize, workerThreadSize,
                 0L, TimeUnit.MILLISECONDS,
-                // 队列长度等于最大连接数
-                new ArrayBlockingQueue<>(maxConnect),
+                // 工作线程除收集数据外还负责为新连接握手，队列长度保证余量
+                new ArrayBlockingQueue<>(maxConnect  * 2),
                 new DaemonThreadFactory("pool-fserver-worker-thread"),
-                (r, executor) -> System.out.println("连接拒绝")
+                (r, executor) -> System.out.println("服务器连接已满")
         );
     }
 
@@ -150,7 +152,8 @@ public class FServer {
                     && name.endsWith(REQUEST));
             if (requestFiles != null) {
                 for (File requestFile : requestFiles) {
-                    accept(requestFile);
+                    // 使用工作线程接收连接
+                    workerExecutor.submit(() -> accept(requestFile));
                 }
             }
             // 执行一次的时间
@@ -163,7 +166,7 @@ public class FServer {
             try {
                 List<Callable<Boolean>> tasks = ctxMap.values()
                         .stream()
-                        .filter(ctx ->  ctx != ACCEPTED_CTX && !ctx.isClose())
+                        .filter(ctx -> ctx != ACCEPTED_CTX && ctx != FAILED_CTX && !ctx.isClose())
                         .map(ctx -> (Callable<Boolean>) () -> {
                             FFrame read = ctx.tryRead();
                             if (read != null) {
@@ -190,7 +193,8 @@ public class FServer {
                     Map.Entry<String, Connector> next = itr.next();
                     // 获取关闭的上下文
                     Connector ctx = next.getValue();
-                    if (ctx != ACCEPTED_CTX && ctx.isClose()) {
+                    if (    (ctx != ACCEPTED_CTX && ctx.isClose()) || ctx == FAILED_CTX
+                    ) {
                         // 删除关闭连接的文件
                         String fileName = next.getKey();
                         System.out.println("清理 " + fileName);
@@ -217,11 +221,20 @@ public class FServer {
     }
 
     private void accept(File requestFile) {
+        if (ctxMap.size() >= maxConnect) {
+            ctxMap.putIfAbsent(requestFile.getName(), FAILED_CTX);
+            throw new RuntimeException("连接忽略" + requestFile.getName());
+        }
         InputStream inputStream = null;
         OutputStream outputStream = null;
         try {
             // 拒绝的连接认为已处理，否则将不断处理
-            ctxMap.put(requestFile.getName(), ACCEPTED_CTX);
+            // 不存在的情况put
+            Connector putted = ctxMap.putIfAbsent(requestFile.getName(), ACCEPTED_CTX);
+            if (putted != null) {
+                // 旧值不为空表示发生并发
+                return;
+            }
             inputStream = new FileInputStream(requestFile);
             outputStream = new FileOutputStream(
                     new File(requestFile.getAbsolutePath() + RESPONSE));
@@ -230,7 +243,7 @@ public class FServer {
             );
             boolean open = handleManager.openConnect(ctx);
             if (!open) {
-                throw new RuntimeException("连接建立失败");
+                throw new RuntimeException("连接建立失败" + requestFile.getName());
             }
             ctxMap.put(requestFile.getName(), ctx);
         } catch (Exception e) {

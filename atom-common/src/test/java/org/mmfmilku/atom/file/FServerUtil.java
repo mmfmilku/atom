@@ -18,6 +18,15 @@ public class FServerUtil {
         fServer.start();
     }
 
+    public static void runServer(int maxConnect, ServerHandle ...serverHandles) {
+        String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
+        FServer fServer = new FServer(path, maxConnect);
+        for (ServerHandle serverHandle : serverHandles) {
+            fServer.addHandle(serverHandle);
+        }
+        fServer.start();
+    }
+
     public static void runServerDaemon(ServerHandle serverHandle) {
         Thread thread = new Thread("test-fserver") {
             @Override

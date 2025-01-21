@@ -4,6 +4,7 @@ import org.mmfmilku.atom.transport.protocol.Connector;
 import org.mmfmilku.atom.transport.protocol.MessageUtils;
 import org.mmfmilku.atom.transport.protocol.base.FFrame;
 import org.mmfmilku.atom.transport.protocol.base.FServer;
+import org.mmfmilku.atom.transport.protocol.exception.ConnectException;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.*;
@@ -69,18 +70,19 @@ public class FClient {
     }
     
     public ClientSession<String> connect(String name) {
+        System.out.println("请求连接" + name);
         checkListen();
         String requestName = name + FServer.REQUEST;
         String responseName = requestName + FServer.RESPONSE;
         File requestFile = new File(connectPath, requestName);
         if (requestFile.exists() || requestFile.isDirectory()) {
-            throw new RuntimeException("连接失败,连接重复");
+            throw new ConnectException("连接失败,连接重复");
         }
         try {
             boolean newFile = requestFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("连接失败");
+            throw new ConnectException("连接失败");
         }
         File responseFile = new File(connectPath, responseName);
         waitCount(o -> responseFile.exists());
@@ -90,21 +92,28 @@ public class FClient {
             inputStream = new FileInputStream(responseFile);
             outputStream = new FileOutputStream(requestFile);
             Connector ctx = new Connector(inputStream, outputStream, null);
-            // TODO @chenxp 2024/9/30 建立连接
             FFrame ping = ctx.read(readTimeOutMillis);
             if (ping != null) {
+                if (MessageUtils.decodeLength(ping.getLen()) == 0) {
+                    throw new ConnectException("连接已满");
+                }
                 byte[] pong = MessageUtils.getPong(ping.getData());
                 ctx.write(MessageUtils.packFFrame(pong));
+                FFrame accept = ctx.read(readTimeOutMillis);
+                if (accept != null && accept.getData()[0] == 1) {
+                    return new SRClientSession(ctx);
+                } else {
+                    throw new ConnectException("连接失败");
+                }
             } else {
-                throw new RuntimeException("连接失败");
+                throw new ConnectException("连接超时");
             }
-            return new SRClientSession(ctx);
         } catch (IOException e) {
             e.printStackTrace();
             IOUtils.closeStream(inputStream);
             IOUtils.closeStream(outputStream);
         }
-        throw new RuntimeException("连接失败");
+        throw new ConnectException("连接失败");
     }
 
     private void checkListen() {
@@ -116,11 +125,11 @@ public class FClient {
         int waitCount = 0;
         while (!function.apply(waitCount)) {
             if (waitCount > 10) {
-                throw new RuntimeException("等待服务器响应超时");
+                throw new ConnectException("等待服务器响应超时");
             }
             try {
-                System.out.println("等待服务器响应");
-                Thread.sleep(1000);
+//                System.out.println("等待服务器响应");
+                Thread.sleep(300);
                 waitCount++;
             } catch (InterruptedException e) {
                 e.printStackTrace();
