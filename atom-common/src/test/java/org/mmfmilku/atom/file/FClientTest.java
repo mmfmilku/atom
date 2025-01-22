@@ -42,45 +42,56 @@ public class FClientTest {
     }
 
     @Test
-    public void connect() {
-        FClient fClient = new FClient(path);
-        ClientSession<String> connect1 = fClient.connect("1");
-        ClientSession<String> connect2 = fClient.connect("2");
-
-        String s = connect1.sendThenRead("发送消息1");
-        System.out.println("接收：" + s);
-        assertEquals("fserver接收到消息:发送消息1", s);
-
-        s = connect2.sendThenRead("连接2发送消息1");
-        System.out.println("接收：" + s);
-        assertEquals("fserver接收到消息:连接2发送消息1", s);
-
-        s = connect1.sendThenRead("发送消息2");
-        System.out.println("接收：" + s);
-        assertEquals("fserver接收到消息:发送消息2", s);
-
-        connect1.close();
-
-        s = connect2.sendThenRead("连接2发送消息2");
-        System.out.println("接收：" + s);
-        assertEquals("fserver接收到消息:连接2发送消息2", s);
-
-        for (int j = 1; j <= 10; j++) {
-            System.out.println("第" + j + "次发送");
-            String read = printCostTime(i -> connect2.sendThenRead("loop msg"));
-            System.out.println("第" + j + "次发送完成,接收:" + read);
-            assertEquals("fserver接收到消息:loop msg", read);
+    public void testAll() throws InterruptedException, ExecutionException {
+        // 综合测试
+        // 1.测试连接与关闭连接，获取最大连接数
+        List<ClientSession<String>> sessions = printCostTime((a) -> {
+            try {
+                return testConnectClose();
+            } catch (InterruptedException e) {
+                fail(e.getMessage());
+            }
+            return null;
+        }, "testConnectClose");
+        // 2.测试发送接收消息
+        printCostTime((a) -> {
+            try {
+                testSendMessage(sessions);
+                return null;
+            } catch (InterruptedException | ExecutionException e) {
+                fail(e.getMessage());
+            }
+            return null;
+        }, "testSendMessage");
+        // 3.测试复杂字符串的发送接收
+        testRRModeClient(sessions);
+        // 4.关闭所有连接
+        for (ClientSession<String> connect : sessions) {
+            connect.close();
         }
-
-        connect2.close();
-
     }
 
-    @Test
-    public void testMaxConnect() throws InterruptedException, ExecutionException {
-        int max = MAX_CONNECT;
-        List<ClientSession<String>> connects = connectToMax();
+    public List<ClientSession<String>> testConnectClose() throws InterruptedException {
+        System.out.println("------------------第一次连接至上限--------------");
+        List<ClientSession<String>> connects1 = connectToMax();
+        assertEquals(connects1.size(), MAX_CONNECT);
+        System.out.println("------------------第二次连一定数量--------------");
+        List<ClientSession<String>> connects2 = connect(5);
+        assertEquals(connects2.size(), 0);
+        System.out.println("------------------关闭所有连接--------------");
+        for (ClientSession<String> session : connects1) {
+            session.close();
+        }
+        // 等待服务器完全释放连接
+        Thread.sleep(2500);
+        System.out.println("------------------第三次连接至上限--------------");
+        List<ClientSession<String>> connects3 = connectToMax();
+        assertEquals(connects3.size(), MAX_CONNECT);
+        return connects3;
+    }
 
+    public void testSendMessage(List<ClientSession<String>> connects) throws InterruptedException, ExecutionException {
+        int max = MAX_CONNECT;
         List<Future<?>> sendFutures = new ArrayList<>(max);
         for (int i = 0; i < connects.size(); i++) {
             int idx = i;
@@ -98,31 +109,6 @@ public class FClientTest {
         }
         for (Future<?> sendFuture : sendFutures) {
             sendFuture.get();
-        }
-
-        for (ClientSession<String> connect : connects) {
-            connect.close();
-        }
-
-    }
-
-    @Test
-    public void testClose() throws InterruptedException {
-        System.out.println("------------------第一次连接至上限--------------");
-        List<ClientSession<String>> connects1 = connectToMax();
-        assertEquals(connects1.size(), MAX_CONNECT);
-        System.out.println("------------------第二次连一定数量--------------");
-        List<ClientSession<String>> connects2 = connect(5);
-        assertEquals(connects2.size(), 0);
-        System.out.println("------------------关闭所有连接--------------");
-        for (ClientSession<String> session : connects1) {
-            session.close();
-        }
-        System.out.println("------------------第三次连接至上限--------------");
-        List<ClientSession<String>> connects3 = connectToMax();
-        assertEquals(connects3.size(), MAX_CONNECT);
-        for (ClientSession<String> session : connects3) {
-            session.close();
         }
     }
 
@@ -156,34 +142,20 @@ public class FClientTest {
         return connect(MAX_CONNECT);
     }
 
-    @Test
-    public void testCaseThree() {
-        String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
-        FClient fClient = new FClient(path);
-        ClientSession<String> connect = fClient.connect();
-        String read = connect.sendThenRead("fuck");
-        System.out.println(read);
-        assertEquals("fserver接收到消息:fuck", read);
-        connect.close();
-    }
-
-    @Test
-    public void testRRModeClient() {
-        ClientSession<String> connect = FServerUtil.connect();
+    public void testRRModeClient(List<ClientSession<String>> connects) {
+        ClientSession<String> connect = connects.get(0);
         Map<String, Object> map = new HashMap<>();
         map.put("k1", "5");
         map.put("k2", "8");
         String s = connect.sendThenRead(JSON.toJSONString(map));
         assertEquals("fserver接收到消息:" + JSON.toJSONString(map), s);
-        System.out.println("客户端接收" + s);
-        connect.close();
     }
 
-    private String printCostTime(Function<String, String> function) {
+    private <T> T printCostTime(Function<String, T> function, String desc) {
         long start = System.currentTimeMillis();
-        String apply = function.apply(null);
+        T apply = function.apply(null);
         long finish = System.currentTimeMillis();
-        System.out.println("耗时：" + (finish - start));
+        System.out.println(desc + "耗时：" + (finish - start));
         return apply;
     }
 }

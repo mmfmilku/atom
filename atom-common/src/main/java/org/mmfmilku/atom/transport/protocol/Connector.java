@@ -113,6 +113,7 @@ public class Connector implements Closeable {
         }
     }
 
+    @Deprecated
     public void write(String send) {
         byte[] bytes = send.getBytes();
         byte[] sendLenByte = MessageUtils.codeLength(bytes.length);
@@ -135,7 +136,7 @@ public class Connector implements Closeable {
     @Override
     public void close() {
         System.out.println("关闭连接");
-        write("");
+        write(MessageUtils.packFFrame());
         if (closeCallback != null) {
             closeCallback.accept(this);
         }

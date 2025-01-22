@@ -18,10 +18,10 @@ public class HandleManager {
         this.readTimeOutMillis = readTimeOutMillis;
     }
 
-    public void refuse(Connector ctx) {
-        ctx.write(MessageUtils.packFFrame());
-        ctx.close();
-    }
+//    public void refuse(Connector ctx) {
+//        ctx.write(MessageUtils.packFFrame());
+//        ctx.close();
+//    }
 
     public boolean openConnect(Connector ctx) {
         FFrame[] pingPong = MessageUtils.getPingPong();
@@ -44,13 +44,11 @@ public class HandleManager {
         return connector::write;
     }
 
-    public void onClose(Connector ctx) {
+    public void closeConnect(Connector connector) {
         // 在真正关闭之前触发
-        handles.forEach(h -> h.beforeClose(getChannelContext(ctx)));
-        // TODO 关闭标志
-        ctx.write("");
-        ctx.close();
-        handles.forEach(h -> h.afterClose(getChannelContext(ctx)));
+        handles.forEach(h -> h.beforeClose(getChannelContext(connector)));
+        connector.close();
+        handles.forEach(h -> h.afterClose(getChannelContext(connector)));
     }
 
     public void onError(Connector ctx) {
@@ -58,6 +56,11 @@ public class HandleManager {
     }
 
     public void onReceive(Connector connector, FFrame fFrame) {
+        if (MessageUtils.decodeLength(fFrame.getLen()) == 0) {
+            // TODO 关闭连接消息
+            closeConnect(connector);
+            return;
+        }
         Iterator<ServerHandle> handleItr = handles.iterator();
         if (handleItr.hasNext()) {
             ServerHandle next = handleItr.next();

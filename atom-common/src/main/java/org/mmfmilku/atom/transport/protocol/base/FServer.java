@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.transport.protocol.base;
 
 import org.mmfmilku.atom.transport.protocol.Connector;
+import org.mmfmilku.atom.transport.protocol.MessageUtils;
 import org.mmfmilku.atom.transport.protocol.handle.HandleManager;
 import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
 import org.mmfmilku.atom.util.IOUtils;
@@ -58,7 +59,7 @@ public class FServer {
     // 接收消息间隔毫秒时间
     private long receiveDelay = 100;
     // 清理断开连接的通信文件时间间隔，秒
-    private long clearDelay = 3;
+    private long clearDelay = 2;
 
     // 读取完整帧超时时间，毫秒
     private long readTimeOutMillis = 2000;
@@ -198,8 +199,8 @@ public class FServer {
                         // 删除关闭连接的文件
                         String fileName = next.getKey();
                         System.out.println("清理 " + fileName);
-                        if (new File(listenPath, fileName).delete()
-                                && new File(listenPath, fileName + RESPONSE).delete()) {
+                        if (deleteFile(new File(listenPath, fileName))
+                                && deleteFile(new File(listenPath, fileName + RESPONSE))) {
                             // 移除引用
                             itr.remove();
                         }
@@ -212,6 +213,10 @@ public class FServer {
         }, 0, clearDelay, TimeUnit.SECONDS);
     }
 
+    private boolean deleteFile(File file) {
+        return !file.exists() || file.delete();
+    }
+
     public void stop() {
         bossExecutor.shutdown();
         workerExecutor.shutdown();
@@ -222,8 +227,14 @@ public class FServer {
 
     private void accept(File requestFile) {
         if (ctxMap.size() >= maxConnect) {
-            ctxMap.putIfAbsent(requestFile.getName(), FAILED_CTX);
-            throw new RuntimeException("连接忽略" + requestFile.getName());
+            Connector absent = ctxMap.putIfAbsent(requestFile.getName(), FAILED_CTX);
+            if (absent == null) {
+                try (OutputStream outputStream = new FileOutputStream(
+                        new File(requestFile.getAbsolutePath() + RESPONSE))) {
+                    outputStream.write(MessageUtils.codeLength(0));
+                } catch (IOException ignored) {}
+            }
+            return;
         }
         InputStream inputStream = null;
         OutputStream outputStream = null;

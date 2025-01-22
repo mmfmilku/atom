@@ -108,7 +108,12 @@ public class FClient {
             } else {
                 throw new ConnectException("连接超时");
             }
-        } catch (IOException e) {
+        } catch (ConnectException e) {
+            e.printStackTrace();
+            IOUtils.closeStream(inputStream);
+            IOUtils.closeStream(outputStream);
+            throw e;
+        } catch (Throwable e) {
             e.printStackTrace();
             IOUtils.closeStream(inputStream);
             IOUtils.closeStream(outputStream);
