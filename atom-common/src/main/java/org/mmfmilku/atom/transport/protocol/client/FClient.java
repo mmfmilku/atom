@@ -64,12 +64,12 @@ public class FClient {
         }, 0, 300, TimeUnit.MILLISECONDS);
     }
 
-    public ClientSession<String> connect() {
+    public FClientSession connect() {
         String uuid = UUID.randomUUID().toString();
         return connect(uuid);
     }
     
-    public ClientSession<String> connect(String name) {
+    public FClientSession connect(String name) {
         System.out.println("请求连接" + name);
         checkListen();
         String requestName = name + FServer.REQUEST;
@@ -101,7 +101,7 @@ public class FClient {
                 ctx.write(MessageUtils.packFFrame(pong));
                 FFrame accept = ctx.read(readTimeOutMillis);
                 if (accept != null && accept.getData()[0] == 1) {
-                    return new SRClientSession(ctx);
+                    return new FClientSession(ctx);
                 } else {
                     throw new ConnectException("连接失败");
                 }

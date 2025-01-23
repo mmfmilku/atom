@@ -3,11 +3,9 @@ package org.mmfmilku.atom.file;
 import com.alibaba.fastjson.JSON;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mmfmilku.atom.transport.protocol.Connector;
 import org.mmfmilku.atom.transport.protocol.client.ClientSession;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
-import org.mmfmilku.atom.transport.protocol.exception.ConnectException;
-import org.mmfmilku.atom.transport.protocol.handle.ChannelContext;
+import org.mmfmilku.atom.transport.protocol.client.FClients;
 import org.mmfmilku.atom.transport.protocol.handle.RRModeHandle;
 import org.mmfmilku.atom.transport.protocol.handle.string.StringHandle;
 import org.mmfmilku.atom.transport.protocol.handle.type.TypeHandler;
@@ -120,7 +118,7 @@ public class FClientTest {
         long start = System.currentTimeMillis();
         for (int i = 0; i < max; i++) {
             Future<ClientSession<String>> submit =
-                    executorService.submit((Callable<ClientSession<String>>) fClient::connect);
+                    executorService.submit(() -> FClients.getStringClientSession(fClient));
             futures.add(submit);
         }
         for (int i = 0; i < max; i++) {

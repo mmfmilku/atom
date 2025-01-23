@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.file;
 
 import org.mmfmilku.atom.transport.protocol.client.ClientSession;
+import org.mmfmilku.atom.transport.protocol.client.FClients;
 import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
 import org.mmfmilku.atom.transport.protocol.base.FServer;
@@ -41,7 +42,7 @@ public class FServerUtil {
     public static ClientSession<String> connect() {
         String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
         FClient fClient = new FClient(path);
-        return fClient.connect();
+        return FClients.getStringClientSession(fClient);
     }
 
 }

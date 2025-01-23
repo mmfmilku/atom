@@ -57,7 +57,7 @@ public class HandleManager {
 
     public void onReceive(Connector connector, FFrame fFrame) {
         if (MessageUtils.decodeLength(fFrame.getLen()) == 0) {
-            // TODO 关闭连接消息
+            // 关闭连接消息
             closeConnect(connector);
             return;
         }

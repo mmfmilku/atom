@@ -4,6 +4,7 @@ import org.mmfmilku.atom.transport.protocol.client.ClientSession;
 import org.mmfmilku.atom.transport.frpc.server.FRPCParam;
 import org.mmfmilku.atom.transport.frpc.server.FRPCReturn;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
+import org.mmfmilku.atom.transport.protocol.client.FClients;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.util.Base64;
@@ -71,7 +72,7 @@ public class FRPCClient {
             // double check 同步，保证不超上限
             synchronized (clientList) {
                 if (clientList.size() < maxConnect) {
-                    FRPCSession frpcSession = new FRPCSession(fClient.connect());
+                    FRPCSession frpcSession = new FRPCSession(FClients.getStringClientSession(fClient));
                     // 局部变量，无需上锁
                     FRPCReturn result = call(frpcSession, frpcParam);
                     // 调用完后再添加至连接列表，避免被其他线程抢夺
