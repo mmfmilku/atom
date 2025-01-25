@@ -7,6 +7,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -17,6 +19,8 @@ public class Connector implements Closeable {
     private Consumer<Connector> closeCallback;
 
     private boolean close = false;
+
+    private Charset charset = StandardCharsets.UTF_8;
 
     public boolean isClose() {
         return close;
@@ -98,6 +102,11 @@ public class Connector implements Closeable {
             if (fFrame != null) {
                 return fFrame;
             }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         while (timeOut > System.currentTimeMillis());
         return null;
@@ -115,7 +124,7 @@ public class Connector implements Closeable {
 
     @Deprecated
     public void write(String send) {
-        byte[] bytes = send.getBytes();
+        byte[] bytes = send.getBytes(charset);
         byte[] sendLenByte = MessageUtils.codeLength(bytes.length);
         try {
             outputStream.write(sendLenByte);

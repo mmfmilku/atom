@@ -1,14 +1,13 @@
 package org.mmfmilku.atom.transport.frpc.server;
 
-import org.mmfmilku.atom.transport.protocol.Connector;
 import org.mmfmilku.atom.transport.protocol.handle.ChannelContext;
 import org.mmfmilku.atom.transport.protocol.handle.RRModeHandle;
+import org.mmfmilku.atom.transport.protocol.handle.type.TypeFrame;
 import org.mmfmilku.atom.util.IOUtils;
 
-import java.util.Base64;
 import java.util.Map;
 
-public class FRPCHandle implements RRModeHandle<String> {
+public class FRPCHandle implements RRModeHandle<TypeFrame> {
 
     private Map<String, ServiceMapping> mappings;
 
@@ -17,9 +16,9 @@ public class FRPCHandle implements RRModeHandle<String> {
     }
 
     @Override
-    public void onReceive(String data, ChannelContext<String> ctx) {
+    public void onReceive(TypeFrame data, ChannelContext<TypeFrame> ctx) {
         try {
-            byte[] rawData = Base64.getDecoder().decode(data.trim());
+            byte[] rawData = data.getData();
 
             FRPCParam frpcParam = IOUtils.deserialize(rawData);
 
@@ -29,7 +28,6 @@ public class FRPCHandle implements RRModeHandle<String> {
             }
 
             FRPCReturn frpcReturn = serviceMapping.execute(frpcParam.getApiName(), frpcParam);
-            // TODO 超长数据，分批写入
             ctx.write(encode(frpcReturn));
         } catch (Throwable e) {
             e.printStackTrace();
@@ -45,10 +43,9 @@ public class FRPCHandle implements RRModeHandle<String> {
         }
     }
 
-    private String encode(FRPCReturn frpcReturn) {
+    private TypeFrame encode(FRPCReturn frpcReturn) {
         byte[] serialize = IOUtils.serialize(frpcReturn);
-        String encode = Base64.getEncoder().encodeToString(serialize);
-        return encode + "\r";
+        return new TypeFrame(serialize);
     }
 
 }

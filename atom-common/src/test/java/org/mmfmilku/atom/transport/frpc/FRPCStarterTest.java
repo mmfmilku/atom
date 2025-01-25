@@ -19,10 +19,11 @@ import static org.junit.Assert.*;
 
 public class FRPCStarterTest {
 
+    String fDir = System.getProperty("user.dir") + File.separator + "test" + File.separator + "fserver2";
+
     @Test
     public void testScanService() {
         try {
-            String fDir = System.getProperty("user.dir") + File.separator + "fserver";
             FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
             ReflectUtils.invokeMethod(starter, "scanService");
             List<Class<?>> classes = (List<Class<?>>)
@@ -40,7 +41,6 @@ public class FRPCStarterTest {
     @Test
     public void testMapService() {
         try {
-            String fDir = System.getProperty("user.dir") + File.separator + "fserver";
             FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
             ReflectUtils.invokeMethod(starter, "scanService");
             ReflectUtils.invokeMethod(starter, "mapService");
@@ -57,7 +57,6 @@ public class FRPCStarterTest {
     @Test
     public void testMappingExecute() {
         try {
-            String fDir = System.getProperty("user.dir") + File.separator + "fserver";
             FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
             ReflectUtils.invokeMethod(starter, "scanService");
             ReflectUtils.invokeMethod(starter, "mapService");
@@ -96,8 +95,6 @@ public class FRPCStarterTest {
 
     @Test
     public void testRunServer() {
-        String fDir = System.getProperty("user.dir") + File.separator + "fserver";
-
         FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
         starter.runServer();
 

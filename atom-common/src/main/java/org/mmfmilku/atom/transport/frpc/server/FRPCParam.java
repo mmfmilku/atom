@@ -11,6 +11,16 @@ public class FRPCParam implements Serializable {
 
     private Object[] data;
 
+    private FRPCReturn frpcReturn;
+
+    public FRPCReturn getFrpcReturn() {
+        return frpcReturn;
+    }
+
+    public void setFrpcReturn(FRPCReturn frpcReturn) {
+        this.frpcReturn = frpcReturn;
+    }
+
     public String getServiceClass() {
         return serviceClass;
     }

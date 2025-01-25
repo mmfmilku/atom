@@ -5,11 +5,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mmfmilku.atom.transport.protocol.client.ClientSession;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
-import org.mmfmilku.atom.transport.protocol.client.FClients;
+import org.mmfmilku.atom.transport.protocol.FClients;
 import org.mmfmilku.atom.transport.protocol.handle.RRModeHandle;
 import org.mmfmilku.atom.transport.protocol.handle.string.StringHandle;
 import org.mmfmilku.atom.transport.protocol.handle.type.TypeHandler;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,7 @@ import static org.junit.Assert.*;
 public class FClientTest {
 
     private static int MAX_CONNECT = 20;
-    private String path = System.getProperty("user.dir") + "\\src\\main\\resources\\test\\transport";
+    private String path = System.getProperty("user.dir") + File.separator + "test" + File.separator + "transport";
     private ExecutorService executorService = Executors.newFixedThreadPool(10);
 
     @BeforeClass
@@ -36,7 +37,7 @@ public class FClientTest {
         FServerUtil.runServer(MAX_CONNECT,
                 new TypeHandler(), new StringHandle(),
                 (RRModeHandle<String>) (data, channelContext) ->
-                        channelContext.write( "fserver接收到消息:" + data));
+                        channelContext.write( "fserver receive:" + data));
     }
 
     @Test
@@ -57,6 +58,7 @@ public class FClientTest {
                 testSendMessage(sessions);
                 return null;
             } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
                 fail(e.getMessage());
             }
             return null;
@@ -95,13 +97,15 @@ public class FClientTest {
             int idx = i;
             Future<?> submit = executorService.submit(() -> {
                 ClientSession<String> connect = connects.get(idx);
-                String s = connect.sendThenRead("连接" + idx + "发送消息a");
+                String send  = "connect " + idx + " send message a";
+                String s = connect.sendThenRead(send);
                 System.out.println("连接" + idx + "接收：" + s);
-                assertEquals("fserver接收到消息:连接" + idx + "发送消息a", s);
+                assertEquals("fserver receive:" + send, s);
 
-                s = connect.sendThenRead("连接" + idx + "发送消息b");
+                send  = "connect " + idx + " send message b";
+                s = connect.sendThenRead(send);
                 System.out.println("连接" + idx + "接收：" + s);
-                assertEquals("fserver接收到消息:连接" + idx + "发送消息b", s);
+                assertEquals("fserver receive:" + send, s);
             });
             sendFutures.add(submit);
         }
@@ -118,7 +122,7 @@ public class FClientTest {
         long start = System.currentTimeMillis();
         for (int i = 0; i < max; i++) {
             Future<ClientSession<String>> submit =
-                    executorService.submit(() -> FClients.getStringClientSession(fClient));
+                    executorService.submit(() -> FClients.openStringClientSession(fClient));
             futures.add(submit);
         }
         for (int i = 0; i < max; i++) {
@@ -146,7 +150,7 @@ public class FClientTest {
         map.put("k1", "5");
         map.put("k2", "8");
         String s = connect.sendThenRead(JSON.toJSONString(map));
-        assertEquals("fserver接收到消息:" + JSON.toJSONString(map), s);
+        assertEquals("fserver receive:" + JSON.toJSONString(map), s);
     }
 
     private <T> T printCostTime(Function<String, T> function, String desc) {

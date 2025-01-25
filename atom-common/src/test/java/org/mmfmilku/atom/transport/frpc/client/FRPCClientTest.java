@@ -19,11 +19,10 @@ import static org.junit.Assert.*;
  */
 public class FRPCClientTest {
 
+    String fDir = System.getProperty("user.dir") + File.separator + "test" + File.separator + "fserver1";
+
     @Test
     public void getService() {
-
-        String fDir = System.getProperty("user.dir") + File.separator + "fserver";
-
         FRPCStarter starter = new FRPCStarter("org.mmfmilku.atom", fDir);
         starter.runServer();
 

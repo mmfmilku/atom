@@ -2,6 +2,7 @@ package org.mmfmilku.atom.transport.frpc.server;
 
 import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.transport.protocol.base.FServer;
+import org.mmfmilku.atom.transport.protocol.handle.type.TypeHandler;
 import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
 
@@ -50,6 +51,7 @@ public class FRPCStarter {
     private void run() {
         try {
             fServer = new FServer(fDir)
+                    .addHandle(new TypeHandler())
                     .addHandle(new FRPCHandle(mappings));
             fServer.start();
         } catch (Throwable throwable) {
