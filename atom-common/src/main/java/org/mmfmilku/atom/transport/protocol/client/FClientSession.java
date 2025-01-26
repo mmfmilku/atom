@@ -28,7 +28,7 @@ public class FClientSession implements ClientSession<FFrame> {
         if (read == null) {
             throw new ConnectException("read timeout");
         }
-        if (0 == MessageUtils.decodeLength(read.getLen())) {
+        if (0 == MessageUtils.decodeInt(read.getLen())) {
             connector.close();
             throw new ConnectException("connect closed");
         }

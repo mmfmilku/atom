@@ -8,7 +8,6 @@ import org.mmfmilku.atom.util.IOUtils;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -231,7 +230,7 @@ public class FServer {
             if (absent == null) {
                 try (OutputStream outputStream = new FileOutputStream(
                         new File(requestFile.getAbsolutePath() + RESPONSE))) {
-                    outputStream.write(MessageUtils.codeLength(0));
+                    outputStream.write(MessageUtils.codeInt(0));
                 } catch (IOException ignored) {}
             }
             return;

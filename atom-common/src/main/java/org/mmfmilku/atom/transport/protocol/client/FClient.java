@@ -94,7 +94,7 @@ public class FClient {
             Connector ctx = new Connector(inputStream, outputStream, null);
             FFrame ping = ctx.read(readTimeOutMillis);
             if (ping != null) {
-                if (MessageUtils.decodeLength(ping.getLen()) == 0) {
+                if (MessageUtils.decodeInt(ping.getLen()) == 0) {
                     throw new ConnectException("连接已满");
                 }
                 byte[] pong = MessageUtils.getPong(ping.getData());

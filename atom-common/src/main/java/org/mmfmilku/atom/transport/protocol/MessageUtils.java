@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.transport.protocol;
 
 import org.mmfmilku.atom.transport.protocol.base.FFrame;
+import org.mmfmilku.atom.transport.protocol.exception.MessageCodeException;
 
 import java.util.Arrays;
 
@@ -8,16 +9,16 @@ public class MessageUtils {
 
     private static int MAX_BYTE_2 = 0xffff;
 
-    public static byte[] codeLength(int i) {
+    public static byte[] codeInt(int i) {
         if (i > MAX_BYTE_2) {
-            throw new RuntimeException("长度超长" + i);
+            throw new MessageCodeException("data too long " + i);
         }
         byte b1 = (byte) (i >> 8);
         byte b2 = (byte) (i & 0xff);
         return new byte[]{b1, b2};
     }
 
-    public static int decodeLength(byte[] byteBuf) {
+    public static int decodeInt(byte[] byteBuf) {
         if (byteBuf.length != 2) {
             throw new RuntimeException("字节数组大小不为2");
         }
@@ -27,7 +28,7 @@ public class MessageUtils {
     }
 
     public static FFrame packFFrame(byte ...data) {
-        byte[] lenByte = MessageUtils.codeLength(data.length);
+        byte[] lenByte = MessageUtils.codeInt(data.length);
         FFrame fFrame = new FFrame();
         fFrame.setData(data);
         fFrame.setLen(lenByte);

@@ -23,8 +23,11 @@ public class TypeFrame {
      * */
     public static final byte ERROR = 4;
 
+    public static final int MAX_DATA_LENGTH = 65534;
+
     private byte type;
 
+    // max length 65534
     private byte[] data;
 
     public TypeFrame(byte[] data) {

@@ -11,12 +11,12 @@ public class FServerTest {
     @Test
     public void testLength() {
         for (int i = 0; i <= 65535; i+=1) {
-            byte[] bytes = MessageUtils.codeLength(i);
-            int i1 = MessageUtils.decodeLength(bytes);
+            byte[] bytes = MessageUtils.codeInt(i);
+            int i1 = MessageUtils.decodeInt(bytes);
             assertEquals(i, i1);
         }
         try {
-            MessageUtils.codeLength(65536);
+            MessageUtils.codeInt(65536);
             fail("65536长度超长未校验");
         } catch (Exception ignored) {
 

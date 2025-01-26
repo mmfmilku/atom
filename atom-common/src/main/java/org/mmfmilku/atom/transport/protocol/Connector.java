@@ -61,7 +61,7 @@ public class Connector implements Closeable {
                     dataReadSize = 0;
                 }
             }
-            int len = MessageUtils.decodeLength(tmpLen);
+            int len = MessageUtils.decodeInt(tmpLen);
             if (tmpData == null) {
                 tmpData = new byte[len];
                 dataReadSize = 0;
@@ -125,7 +125,7 @@ public class Connector implements Closeable {
     @Deprecated
     public void write(String send) {
         byte[] bytes = send.getBytes(charset);
-        byte[] sendLenByte = MessageUtils.codeLength(bytes.length);
+        byte[] sendLenByte = MessageUtils.codeInt(bytes.length);
         try {
             outputStream.write(sendLenByte);
             outputStream.write(bytes);

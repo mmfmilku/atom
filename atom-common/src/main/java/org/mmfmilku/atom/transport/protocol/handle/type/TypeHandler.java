@@ -6,6 +6,7 @@ import org.mmfmilku.atom.transport.protocol.base.FFrame;
 import org.mmfmilku.atom.transport.protocol.handle.ChannelContext;
 import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 /**
@@ -15,17 +16,28 @@ public class TypeHandler implements ServerHandle<FFrame, TypeFrame> {
 
     @Override
     public ChannelContext<TypeFrame> getChannelContext(ChannelContext<FFrame> channelContext) {
-        return typeFrame -> {
-            byte type = typeFrame.getType();
-            byte[] data = typeFrame.getData();
-            byte[] fData = new byte[1 + data.length];
-            fData[0] = type;
+        return typeFrame -> channelContext.write(decode(typeFrame));
+    }
+
+    private FFrame decode(TypeFrame typeFrame) {
+        byte type = typeFrame.getType();
+        byte[] data = typeFrame.getData();
+        byte[] fData = new byte[1 + data.length];
+        fData[0] = type;
+        System.arraycopy(data, 0, fData, 1, data.length);
+        FFrame fFrame = new FFrame();
+        try {
+            fFrame.setLen(MessageUtils.codeInt(fData.length));
+        } catch (Exception e) {
+            e.printStackTrace();
+            data = e.getMessage().getBytes(StandardCharsets.UTF_8);
+            fData = new byte[1 + data.length];
+            fData[0] = TypeFrame.ERROR;
             System.arraycopy(data, 0, fData, 1, data.length);
-            FFrame fFrame = new FFrame();
-            fFrame.setLen(MessageUtils.codeLength(fData.length));
-            fFrame.setData(fData);
-            channelContext.write(fFrame);
-        };
+            fFrame.setLen(MessageUtils.codeInt(fData.length));
+        }
+        fFrame.setData(fData);
+        return fFrame;
     }
 
     @Override

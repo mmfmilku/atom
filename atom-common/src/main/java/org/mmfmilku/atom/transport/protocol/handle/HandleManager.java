@@ -12,16 +12,11 @@ public class HandleManager {
 
     private final List<ServerHandle> handles = new ArrayList<>();
 
-    private long readTimeOutMillis = 0;
+    private long readTimeOutMillis = 2000;
 
     public void setReadTimeOutMillis(long readTimeOutMillis) {
         this.readTimeOutMillis = readTimeOutMillis;
     }
-
-//    public void refuse(Connector ctx) {
-//        ctx.write(MessageUtils.packFFrame());
-//        ctx.close();
-//    }
 
     public boolean openConnect(Connector ctx) {
         FFrame[] pingPong = MessageUtils.getPingPong();
@@ -56,7 +51,7 @@ public class HandleManager {
     }
 
     public void onReceive(Connector connector, FFrame fFrame) {
-        if (MessageUtils.decodeLength(fFrame.getLen()) == 0) {
+        if (MessageUtils.decodeInt(fFrame.getLen()) == 0) {
             // 关闭连接消息
             closeConnect(connector);
             return;
