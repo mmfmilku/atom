@@ -6,6 +6,7 @@ import org.mmfmilku.atom.transport.protocol.base.FFrame;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class HandleManager {
 
@@ -26,10 +27,10 @@ public class HandleManager {
         boolean open = MessageUtils.equals(pongFrame, read);
         if (open) {
             connector.write(MessageUtils.packFFrame((byte) 1));
-            handles.forEach(h -> h.onOpen(newPipeLine(connector)));
+            eventTrig(ServerHandle::onOpen, newPipeLine(connector));
         } else {
             connector.write(MessageUtils.packFFrame((byte) 0));
-            handles.forEach(h -> h.onOpenFail(newPipeLine(connector)));
+            eventTrig(ServerHandle::onOpenFail, newPipeLine(connector));
         }
         return open;
     }
@@ -40,15 +41,19 @@ public class HandleManager {
         return pipeLine;
     }
 
+    private void eventTrig(BiConsumer<ServerHandle, PipeLine> biConsumer, PipeLine pipeLine) {
+        if (handles.size() > 0) biConsumer.accept(handles.get(0), pipeLine);
+    }
+
     public void closeConnect(Connector connector) {
         // 在真正关闭之前触发
-        handles.forEach(h -> h.beforeClose(newPipeLine(connector)));
+        eventTrig(ServerHandle::beforeClose, newPipeLine(connector));
         connector.close();
-        handles.forEach(h -> h.afterClose(newPipeLine(connector)));
+        eventTrig(ServerHandle::afterClose, newPipeLine(connector));
     }
 
     public void onError(Connector connector) {
-        handles.forEach(h -> h.onError(newPipeLine(connector)));
+        eventTrig(ServerHandle::onError, newPipeLine(connector));
     }
 
     public void onReceive(Connector connector, FFrame fFrame) {

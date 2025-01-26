@@ -48,7 +48,7 @@ public class BigDataTest {
         }
     }
 
-//    @Test
+    @Test
     public void bigServerTest() {
         TypeClientSession session = FClients.openTypeClientSession(fClient2);
         String base = new String(new byte[65534]);

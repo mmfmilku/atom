@@ -11,7 +11,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class Connector implements Closeable {
@@ -20,7 +21,7 @@ public class Connector implements Closeable {
     private OutputStream outputStream;
     private Consumer<Connector> closeCallback;
 
-    private List<FFrame> cacheList = new ArrayList<>();
+    private Map<Object, Object> connectAttr = new HashMap<>();
 
     private boolean close = false;
 
@@ -138,16 +139,8 @@ public class Connector implements Closeable {
         }
     }
 
-    public void cache(FFrame fFrame) {
-        cacheList.add(fFrame);
-    }
-
-    public void clearCache() {
-        cacheList.clear();
-    }
-
-    public void getCache() {
-        return;
+    public Map<Object, Object> getAttrMap() {
+        return connectAttr;
     }
 
     public void flush() {

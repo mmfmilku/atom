@@ -10,7 +10,7 @@ public class PipeLine {
 
     private Connector connector;
 
-    public PipeLine(Connector connector) {
+    PipeLine(Connector connector) {
         this.connector = connector;
     }
 
@@ -20,21 +20,6 @@ public class PipeLine {
      * 表示已经处理的最后 handle的下标
      * */
     private int handlePoint = -1;
-
-    private ChannelContext channelContext;
-
-    private FFrame decode(Object input) {
-        Object output = input;
-        // 倒序解码
-        for (int i = handlePoint; i >= 0; i--) {
-            output = handleList.get(i).decode(output);
-        }
-        return (FFrame) output;
-    }
-
-    public List<ServerHandle> getHandleList() {
-        return handleList;
-    }
 
     public void handleNext(Object frame) {
         if (handleList.size() > handlePoint + 1) {
@@ -47,4 +32,24 @@ public class PipeLine {
         connector.write(decode(input));
     }
 
+    public void setAttr(Object key, Object value) {
+        connector.getAttrMap().put(key, value);
+    }
+
+    public Object getAttr(Object key) {
+        return connector.getAttrMap().get(key);
+    }
+
+    private FFrame decode(Object input) {
+        Object output = input;
+        // 倒序解码
+        for (int i = handlePoint; i >= 0; i--) {
+            output = handleList.get(i).decode(output);
+        }
+        return (FFrame) output;
+    }
+
+    List<ServerHandle> getHandleList() {
+        return handleList;
+    }
 }

@@ -9,21 +9,9 @@ import org.mmfmilku.atom.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 public class TypeAssemblyHandler implements ServerHandle<TypeFrame, AssemblyDataFrame> {
-
-//    @Override
-//    public ChannelContext<AssemblyDataFrame> getChannelContext(ChannelContext<TypeFrame> channelContext) {
-//        // 拆分数据
-//        return assemblyDataFrame -> {
-//            List<TypeFrame> typeFrames = decodeList(assemblyDataFrame);
-//            for (TypeFrame typeFrame : typeFrames) {
-//                channelContext.write(typeFrame);
-//            }
-//        };
-//    }
 
     @Override
     public AssemblyDataFrame code(TypeFrame typeFrame) {
@@ -76,14 +64,31 @@ public class TypeAssemblyHandler implements ServerHandle<TypeFrame, AssemblyData
 
         byte[] data = typeFrame.getData();
         int total = MessageUtils.decodeInt(Arrays.copyOfRange(data, 0, 2));
-        List<TypeFrame> typeFrames = new ArrayList<>();
-        typeFrames.add(typeFrame);
-        for (int i = 2; i <= total; i++) {
-            // TODO 获取第二分片及之后的数据
-
+        Object attr = pipeLine.getAttr(this);
+        if (attr != null) {
+            List<TypeFrame> typeFrames = (List<TypeFrame>) attr;
+            typeFrames.add(typeFrame);
+            if (typeFrames.size() < total) {
+                pipeLine.setAttr(this, typeFrames);
+            } else {
+                // 聚合所有帧
+                AssemblyDataFrame assemblyDataFrame = codeList(typeFrames);
+                pipeLine.handleNext(assemblyDataFrame);
+            }
+        } else {
+            // 首帧
+            List<TypeFrame> typeFrames = new ArrayList<>();
+            typeFrames.add(typeFrame);
+            if (total == 1) {
+                // 无需聚合
+                AssemblyDataFrame assemblyDataFrame = codeList(typeFrames);
+                pipeLine.handleNext(assemblyDataFrame);
+            } else {
+                // 需要聚合，保存首帧
+                pipeLine.setAttr(this, typeFrames);
+            }
         }
-        AssemblyDataFrame assemblyDataFrame = codeList(typeFrames);
-        pipeLine.handleNext(assemblyDataFrame);
+
     }
 
 }
