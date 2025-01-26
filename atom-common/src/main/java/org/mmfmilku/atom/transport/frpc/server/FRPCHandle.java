@@ -1,6 +1,6 @@
 package org.mmfmilku.atom.transport.frpc.server;
 
-import org.mmfmilku.atom.transport.protocol.handle.ChannelContext;
+import org.mmfmilku.atom.transport.protocol.handle.PipeLine;
 import org.mmfmilku.atom.transport.protocol.handle.RRModeHandle;
 import org.mmfmilku.atom.transport.protocol.handle.type.TypeFrame;
 import org.mmfmilku.atom.util.IOUtils;
@@ -16,7 +16,7 @@ public class FRPCHandle implements RRModeHandle<TypeFrame> {
     }
 
     @Override
-    public void onReceive(TypeFrame data, ChannelContext<TypeFrame> ctx) {
+    public void onReceive(TypeFrame data, PipeLine pipeLine) {
         try {
             byte[] rawData = data.getData();
 
@@ -28,14 +28,14 @@ public class FRPCHandle implements RRModeHandle<TypeFrame> {
             }
 
             FRPCReturn frpcReturn = serviceMapping.execute(frpcParam.getApiName(), frpcParam);
-            ctx.write(encode(frpcReturn));
+            pipeLine.write(encode(frpcReturn));
         } catch (Throwable e) {
             e.printStackTrace();
             try {
                 FRPCReturn frpcReturn = new FRPCReturn();
                 frpcReturn.setSuccess(Boolean.FALSE);
                 frpcReturn.setFrpcException(new FRPCException(e.getMessage()));
-                ctx.write(encode(frpcReturn));
+                pipeLine.write(encode(frpcReturn));
             } catch (Exception ex) {
                 // 异常处理再次报错
                 ex.printStackTrace();

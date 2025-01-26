@@ -1,8 +1,5 @@
 package org.mmfmilku.atom.transport.protocol.handle;
 
-import org.mmfmilku.atom.transport.protocol.exception.ConnectException;
-
-import java.util.Iterator;
 
 /**
  * 请求响应模式
@@ -10,14 +7,19 @@ import java.util.Iterator;
 public interface RRModeHandle<IN> extends ServerHandle<IN, IN> {
 
     @Override
-    default ChannelContext<IN> getChannelContext(ChannelContext<IN> channelContext) {
-        throw new ConnectException("not support");
+    default void handle(IN in, PipeLine pipeLine) {
+        onReceive(in, pipeLine);
+    }
+
+    void onReceive(IN in, PipeLine pipeLine);
+
+    @Override
+    default IN code(IN in) {
+        return in;
     }
 
     @Override
-    default void handle(IN in, Iterator<ServerHandle> handleItr, ChannelContext<IN> channelContext) {
-        onReceive(in, channelContext);
+    default IN decode(IN in) {
+        return in;
     }
-
-    void onReceive(IN in, ChannelContext<IN> channelContext);
 }

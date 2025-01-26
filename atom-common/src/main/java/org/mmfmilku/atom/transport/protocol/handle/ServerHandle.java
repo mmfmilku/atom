@@ -1,28 +1,21 @@
 package org.mmfmilku.atom.transport.protocol.handle;
 
-import java.util.Iterator;
-
 public interface ServerHandle<IN, OUT> {
 
-    ChannelContext<OUT> getChannelContext(ChannelContext<IN> channelContext);
+    void handle(IN in, PipeLine pipeLine);
 
-    void handle(IN in, Iterator<ServerHandle> handleItr, ChannelContext<IN> channelContext);
+    OUT code(IN in);
 
-    default void onOpen(ChannelContext<IN> channelContext) {}
+    IN decode(OUT out);
 
-    default void onOpenFail(ChannelContext<IN> channelContext) {}
+    default void onOpen(PipeLine pipeLine) {}
 
-    default void beforeClose(ChannelContext<IN> channelContext) {}
+    default void onOpenFail(PipeLine pipeLine) {}
 
-    default void afterClose(ChannelContext<IN> channelContext) {}
+    default void beforeClose(PipeLine pipeLine) {}
 
-    default void onError(ChannelContext<IN> channelContext) {}
+    default void afterClose(PipeLine pipeLine) {}
 
-    default void handleNext(Object frame, Iterator<ServerHandle> handleItr, ChannelContext channelContext) {
-        if (handleItr.hasNext()) {
-            ServerHandle next = handleItr.next();
-            next.handle(frame, handleItr, getChannelContext(channelContext));
-        }
-    }
+    default void onError(PipeLine pipeLine) {}
 
 }

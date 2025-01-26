@@ -1,7 +1,8 @@
 package org.mmfmilku.atom.transport.protocol.handle.assembly;
 
 import org.mmfmilku.atom.transport.protocol.MessageUtils;
-import org.mmfmilku.atom.transport.protocol.handle.ChannelContext;
+import org.mmfmilku.atom.transport.protocol.exception.MessageCodeException;
+import org.mmfmilku.atom.transport.protocol.handle.PipeLine;
 import org.mmfmilku.atom.transport.protocol.handle.ServerHandle;
 import org.mmfmilku.atom.transport.protocol.handle.type.TypeFrame;
 import org.mmfmilku.atom.util.ArrayUtils;
@@ -13,18 +14,28 @@ import java.util.List;
 
 public class TypeAssemblyHandler implements ServerHandle<TypeFrame, AssemblyDataFrame> {
 
+//    @Override
+//    public ChannelContext<AssemblyDataFrame> getChannelContext(ChannelContext<TypeFrame> channelContext) {
+//        // 拆分数据
+//        return assemblyDataFrame -> {
+//            List<TypeFrame> typeFrames = decodeList(assemblyDataFrame);
+//            for (TypeFrame typeFrame : typeFrames) {
+//                channelContext.write(typeFrame);
+//            }
+//        };
+//    }
+
     @Override
-    public ChannelContext<AssemblyDataFrame> getChannelContext(ChannelContext<TypeFrame> channelContext) {
-        // 拆分数据
-        return assemblyDataFrame -> {
-            List<TypeFrame> typeFrames = decode(assemblyDataFrame);
-            for (TypeFrame typeFrame : typeFrames) {
-                channelContext.write(typeFrame);
-            }
-        };
+    public AssemblyDataFrame code(TypeFrame typeFrame) {
+        throw new MessageCodeException("not support");
     }
 
-    private AssemblyDataFrame code(List<TypeFrame> typeFrames) {
+    @Override
+    public TypeFrame decode(AssemblyDataFrame assemblyDataFrame) {
+        throw new MessageCodeException("not support");
+    }
+
+    private AssemblyDataFrame codeList(List<TypeFrame> typeFrames) {
         // TODO 数据校验
         List<byte[]> dataList = new ArrayList<>();
         for (TypeFrame typeFrame : typeFrames) {
@@ -35,7 +46,7 @@ public class TypeAssemblyHandler implements ServerHandle<TypeFrame, AssemblyData
         return new AssemblyDataFrame(assembly);
     }
 
-    private List<TypeFrame> decode(AssemblyDataFrame assemblyDataFrame) {
+    public List<TypeFrame> decodeList(AssemblyDataFrame assemblyDataFrame) {
         List<TypeFrame> typeFrames = new ArrayList<>();
         byte[] data = assemblyDataFrame.getData();
         int pieceTotal = Math.floorDiv(data.length, AssemblyDataFrame.MAX_PIECE_LENGTH) +
@@ -61,7 +72,7 @@ public class TypeAssemblyHandler implements ServerHandle<TypeFrame, AssemblyData
     }
 
     @Override
-    public void handle(TypeFrame typeFrame, Iterator<ServerHandle> handleItr, ChannelContext<TypeFrame> channelContext) {
+    public void handle(TypeFrame typeFrame, PipeLine pipeLine) {
 
         byte[] data = typeFrame.getData();
         int total = MessageUtils.decodeInt(Arrays.copyOfRange(data, 0, 2));
@@ -71,7 +82,8 @@ public class TypeAssemblyHandler implements ServerHandle<TypeFrame, AssemblyData
             // TODO 获取第二分片及之后的数据
 
         }
-        AssemblyDataFrame assemblyDataFrame = code(typeFrames);
-        handleNext(assemblyDataFrame, handleItr, channelContext);
+        AssemblyDataFrame assemblyDataFrame = codeList(typeFrames);
+        pipeLine.handleNext(assemblyDataFrame);
     }
+
 }

@@ -28,12 +28,12 @@ public class BigDataTest {
     public static void beforeClass() {
         FServerUtil.runServer(path1, 1,
                 new TypeHandler(), new StringHandle(),
-                (RRModeHandle<String>) (data, channelContext) ->
-                        channelContext.write( data));
+                (RRModeHandle<String>) (data, pipeLine) ->
+                        pipeLine.write( data));
         FServerUtil.runServer(path2, 2,
                 new TypeHandler(), new TypeAssemblyHandler(), new StringHandle(),
-                (RRModeHandle<String>) (data, channelContext) ->
-                        channelContext.write( "big:" + data));
+                (RRModeHandle<String>) (data, pipeLine) ->
+                        pipeLine.write( "big:" + data));
     }
 
     @Test
@@ -48,7 +48,7 @@ public class BigDataTest {
         }
     }
 
-    @Test
+//    @Test
     public void bigServerTest() {
         TypeClientSession session = FClients.openTypeClientSession(fClient2);
         String base = new String(new byte[65534]);

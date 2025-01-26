@@ -9,7 +9,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class Connector implements Closeable {
@@ -17,6 +19,8 @@ public class Connector implements Closeable {
     private InputStream inputStream;
     private OutputStream outputStream;
     private Consumer<Connector> closeCallback;
+
+    private List<FFrame> cacheList = new ArrayList<>();
 
     private boolean close = false;
 
@@ -132,6 +136,18 @@ public class Connector implements Closeable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void cache(FFrame fFrame) {
+        cacheList.add(fFrame);
+    }
+
+    public void clearCache() {
+        cacheList.clear();
+    }
+
+    public void getCache() {
+        return;
     }
 
     public void flush() {

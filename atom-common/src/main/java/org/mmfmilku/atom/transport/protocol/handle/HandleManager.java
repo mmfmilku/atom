@@ -5,7 +5,6 @@ import org.mmfmilku.atom.transport.protocol.MessageUtils;
 import org.mmfmilku.atom.transport.protocol.base.FFrame;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class HandleManager {
@@ -18,36 +17,38 @@ public class HandleManager {
         this.readTimeOutMillis = readTimeOutMillis;
     }
 
-    public boolean openConnect(Connector ctx) {
+    public boolean openConnect(Connector connector) {
         FFrame[] pingPong = MessageUtils.getPingPong();
         FFrame pingFrame = pingPong[0];
         FFrame pongFrame = pingPong[1];
-        ctx.write(pingFrame);
-        FFrame read = ctx.read(readTimeOutMillis);
+        connector.write(pingFrame);
+        FFrame read = connector.read(readTimeOutMillis);
         boolean open = MessageUtils.equals(pongFrame, read);
         if (open) {
-            ctx.write(MessageUtils.packFFrame((byte) 1));
-            handles.forEach(h -> h.onOpen(getChannelContext(ctx)));
+            connector.write(MessageUtils.packFFrame((byte) 1));
+            handles.forEach(h -> h.onOpen(newPipeLine(connector)));
         } else {
-            ctx.write(MessageUtils.packFFrame((byte) 0));
-            handles.forEach(h -> h.onOpenFail(getChannelContext(ctx)));
+            connector.write(MessageUtils.packFFrame((byte) 0));
+            handles.forEach(h -> h.onOpenFail(newPipeLine(connector)));
         }
         return open;
     }
 
-    private ChannelContext<FFrame> getChannelContext(Connector connector) {
-        return connector::write;
+    private PipeLine newPipeLine(Connector connector) {
+        PipeLine pipeLine = new PipeLine(connector);
+        pipeLine.getHandleList().addAll(handles);
+        return pipeLine;
     }
 
     public void closeConnect(Connector connector) {
         // 在真正关闭之前触发
-        handles.forEach(h -> h.beforeClose(getChannelContext(connector)));
+        handles.forEach(h -> h.beforeClose(newPipeLine(connector)));
         connector.close();
-        handles.forEach(h -> h.afterClose(getChannelContext(connector)));
+        handles.forEach(h -> h.afterClose(newPipeLine(connector)));
     }
 
-    public void onError(Connector ctx) {
-        handles.forEach(h -> h.onError(getChannelContext(ctx)));
+    public void onError(Connector connector) {
+        handles.forEach(h -> h.onError(newPipeLine(connector)));
     }
 
     public void onReceive(Connector connector, FFrame fFrame) {
@@ -56,11 +57,10 @@ public class HandleManager {
             closeConnect(connector);
             return;
         }
-        Iterator<ServerHandle> handleItr = handles.iterator();
-        if (handleItr.hasNext()) {
-            ServerHandle next = handleItr.next();
-            next.handle(fFrame, handleItr, getChannelContext(connector));
-        }
+        PipeLine pipeLine = new PipeLine(connector);
+        pipeLine.getHandleList().addAll(handles);
+
+        pipeLine.handleNext(fFrame);
     }
 
     public void addHandle(ServerHandle handle) {
