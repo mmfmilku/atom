@@ -2,6 +2,7 @@ package org.mmfmilku.atom.web.console.controller;
 
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
+import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * AgentConfigController
@@ -29,8 +31,14 @@ public class AgentConfigController {
         return agentConfigService.getConfigByName(appName);
     }
 
+    @RequestMapping("saveConfig")
+    public String saveConfig(@RequestParam String appName, @RequestBody Map<String, String> saveData) {
+        agentConfigService.saveConfig(appName, saveData);
+        return "success";
+    }
+
     @RequestMapping("listOrd")
-    public List<String> listOrd(@RequestParam String appName) {
+    public List<OrdRunInfo> listOrd(@RequestParam String appName) {
         return agentConfigService.listOrd(appName);
     }
 

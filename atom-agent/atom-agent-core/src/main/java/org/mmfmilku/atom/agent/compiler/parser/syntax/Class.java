@@ -1,6 +1,9 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.ClassType;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.util.StringUtils;
 
 import java.util.List;
@@ -28,7 +31,7 @@ public class Class implements Node {
     private ClassType classType;
 
     /**
-     * 访问权限
+     * 修饰符
      * */
     private Modifier modifier;
 
@@ -45,11 +48,38 @@ public class Class implements Node {
     // TODO 内部类,静态非静态？
     private List<String> innerClasses;
 
-    // TODO 静态代码块
+    // 静态代码块
+    private List<CodeBlock> staticBlocks;
 
     private List<Member> members;
 
+    private List<Method> constructors;
+
     private List<Method> methods;
+
+    public List<CodeBlock> getStaticBlocks() {
+        return staticBlocks;
+    }
+
+    public void setStaticBlocks(List<CodeBlock> staticBlocks) {
+        this.staticBlocks = staticBlocks;
+    }
+
+    public Modifier getModifier() {
+        return modifier;
+    }
+
+    public void setModifier(Modifier modifier) {
+        this.modifier = modifier;
+    }
+
+    public List<Method> getConstructors() {
+        return constructors;
+    }
+
+    public void setConstructors(List<Method> constructors) {
+        this.constructors = constructors;
+    }
 
     public Class(String className) {
         this.className = className;
@@ -85,14 +115,6 @@ public class Class implements Node {
 
     public void setClassType(ClassType classType) {
         this.classType = classType;
-    }
-
-    public Modifier getModifier() {
-        return modifier;
-    }
-
-    public void setModifier(Modifier modifier) {
-        this.modifier = modifier;
     }
 
     public String getSuperClass() {
@@ -139,12 +161,16 @@ public class Class implements Node {
     public String getSourceCode() {
         return GrammarUtil.getLinesCode(annotations)
                 + "\n"
-                + modifier.getSourceCode() + " class " + getClassName()
+                + GrammarUtil.getSentenceCode(modifier.getSourceCode(), "class", getClassName())
                 + (StringUtils.isEmpty(superClass) ? ""
                     : " extends " + superClass)
                 + (implementClasses == null || implementClasses.size() == 0 ? ""
                     : " implements " + String.join(", ", implementClasses))
                 + " {"
+                + GrammarUtil.emptyWrap(staticBlocks == null || staticBlocks.isEmpty(),
+                    () -> GrammarUtil.getLinesCode(staticBlocks))
+                + GrammarUtil.getLinesCode(members)
+                + GrammarUtil.getLinesCode(constructors)
                 + GrammarUtil.getLinesCode(methods)
                 + "}"
                 ;

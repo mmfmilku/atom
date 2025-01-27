@@ -1,24 +1,33 @@
 package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.consts.CodeConst;
+import org.mmfmilku.atom.util.CodeUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
+import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
+import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * AgentConfigService
@@ -37,6 +46,9 @@ public class AgentConfigService implements IAgentConfigService {
 
     private static MessageDigest sha1;
 
+    @Autowired
+    IInstrumentService instrumentService;
+
     static {
         try {
             sha1 = MessageDigest.getInstance("SHA-1");
@@ -54,8 +66,25 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public AgentConfig getConfig(String vmId) {
-        return null;
+    public void saveConfig(String appName, Map<String, String> saveData) {
+        // 仅覆盖map
+        AgentConfig configByName = getConfigByName(appName);
+        configByName.getConfigData().clear();
+        configByName.getConfigData().putAll(saveData);
+        StringBuilder saveText = new StringBuilder();
+        saveData.forEach((k, v) ->
+                saveText.append(k)
+                .append("=")
+                .append(v)
+                .append("\n")
+        );
+        try (OutputStream os = Files.newOutputStream(Paths.get(configByName.getConfFile()))) {
+            os.write(saveText.toString().getBytes(StandardCharsets.UTF_8));
+            configMap.put(appName, configByName);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("保存配置失败");
+        }
     }
 
     @Override
@@ -80,10 +109,24 @@ public class AgentConfigService implements IAgentConfigService {
         agentConfig.setFDir(agentConfig.getAppBaseDir() + File.separator + "fserver");
         agentConfig.setOrdDir(agentConfig.getAppBaseDir() + File.separator + "ord");
         agentConfig.setTmpDir(agentConfig.getAppBaseDir() + File.separator + "tmp");
+        agentConfig.setConfFile(agentConfig.getAppBaseDir() + File.separator + ".conf");
+
         try {
             Files.createDirectories(Paths.get(agentConfig.getAppBaseDir()));
             Files.createDirectories(Paths.get(agentConfig.getOrdDir()));
             Files.createDirectories(Paths.get(agentConfig.getTmpDir()));
+            Paths.get(agentConfig.getConfFile()).toFile().createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("init agent config fail");
+        }
+
+        try (InputStream in = Files.newInputStream(
+                Paths.get(agentConfig.getConfFile()), StandardOpenOption.CREATE)) {
+            // TODO fix中文读取乱码
+            Properties properties = new Properties();
+            properties.load(in);
+            properties.forEach((k, v) -> agentConfig.getConfigData().put((String) k, (String) v));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("init agent config fail");
@@ -102,9 +145,17 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public List<String> listOrd(String appName) {
+    public List<OrdRunInfo> listOrd(String appName) {
+        Map<String, Object> runningOrdClass = instrumentService.getRunningOrdClass(appName);
         AgentConfig config = getConfigByName(appName);
-        return ordFileOperation.listFiles(config);
+        List<OrdRunInfo> ordRunInfoList = ordFileOperation.listFiles(config).stream().map(ordFileName -> {
+            OrdRunInfo ordRunInfo = new OrdRunInfo();
+            ordRunInfo.setOrdName(ordFileName);
+            ordRunInfo.setRunning(
+                    runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
+            return ordRunInfo;
+        }).collect(Collectors.toList());
+        return ordRunInfoList;
     }
 
     @Override
@@ -119,7 +170,10 @@ public class AgentConfigService implements IAgentConfigService {
     @Override
     public OrdFile readOrd(String appName, String ordFileName) {
         AgentConfig config = getConfigByName(appName);
-        return ordFileOperation.getOrd(config, ordFileName);
+        OrdFile ord = ordFileOperation.getOrd(config, ordFileName);
+        Map<String, Object> runningOrdClass = instrumentService.getRunningOrdClass(appName);
+        ord.setRunning(runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
+        return ord;
     }
 
     @Override

@@ -3,26 +3,27 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+/**
+ * while 循环语句
+ *
+ * while (loopCondition)
+ *     loopBody
+ *
+ * */
+public class WhileStatement extends LoopStatement {
 
-public class WhileStatement implements Statement {
+    public WhileStatement(Expression loopCondition, CodeBlock loopBody) {
+        super(loopCondition, loopBody);
+    }
+
     @Override
     public String getStatementSource() {
-        // TODO
-        GrammarUtil.notSupport();
-        return null;
+        return GrammarUtil.getSentenceCode("while",
+                "(",
+                loopCondition.getSourceCode(),
+                ")",
+                loopBody.getSourceCode()
+        );
     }
 
-    @Override
-    public List<Expression> getAllExpression() {
-        GrammarUtil.notSupport();
-        return null;
-    }
-
-    @Override
-    public void useImports(Map<String, String> importsMap) {
-        GrammarUtil.notSupport();
-    }
 }

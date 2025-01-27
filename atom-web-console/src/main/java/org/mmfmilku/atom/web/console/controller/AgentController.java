@@ -9,7 +9,6 @@ import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -43,18 +42,19 @@ public class AgentController {
 
     @RequestMapping("vmInfo")
     public Map<String, String> vmInfo(@RequestParam String vmId) {
-        for (Map<String, String> vmMap : AgentClient.listVMMap()) {
-            if (vmMap.get("vmId").equals(vmId)) {
-                return vmMap;
-            }
-        }
-        return Collections.emptyMap();
+        return agentService.vmInfo(vmId);
     }
     
     @RequestMapping("loadAgent")
     public String loadAgent(@RequestParam String vmId, @RequestParam String appName) {
         boolean success = agentService.loadAgent(vmId, appName);
         return String.valueOf(success);
+    }
+
+    @RequestMapping("listAllClass")
+    @ResponseBody
+    public List<String> listAllClass(@RequestParam String appName) {
+        return instrumentService.listClassForPage(appName, 1, Integer.MAX_VALUE);
     }
 
     @RequestMapping("listClass")
@@ -83,5 +83,12 @@ public class AgentController {
         instrumentService.loadOrdFile(appName, ordFileName);
         return "success";
     }
+
+    @RequestMapping("stopClassOrd")
+    public String stopClassOrd(@RequestParam String appName, @RequestParam String fullClassName) {
+        instrumentService.stopClassOrd(appName, fullClassName);
+        return "success";
+    }
+
     
 }

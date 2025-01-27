@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class IfStatement implements Statement {
+public class IfStatement implements SpecialStatement {
 
     /**
      * if中的条件表达式
@@ -69,11 +69,6 @@ public class IfStatement implements Statement {
             all.addAll(falseStatement.getAllExpression());
         }
         return all;
-    }
-
-    @Override
-    public String getSourceCode() {
-        return getStatementSource();
     }
 
     @Override

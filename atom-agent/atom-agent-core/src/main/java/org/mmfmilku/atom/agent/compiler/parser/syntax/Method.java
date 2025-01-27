@@ -1,25 +1,26 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.ImportUse;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Method implements Node, ImportUse {
 
-    private List<Annotation> annotations;
-    private String methodName;
-    private Modifier modifier;
-    private List<VarDefineStatement> methodParams;
-    private List<String> throwList;
-    private String returnType;
-    private CodeBlock codeBlock;
-    private String value;
+    protected List<Annotation> annotations;
+    protected String methodName;
+    protected Modifier modifier;
+    protected List<VarDefineStatement> methodParams;
+    protected List<String> throwList;
+    protected String returnType;
+    protected CodeBlock codeBlock;
+    protected String value;
 
     @Override
     public String getSourceCode() {
@@ -34,6 +35,7 @@ public class Method implements Node, ImportUse {
                 + (throwList == null || throwList.size() == 0 ? ""
                     : "throws " + String.join(", ", throwList)
                     )
+                + " "
                 + GrammarUtil.getLinesCode(codeBlock);
     }
 

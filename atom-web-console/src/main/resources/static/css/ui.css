@@ -18,11 +18,59 @@ h3 {
     display: flex;
     flex-direction: column;
 }
+.hide {
+    display: none!important;
+}
 .vm-list-block {
     border: 2px solid #2196F3;
-    margin-top: 5px;
-    margin-left: 50px;
+    background-color: #eff6fe;
+    height: 80px;
+    width: 80%;
+    margin-top: 10px;
+    margin-left: 10%;
     margin-right: 50px;
+}
+/*
+    按钮容器，水平排列
+*/
+.button-container-center {
+    display: flex;
+    justify-content: center;
+    margin: 4px;
+}
+.button-container-column {
+    display: flex;
+    flex-direction: column;
+}
+.button-container-btn {
+    /* 上下0 左右4 */
+    /*margin: 0 4px;*/
+    padding: 2px 4px;
+    color: white;
+    /* 按钮填满 */
+    flex: 1;
+    /* 文字居中 */
+    text-align: center;
+}
+.button-container-select {
+    background-color: #272727!important;
+}
+.button-container-btn:hover {
+    background-color: #3F3F3F;
+}
+
+.button-container-btn2 {
+    padding: 5px 10px;
+    flex: 1;
+    text-align: center;
+}
+.button-container-btn2:hover {
+    background-color: #7e7e7e;
+}
+
+/* 鼠标悬停时添加阴影 */
+.vm-list-block:hover {
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* 水平偏移 垂直偏移 模糊半径 颜色 */
 }
 .vm-field {
     display: flex;
@@ -77,22 +125,50 @@ h3 {
     overflow-y: scroll; /* 当内容超出div的高度时，垂直方向显示滚动条 */
 }
 
-.atom-popup {
+.atom-op-block {
     position: fixed;
     top: 50%;
     left: 50%;
-    width: 100px;
-    height: 50px;
+    /*width: 100px;*/
+    /*height: 50px;*/
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* 水平偏移 垂直偏移 模糊半径 颜色 */
+}
+
+.atom-tip {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    /*width: 100px;*/
+    /*height: 50px;*/
     display: flex;
     justify-content: center; /* 水平居中,flex模式 */
     align-items: center; /* 垂直居中,flex模式 */
     transform: translate(-50%, -50%);
     background-color: #50802a;
     padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    animation: fadeOut 5s ease-in-out forwards;
+}
+
+.atom-error {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    /*width: 100px;*/
+    /*height: 50px;*/
+    display: flex;
+    justify-content: center; /* 水平居中,flex模式 */
+    align-items: center; /* 垂直居中,flex模式 */
+    transform: translate(-50%, -50%);
+    background-color: #803327;
+    padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     animation: fadeOut 5s ease-in-out forwards;
 }
+
 @keyframes fadeOut {
     0% { opacity: 1; }
     100% { opacity: 0; }

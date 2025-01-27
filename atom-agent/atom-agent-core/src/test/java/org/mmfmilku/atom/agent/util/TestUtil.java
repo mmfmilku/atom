@@ -1,6 +1,9 @@
 package org.mmfmilku.atom.agent.util;
 
 import org.junit.Test;
+import org.mmfmilku.atom.agent.compiler.CompilerUtil;
+import org.mmfmilku.atom.agent.compiler.parser.aa.TestFile1;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.util.FileUtils;
 
 import java.io.IOException;
@@ -21,6 +24,14 @@ public class TestUtil {
             fail(e.getMessage());
         }
         return s;
+    }
+
+    public static void compareParsedText(Class clazz) {
+        String javaText = TestUtil.getJavaText(clazz);
+        JavaAST javaAST = CompilerUtil.parseAST(javaText);
+        String sourceCode = javaAST.getSourceCode();
+        System.out.println(sourceCode);
+        assertEquals(javaText, sourceCode);
     }
 
     @Test

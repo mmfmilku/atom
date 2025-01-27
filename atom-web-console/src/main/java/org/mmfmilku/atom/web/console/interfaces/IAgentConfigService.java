@@ -2,9 +2,11 @@ package org.mmfmilku.atom.web.console.interfaces;
 
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
+import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IAgentConfigService
@@ -16,11 +18,11 @@ public interface IAgentConfigService {
 
     Collection<AgentConfig> list();
 
-    AgentConfig getConfig(String vmId);
+    void saveConfig(String appName, Map<String, String> saveData);
 
     AgentConfig getConfigByName(String appName);
 
-    List<String> listOrd(String appName);
+    List<OrdRunInfo> listOrd(String appName);
 
     void deleteOrd(String appName, String ordFileName);
     

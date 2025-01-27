@@ -4,8 +4,10 @@ import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler
         .CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
+import org.mmfmilku.atom.agent.compiler.parser.aa.*;
 import org.mmfmilku.atom.agent.compiler
         .parser.syntax.express.Expression;
+import org.mmfmilku.atom.agent.util.TestUtil;
 import org.mmfmilku.atom.util.FileUtils;
 
 import javax.annotation.Resource;
@@ -20,9 +22,18 @@ import static org.junit.Assert.*;
  * */
 @SuppressWarnings("f")
 @Resource
-public class ParserTest extends Object implements Serializable, Closeable {
+public class ParserTest implements Serializable, Closeable {
+
+    int a = 1;
+    String b = "";
+
+    public ParserTest() {
+        this.a = 0;
+        this.b.equals("");
+    }
 
     private void m1(String a, int b) {
+        this.b = a;
         System.out.println(a);
         if (b == 0) {
             System.out.println("b等于零");
@@ -44,7 +55,7 @@ public class ParserTest extends Object implements Serializable, Closeable {
 //        System.out
 //                .println(lexer.showCode(true, true));
         org.mmfmilku.atom.agent.compiler
-                .parser.syntax.Node execute = new Parser(lexer)
+                .parser.syntax.Node execute = new ParserDispatcher(lexer)
                 .execute();
         System.out.println(execute);
         int a = 1;
@@ -106,4 +117,53 @@ public class ParserTest extends Object implements Serializable, Closeable {
     public void close() throws IOException {
 
     }
+
+    /**
+     * 测试语法
+     * 1.构造器
+     * 2.类型强转
+     * 3.表达式括号包裹处理
+     * */
+    @Test
+    public void parseTestFile1() {
+        TestUtil.compareParsedText(TestFile1.class);
+    }
+
+    /**
+     * 测试语法
+     * 1.成员变量解析
+     * 1.修饰符解析解析
+     * */
+    @Test
+    public void parseTestFile2() {
+        TestUtil.compareParsedText(TestFile2.class);
+    }
+
+    /**
+     * 测试语法
+     * 循环语句解析
+     * */
+    @Test
+    public void parseTestFile3() {
+        TestUtil.compareParsedText(TestFile3.class);
+    }
+
+    /**
+     * 测试语法
+     * try catch 语句解析
+     * */
+    @Test
+    public void parseTestFile4() {
+        TestUtil.compareParsedText(TestFile4.class);
+    }
+
+    /**
+     * 测试语法
+     * 静态代码块、同步代码块
+     * */
+    @Test
+    public void parseTestFile5() {
+        TestUtil.compareParsedText(TestFile5.class);
+    }
+
 }

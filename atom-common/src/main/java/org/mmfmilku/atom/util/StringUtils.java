@@ -88,6 +88,13 @@ public class StringUtils {
     }
 
     /**
+     * 非空
+     * */
+    public static boolean isNotEmpty(String str) {
+        return !isEmpty(str);
+    }
+
+    /**
      * 字符串防重复替换，多次调用只会替换一次
      * */
     public static String replaceNoRepeat(String str, String target, String replacement) {

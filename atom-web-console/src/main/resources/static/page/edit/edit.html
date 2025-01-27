@@ -11,16 +11,31 @@
         background-color: gray;
     }
 
+    .edit-left-bar-content {
+        /* 设置高度，左侧使用滚动条 */
+        height: 100%;
+    }
+
     .edit-area {
         height: 100%;
     }
 
-    .edit-file-list {
+    .edit-left-bar {
         margin-left: 1%;
         margin-right: 1%;
         background-color: gray;
         /* 左侧文件列表，占整体的宽度为20% */
         width: 20%;
+    }
+
+    .edit-left-bar-operate {
+        background-color: #545454;
+    }
+
+    .edit-file-list {
+        padding-left: 1%;
+        padding-right: 1%;
+        background-color: gray;
     }
 
     .edit-file {
@@ -31,17 +46,41 @@
         padding: 0 3%;
     }
 
+    .edit-file:hover {
+        background-color: #767676;
+    }
+
     .edit-file-select {
-        background-color: #424674;
+        background-color: #545454!important;
     }
 
     .edit-code-title {
         text-align: center;
-        height: 5%;
+        width: 90%;
+        height: 25px;
+        color: #50802a;
+        font-weight: 800;
+    }
+
+    .edit-code-desc {
+        color: red;
+        width: 10%;
+        display: flex;
+        justify-content: end;
+    }
+
+    .edit-code-desc > button {
+        /* 上下  左右 */
+        margin: 1px 2px;
+        color: red;
     }
 
     .edit-code-box {
         width: 77%;
+    }
+
+    .ord-running {
+        color: #5fcf84;
     }
 
     .javaList {
@@ -55,24 +94,31 @@
         <div class="edit-frame">
             <div class="edit-operate-bar">
                 <div class="vm-button-container">
-                    <button onclick="listJavaFile()">java文件</button>
-                    <button onclick="genCode()">源码</button>
-                    <button onclick="saveText()">保存</button>
-                    <button onclick="addFile()">创建</button>
-                    <button onclick="deleteFile()">删除</button>
-                    <button onclick="loadFile()">重写</button>
-                    <button onclick="loadAgent()">连接</button>
+                    <button onclick="configView()">设置</button>
+                    <button id="loadAgentBtn" onclick="loadAgent()">载入</button>
                 </div>
             </div>
             <div class="flex-row edit-area">
-                <div class="edit-file-list scrollable-y flex-column">
-<!--                    <div class="edit-file">文件1</div>-->
-<!--                    <div class="edit-file edit-file-select">文件2</div>-->
-<!--                    <div class="edit-file">文件2</div>-->
-<!--                    <div class="edit-file">文件2</div>-->
+                <div class="flex-column edit-left-bar">
+                    <div class="edit-left-bar-operate hide">
+                        <div class="button-container-center">
+                            <div class="button-container-btn button-container-select listClassBtn" onclick="listClass(this)">类列表</div>
+                            <div class="button-container-btn listFileBtn" onclick="listFile(this)">重写列表</div>
+                            <div class="button-container-btn listStrategyBtn" onclick="listStrategy(this)">重写策略</div>
+                        </div>
+                    </div>
+                    <div class="edit-left-bar-content scrollable-y">
+                        <div class="edit-file-list listClass hide flex-column"></div>
+                        <div class="edit-file-list listFile hide flex-column"></div>
+                        <div class="edit-file-list listStrategy hide flex-column"></div>
+                    </div>
                 </div>
                 <div class="edit-code-box">
-                    <div class="edit-code-title" for="ordFileText"></div>
+                    <div class="flex-row">
+                        <div class="edit-code-title" for="ordFileText"></div>
+                        <div class="edit-code-desc">
+                        </div>
+                    </div>
                     <textarea id="ordFileText"></textarea>
                 </div>
             </div>

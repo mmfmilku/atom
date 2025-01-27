@@ -1,5 +1,19 @@
+
 const UI = {
 
+    // 弹窗打开新页面
+    openPageWin: (pagePath, title, param) => {
+        return new Promise((resolve, reject) => {
+            atom.SPA.loadHtml(pagePath + '.html', null, param)
+                .then(showHtml => UI.openDialog(showHtml, title))
+                .then((pageDom => {
+                        resolve(atom.getInputData(pageDom))
+                    }
+                ))
+        })
+    },
+
+    // 弹窗展示
     newDialog: (showHtml = '') => {
         let dialog = document.createElement("dialog")
         document.body.appendChild(dialog)
@@ -12,6 +26,7 @@ const UI = {
         return dialog
     },
 
+    // 弹窗展示，显示确认关闭按钮
     openDialog: (showHtml = '', title = '') => {
         let dialog = document.createElement("dialog")
         document.body.appendChild(dialog)
@@ -46,9 +61,11 @@ const UI = {
         return new Promise((resolve, reject) => {
             UI.openDialog('<input name="dialogInput"/>', title)
                 .then((dialog) => {
+                    // 点击确认的回调
                     resolve && resolve(dialog.querySelector("input[name=dialogInput]").value)
                 })
                 .catch((dialog) => {
+                    // 点击取消的回调
                     reject && reject()
                 })
         })
@@ -60,23 +77,40 @@ const UI = {
 
     showMessage: (message) => {
         let popup = document.createElement("div")
-        popup.classList.add('atom-popup')
+        popup.classList.add('atom-tip')
         popup.innerText = message
         document.body.appendChild(popup)
-        setTimeout(function() {
+        setTimeout(function () {
             document.body.removeChild(popup)
         }, 5000);
     },
 
     showError: (message) => {
-        alert(message)
+        let popup = document.createElement("div")
+        popup.classList.add('atom-error')
+        popup.innerText = message
+        document.body.appendChild(popup)
+        setTimeout(function () {
+            document.body.removeChild(popup)
+        }, 5000);
     },
+
+    // 右键菜单
+    showBlock: (blockHtml) => {
+        let block = document.createElement("div")
+        block.classList.add('atom-op-block')
+        block.innerHTML = blockHtml
+        document.body.appendChild(block)
+        return block
+    }
 
 }
 
 const atom = {
 
+    // TODO fix 特殊字符转义
     post: (path, data) => {
+        console.log(this)
         return new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest()
             xhr.open("POST", path, true)
@@ -120,50 +154,31 @@ const atom = {
         }
     },
 
+    getInputData: pageDom => {
+        let allInput = pageDom.querySelectorAll('input')
+        let formData = {}
+        allInput.forEach(item => {
+            formData[item.name] = item.value
+        })
+        return formData
+    },
+
     SPA: {
 
-        routers: [],
+        router: null,
 
-        loadHtml: (path, dom) => {
-            return new Promise(((resolve, reject) => {
-                fetch(path)
-                    .then(response => response.text())
-                    .then(data => {
-                        // document.getElementById('yourElementId').innerHTML = data
-                        dom && (dom.innerHTML = data)
-                        resolve(data)
-                    })
-                    .catch(error => {
-                        reject(error)
-                    })
-            }))
+        // 读取html
+        loadHtml: (path, dom, param = {}) => {
+            return atom.SPA.router.loadHtml(path, dom, param)
         },
 
-        loadJS: (path, param) => {
-            let _body = document.getElementsByTagName('body')[0];
-            let scriptEle = document.createElement('script');
-            scriptEle.type = 'text/javascript';
-            scriptEle.src = path;
-            scriptEle.async = true;
-            scriptEle.onload = function () {
-
-            }
-            _body.appendChild(scriptEle);
-            return scriptEle;
+        loadJS: (path, dom) => {
+            return atom.SPA.router.loadJS(path, dom)
         },
 
-        loadPage: (pagePath, param) => {
-            let pathData = atom.getPathParam(pagePath)
-            let page = pathData.page
-            let htmlPath = '/page/' + page + '/' + page + '.html'
-            let jsPath = '/page/' + page + '/' + page + '.js'
-            atom.SPA.loadHtml(htmlPath, document.getElementById('app'))
-                .then(data => {
-                    // 页面加载成功修改hash
-                    location.hash = '#' + pagePath
-                    // 最后加载js
-                    let jsDom = atom.SPA.loadJS(jsPath)
-                })
+        // 页面路由
+        route: (pagePath, param) => {
+            return atom.SPA.router.route(pagePath, param)
         },
 
         definePage: define => {
@@ -177,122 +192,8 @@ const atom = {
 }
 
 
-window.addEventListener('load', function () {
-    console.log('load')
-})
-//路由切换
-window.addEventListener('hashchange', function () {
-    console.log('hashchange')
-})
-
-
-function spaRouters() {
-    this.routers = {};//保存注册的所有路由
-    this.beforeFun = null;//切换前
-    this.afterFun = null;
-}
-
-spaRouters.prototype = {
-    init: function () {
-        var self = this;
-        //页面加载匹配路由
-        window.addEventListener('load', function () {
-            self.urlChange()
-        })
-        //路由切换
-        window.addEventListener('hashchange', function () {
-            self.urlChange()
-        })
-        //异步引入js通过回调传递参数
-        window.SPA_RESOLVE_INIT = null;
-    },
-    refresh: function (currentHash) {
-        var self = this;
-        if (self.beforeFun) {
-            self.beforeFun({
-                to: {
-                    path: currentHash.path,
-                    query: currentHash.query
-                },
-                next: function () {
-                    self.routers[currentHash.path].callback.call(self, currentHash)
-                }
-            })
-        } else {
-            self.routers[currentHash.path].callback.call(self, currentHash)
-        }
-    },
-    //路由处理
-    urlChange: function () {
-        var currentHash = atom.getParamsUrl();
-        if (this.routers[currentHash.path]) {
-            this.refresh(currentHash)
-        } else {
-            //不存在的地址重定向到首页
-            location.hash = '/index'
-        }
-    },
-    //单层路由注册
-    map: function (path, callback) {
-        path = path.replace(/\s*/g, "");//过滤空格
-        if (callback && Object.prototype.toString.call(callback) === '[object Function]') {
-            this.routers[path] = {
-                callback: callback,//回调
-                fn: null //存储异步文件状态
-            }
-        } else {
-            console.trace('注册' + path + '地址需要提供正确的的注册回调')
-        }
-    },
-    //切换之前一些处理
-    beforeEach: function (callback) {
-        if (Object.prototype.toString.call(callback) === '[object Function]') {
-            this.beforeFun = callback;
-        } else {
-            console.trace('路由切换前钩子函数不正确')
-        }
-    },
-    //切换成功之后
-    afterEach: function (callback) {
-        if (Object.prototype.toString.call(callback) === '[object Function]') {
-            this.afterFun = callback;
-        } else {
-            console.trace('路由切换后回调函数不正确')
-        }
-    },
-    //路由异步懒加载js文件
-    asyncFun: function (file, transition) {
-        var self = this;
-        if (self.routers[transition.path].fn) {
-            self.afterFun && self.afterFun(transition)
-            self.routers[transition.path].fn(transition)
-        } else {
-            console.log("开始异步下载js文件" + file)
-            var _body = document.getElementsByTagName('body')[0];
-            var scriptEle = document.createElement('script');
-            scriptEle.type = 'text/javascript';
-            scriptEle.src = file;
-            scriptEle.async = true;
-            SPA_RESOLVE_INIT = null;
-            scriptEle.onload = function () {
-                console.log('下载' + file + '完成')
-                self.afterFun && self.afterFun(transition)
-                self.routers[transition.path].fn = SPA_RESOLVE_INIT;
-                self.routers[transition.path].fn(transition)
-            }
-            _body.appendChild(scriptEle);
-        }
-    },
-    //同步操作
-    syncFun: function (callback, transition) {
-        this.afterFun && this.afterFun(transition)
-        callback && callback(transition)
-    }
-
-}
 //注册到window全局
 // window.spaRouters = new spaRouters();
-
 
 //
 //
@@ -333,3 +234,106 @@ spaRouters.prototype = {
 // }
 //
 // 6、初始化：spaRouters.init()；
+
+
+
+function spaRouters() {
+    // 保存注册的所有路由
+    this.routers = {
+        'edit': {
+            htmlPath: '/page/edit/edit.html'
+        },
+        'test': {
+            htmlPath: '/page/test/test.html',
+            jsPath: '/page/test/test.js'
+        }
+    }
+    // 路由前钩子
+    this.beforeHook = null
+    // 路由后钩子
+    this.afterFun = null
+}
+
+spaRouters.prototype = {
+    init: function () {
+        let self = this;
+        // 页面加载匹配路由
+        window.addEventListener('load', function () {
+            console.log('load:' + location.hash)
+            // 页面初始加载
+            self.urlChange()
+        })
+        //路由切换
+        window.addEventListener('hashchange', function () {
+            console.log('hashchange:' + location.hash)
+            // 页面hash变化
+            self.urlChange()
+        })
+        // 异步引入js通过回调传递参数
+        // window.SPA_RESOLVE_INIT = null;
+    },
+    //路由处理
+    urlChange: function () {
+        let currentHash = atom.getParamsUrl();
+        this.loadPage(currentHash)
+    },
+    route: function (pagePath, param) {
+        location.hash = pagePath
+    },
+    loadPage: function (pageHash) {
+        if (!pageHash) {
+            location.reload()
+            return
+        }
+        let pageData = this.routers[pageHash.page]
+        if (!pageData) {
+            // 不存在的地址重定向到首页
+            // this.route('index')
+            return
+        }
+        let self = this;
+        if (self.beforeHook) {
+
+        } else {
+            let htmlPath = pageData.htmlPath
+            let jsPath = pageData.jsPath || htmlPath.replace('.html', '.js')
+            // 加载html
+            this.loadHtml(htmlPath, document.getElementById('app'))
+                .then(data => {
+                    // 最后加载js
+                    let jsDom = this.loadJS(jsPath, document.getElementById('app'))
+                })
+        }
+    },
+    loadHtml: (path, dom, param = {}) => {
+        return new Promise(((resolve, reject) => {
+            fetch(path)
+                .then(response => response.text())
+                .then(data => {
+                    let showHtml = eval('`' + data + '`')
+                    dom && (dom.innerHTML = showHtml)
+                    resolve(showHtml)
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        }))
+    },
+    loadJS: (path, dom) => {
+        let _body = document.getElementsByTagName('body')[0];
+        let scriptEle = document.createElement('script');
+        scriptEle.type = 'text/javascript';
+        scriptEle.src = path;
+        scriptEle.async = true;
+        scriptEle.onload = function () {
+
+        }
+        dom.appendChild(scriptEle);
+        return scriptEle;
+    },
+
+}
+
+atom.SPA.router = new spaRouters()
+
+atom.SPA.router.init()

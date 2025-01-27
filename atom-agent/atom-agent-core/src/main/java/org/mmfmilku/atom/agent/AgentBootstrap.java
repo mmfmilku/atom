@@ -1,15 +1,12 @@
 package org.mmfmilku.atom.agent;
 
 import org.mmfmilku.atom.agent.config.AgentProperties;
-import org.mmfmilku.atom.agent.config.OverrideBodyHolder;
 import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.agent.handle.AgentHandle;
-import org.mmfmilku.atom.agent.handle.AgentMainHandle;
-import org.mmfmilku.atom.agent.handle.PreMainHandle;
 import org.mmfmilku.atom.agent.instrument.transformer.FileDefineTransformer;
 import org.mmfmilku.atom.agent.instrument.transformer.ParamPrintTransformer;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
-import org.mmfmilku.atom.transport.frpc.FRPCStarter;
+import org.mmfmilku.atom.transport.frpc.server.FRPCStarter;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
@@ -40,11 +37,7 @@ public class AgentBootstrap {
 
     private static FRPCStarter frpcStarter;
 
-    private static Thread shutdownHook = new Thread(() -> {
-        if (frpcStarter != null) {
-            frpcStarter.stopServer();
-        }
-    });
+    private static Thread shutdownHook = new Thread(AgentBootstrap::stopAgent);
 
     public synchronized static void main(String agentArgs, Instrumentation inst) {
         
@@ -93,6 +86,12 @@ public class AgentBootstrap {
             throw e;
         }
         
+    }
+
+    public static void stopAgent() {
+        if (frpcStarter != null) {
+            frpcStarter.stopServer();
+        }
     }
 
 }

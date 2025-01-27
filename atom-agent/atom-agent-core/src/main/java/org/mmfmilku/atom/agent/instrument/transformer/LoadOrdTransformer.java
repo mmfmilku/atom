@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.instrument.transformer;
 
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
+import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -28,6 +29,7 @@ public class LoadOrdTransformer implements ClassFileTransformer {
         ClassORDDefine classOrdDefine = defineMap.get(fullClassName);
         if (classOrdDefine != null) {
             System.out.println("do LoadOrdTransformer class:" + className);
+            InstrumentationContext.addOrdClass(fullClassName);
             return ByteCodeUtils.redefineClass(classfileBuffer, classOrdDefine);
         }
         return classfileBuffer;

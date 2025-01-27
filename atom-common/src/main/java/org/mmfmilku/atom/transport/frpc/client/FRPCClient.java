@@ -1,22 +1,19 @@
 package org.mmfmilku.atom.transport.frpc.client;
 
-import org.mmfmilku.atom.transport.client.ClientSession;
-import org.mmfmilku.atom.transport.frpc.FRPCParam;
-import org.mmfmilku.atom.transport.frpc.FRPCReturn;
-import org.mmfmilku.atom.transport.frpc.FRPCStarter;
-import org.mmfmilku.atom.transport.protocol.file.FClient;
+import org.mmfmilku.atom.transport.protocol.client.ClientSession;
+import org.mmfmilku.atom.transport.frpc.server.FRPCParam;
+import org.mmfmilku.atom.transport.frpc.server.FRPCReturn;
+import org.mmfmilku.atom.transport.protocol.client.FClient;
+import org.mmfmilku.atom.transport.protocol.FClients;
+import org.mmfmilku.atom.transport.protocol.handle.type.TypeFrame;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class FRPCClient {
 
@@ -51,42 +48,27 @@ public class FRPCClient {
         fClient = new FClient(fDir);
     }
 
-    public FRPCReturn call(ClientSession<String> session, FRPCParam frpcParam) {
-        try {
-            byte[] serialize = IOUtils.serialize(frpcParam);
-            String toSend = Base64.getEncoder().encodeToString(serialize);
-            String read = session.sendThenRead(toSend + "\r");
-            byte[] decode = Base64.getDecoder().decode(read.trim());
-            return IOUtils.deserialize(decode);
-        } finally {
-//            waitCall.signalAll();
-        }
-    }
-
     public FRPCReturn call(FRPCParam frpcParam) {
-        boolean idle = clientList.stream().anyMatch(FRPCSession::idle);
-        if (idle) {
-            for (FRPCSession frpcSession : clientList) {
-                if (frpcSession.lock()) {
-                    return call(frpcSession, frpcParam);
-                }
+        for (FRPCSession frpcSession : clientList) {
+            if (frpcSession.idle() && frpcSession.lock()) {
+                return frpcSession.call(frpcParam);
             }
         }
         if (clientList.size() < maxConnect) {
             // double check 同步，保证不超上限
             synchronized (clientList) {
                 if (clientList.size() < maxConnect) {
-                    FRPCSession frpcSession = new FRPCSession(fClient.connect());
+                    FRPCSession frpcSession = new FRPCSession(FClients.openAssemblySession(fClient));
                     // 局部变量，无需上锁
-                    FRPCReturn result = call(frpcSession, frpcParam);
+                    FRPCReturn result = frpcSession.call(frpcParam);
                     // 调用完后再添加至连接列表，避免被其他线程抢夺
                     clientList.add(frpcSession);
                     return result;
                 }
             }
-            return call(lockSession(), frpcParam);
+            return lockSession().call(frpcParam);
         } else {
-            return call(lockSession(), frpcParam);
+            return lockSession().call(frpcParam);
         }
     }
 
@@ -111,13 +93,13 @@ public class FRPCClient {
         clientList.forEach(FRPCSession::close);
     }
 
-    static class FRPCSession implements ClientSession<String> {
+    static class FRPCSession implements ClientSession<FRPCParam> {
 
-        private ClientSession<String> clientSession;
+        private ClientSession<TypeFrame> clientSession;
 
         private AtomicBoolean lock = new AtomicBoolean(false);
 
-        FRPCSession(ClientSession<String> clientSession) {
+        FRPCSession(ClientSession<TypeFrame> clientSession) {
             this.clientSession = clientSession;
         }
 
@@ -130,19 +112,26 @@ public class FRPCClient {
         }
 
         @Override
-        public void send(String data) {
+        public void send(FRPCParam data) {
             throw new RuntimeException("not support");
         }
 
         @Override
-        public String read() {
+        public FRPCParam read() {
             throw new RuntimeException("not support");
         }
 
         @Override
-        public String sendThenRead(String data) {
+        public FRPCParam sendThenRead(FRPCParam frpcParam) {
+            byte[] serialize = IOUtils.serialize(frpcParam);
+            TypeFrame typeFrame = clientSession.sendThenRead(new TypeFrame(serialize));
+            frpcParam.setFrpcReturn(IOUtils.deserialize(typeFrame.getData()));
+            return frpcParam;
+        }
+
+        public FRPCReturn call(FRPCParam frpcParam) {
             try {
-                return clientSession.sendThenRead(data);
+                return sendThenRead(frpcParam).getFrpcReturn();
             } finally {
                 lock.set(false);
             }

@@ -2,7 +2,7 @@ package org.mmfmilku.atom.agent.api.impl;
 
 import org.junit.Test;
 import org.mmfmilku.atom.api.AppInfoApi;
-import org.mmfmilku.atom.transport.frpc.FRPCStarter;
+import org.mmfmilku.atom.transport.frpc.server.FRPCStarter;
 import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 
 import java.io.File;

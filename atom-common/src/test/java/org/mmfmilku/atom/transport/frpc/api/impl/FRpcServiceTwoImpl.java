@@ -1,6 +1,6 @@
 package org.mmfmilku.atom.transport.frpc.api.impl;
 
-import org.mmfmilku.atom.transport.frpc.FRPCService;
+import org.mmfmilku.atom.transport.frpc.server.FRPCService;
 import org.mmfmilku.atom.transport.frpc.api.FRpcServiceTwo;
 
 import java.util.HashMap;

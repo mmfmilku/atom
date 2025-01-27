@@ -1,7 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
-import org.mmfmilku.atom.agent.compiler.parser.syntax.ExpressionOperate;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.ImportUse;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.ExpressionOperate;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.ImportUse;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 
 import java.util.Collections;

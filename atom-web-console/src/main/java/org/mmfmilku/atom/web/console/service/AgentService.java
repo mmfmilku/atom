@@ -2,13 +2,14 @@ package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.agent.client.AgentClient;
 import org.mmfmilku.atom.api.AppInfoApi;
+import org.mmfmilku.atom.api.dto.RunInfo;
 import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.util.AssertUtil;
+import org.mmfmilku.atom.util.StringUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IAgentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -16,16 +17,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.Map;
 
 @Service
 public class AgentService implements IAgentService {
 
     @Autowired
     IAgentConfigService agentConfigService;
-
-    // TODO 临时测试
-    @Value("${test.app-base-package}")
-    String testAppPackage;
 
     @Override
     public boolean loadAgent(String vmId, String appName) {
@@ -40,8 +39,9 @@ public class AgentService implements IAgentService {
                             // 需要拓展的类加载器
                             + ";app-classloader=" + customClassloader
                             // 可重写class的包路径
-                            // TODO 如何配置
-                            + ";app-base-package=" + testAppPackage
+                            + ";app-base-package=" +
+                                config.getConfigData()
+                                .getOrDefault("basePackage", "com")
                             // ferver监听路径
                             + ";app-fserver-dir=" + config.getFDir()
             );
@@ -53,7 +53,39 @@ public class AgentService implements IAgentService {
         AppInfoApi infoApi = FRPCFactory.getService(AppInfoApi.class, config.getFDir());
         infoApi.ping();
 
+        RunInfo runInfo = infoApi.runInfo();
+        System.out.println(runInfo);
+
+        // TODO
+        String basePath = config.getConfigData().get("basePath");
+        if (StringUtils.isEmpty(basePath)) {
+            config.getConfigData().put("basePath", runInfo.getStartClass());
+        }
+
         return true;
+    }
+
+    @Override
+    public Map<String, String> vmInfo(String vmId) {
+        Map<String, String> vmInfo = Collections.emptyMap();
+        for (Map<String, String> vmMap : AgentClient.listVMMap()) {
+            if (vmMap.get("vmId").equals(vmId)) {
+                vmInfo = vmMap;
+                break;
+            }
+        }
+
+        // 判断是否连接
+        AgentConfig config = agentConfigService.getConfigByName(vmInfo.get("displayName"));
+        AppInfoApi infoApi = FRPCFactory.getService(AppInfoApi.class, config.getFDir());
+        try {
+            infoApi.ping();
+            vmInfo.put("hasAgent", "1");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return vmInfo;
     }
 
     // TODO jar版本如何配置
