@@ -3,6 +3,7 @@ package org.mmfmilku.atom.file;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mmfmilku.atom.transport.protocol.FClients;
+import org.mmfmilku.atom.transport.protocol.client.BigStringClientSession;
 import org.mmfmilku.atom.transport.protocol.client.FClient;
 import org.mmfmilku.atom.transport.protocol.client.TypeClientSession;
 import org.mmfmilku.atom.transport.protocol.exception.MessageCodeException;
@@ -50,20 +51,28 @@ public class BigDataTest {
 
     @Test
     public void bigServerTest() {
-        TypeClientSession session = FClients.openTypeClientSession(fClient2);
-        String base = new String(new byte[65534]);
-        TypeFrame typeFrame;
-        typeFrame = session.sendThenRead(new TypeFrame(base.getBytes()));
-        assertEquals("big:" + base, new String(typeFrame.getData()));
-        typeFrame = session.sendThenRead(new TypeFrame((base + base).getBytes()));
-        assertEquals("big:" + base + base, new String(typeFrame.getData()));
-        
+        BigStringClientSession session = FClients.openBigStringSession(fClient2);
+        String s = "aaa\r";
+        assertEquals("big:" + s, session.sendThenRead(s));
+
         StringBuilder big = new StringBuilder();
-        for (int i = 0; i < 1000_000; i++) {
-            big.append(i + "");
+
+        checkBigFrame(session, big, 100);
+        checkBigFrame(session, big, 1000);
+        checkBigFrame(session, big, 10_000);
+        checkBigFrame(session, big, 100_000);
+    }
+
+    private void checkBigFrame(BigStringClientSession session, StringBuilder big, int len) {
+        String read;
+        big.setLength(0);
+        big.append("start-");
+        for (int i = 0; i < len; i++) {
+            big.append(i);
         }
-        typeFrame = session.sendThenRead(new TypeFrame(big.toString().getBytes()));
-        assertEquals("big:" + big.toString(), new String(typeFrame.getData()));
+        big.append("\r");
+        read = session.sendThenRead(big.toString());
+        assertEquals("big:" + big.toString(), read);
     }
 
 }

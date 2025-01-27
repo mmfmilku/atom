@@ -1,9 +1,6 @@
 package org.mmfmilku.atom.transport.protocol;
 
-import org.mmfmilku.atom.transport.protocol.client.FClient;
-import org.mmfmilku.atom.transport.protocol.client.FClientSession;
-import org.mmfmilku.atom.transport.protocol.client.StringClientSession;
-import org.mmfmilku.atom.transport.protocol.client.TypeClientSession;
+import org.mmfmilku.atom.transport.protocol.client.*;
 
 public class FClients {
 
@@ -21,6 +18,10 @@ public class FClients {
 
     public static StringClientSession openStringClientSession(FClient fClient) {
         return new StringClientSession(openTypeClientSession(fClient));
+    }
+
+    public static BigStringClientSession openBigStringSession(FClient fClient) {
+        return new BigStringClientSession(new AssemblyClientSession(openTypeClientSession(fClient)));
     }
 
 }

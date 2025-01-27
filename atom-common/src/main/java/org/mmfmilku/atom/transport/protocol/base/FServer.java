@@ -170,8 +170,12 @@ public class FServer {
                         .map(ctx -> (Callable<Boolean>) () -> {
                             FFrame read = ctx.tryRead();
                             if (read != null) {
-                                handleManager.onReceive(ctx, read);
-                                return true;
+                                try {
+                                    handleManager.onReceive(ctx, read);
+                                    return true;
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
                             }
                             return false;
                         }).collect(Collectors.toList());

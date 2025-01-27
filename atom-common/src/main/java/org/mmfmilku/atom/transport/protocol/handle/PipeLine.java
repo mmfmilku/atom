@@ -5,6 +5,8 @@ import org.mmfmilku.atom.transport.protocol.base.FFrame;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PipeLine {
 
@@ -29,7 +31,10 @@ public class PipeLine {
     }
 
     public void write(Object input) {
-        connector.write(decode(input));
+        List<Object> fFrames = decode(input);
+        for (Object fFrame : fFrames) {
+            connector.write((FFrame) fFrame);
+        }
     }
 
     public void setAttr(Object key, Object value) {
@@ -40,13 +45,17 @@ public class PipeLine {
         return connector.getAttrMap().get(key);
     }
 
-    private FFrame decode(Object input) {
-        Object output = input;
+    private List<Object> decode(Object input) {
+        List<Object> outputs = new ArrayList();
+        outputs.add(input);
+        Stream stream = outputs.stream();
         // 倒序解码
         for (int i = handlePoint; i >= 0; i--) {
-            output = handleList.get(i).decode(output);
+            int finalI = i;
+            stream = stream.map(output -> handleList.get(finalI).handleDecode(output))
+                    .flatMap(o -> ((List) o).stream());
         }
-        return (FFrame) output;
+        return (List<Object>) stream.collect(Collectors.toList());
     }
 
     List<ServerHandle> getHandleList() {

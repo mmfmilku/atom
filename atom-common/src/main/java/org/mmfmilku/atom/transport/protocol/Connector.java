@@ -127,18 +127,6 @@ public class Connector implements Closeable {
         }
     }
 
-    @Deprecated
-    public void write(String send) {
-        byte[] bytes = send.getBytes(charset);
-        byte[] sendLenByte = MessageUtils.codeInt(bytes.length);
-        try {
-            outputStream.write(sendLenByte);
-            outputStream.write(bytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public Map<Object, Object> getAttrMap() {
         return connectAttr;
     }
