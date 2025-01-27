@@ -19,7 +19,7 @@ import java.util.List;
  * @author chenxp
  * @date 2024/9/30:13:40
  */
-public class AssemblyClientSession implements ClientSession<AssemblyDataFrame> {
+public class AssemblyClientSession implements ClientSession<TypeFrame> {
 
     private ClientSession<TypeFrame> clientSession;
 
@@ -30,8 +30,8 @@ public class AssemblyClientSession implements ClientSession<AssemblyDataFrame> {
     }
 
     @Override
-    public void send(AssemblyDataFrame data) {
-        List<TypeFrame> typeFrames = codec.decode(data);
+    public void send(TypeFrame data) {
+        List<TypeFrame> typeFrames = codec.decode(new AssemblyDataFrame(data.getData()));
         for (TypeFrame typeFrame : typeFrames) {
             clientSession.send(typeFrame);
         }
@@ -51,7 +51,7 @@ public class AssemblyClientSession implements ClientSession<AssemblyDataFrame> {
     }
 
     @Override
-    public AssemblyDataFrame sendThenRead(AssemblyDataFrame data) {
+    public AssemblyDataFrame sendThenRead(TypeFrame data) {
         send(data);
         return read();
     }

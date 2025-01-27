@@ -1,6 +1,6 @@
 package org.mmfmilku.atom.transport.protocol.client;
 
-import org.mmfmilku.atom.transport.protocol.handle.assembly.AssemblyDataFrame;
+import org.mmfmilku.atom.transport.protocol.handle.type.TypeFrame;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -12,24 +12,24 @@ import java.nio.charset.StandardCharsets;
  * @author chenxp
  * @date 2024/9/30:13:40
  */
-public class BigStringClientSession extends ClientSessionDecorate<AssemblyDataFrame, String>
+public class BigStringClientSession extends ClientSessionDecorate<TypeFrame, String>
         implements ClientSession<String> {
 
     private Charset charset;
 
-    public BigStringClientSession(ClientSession<AssemblyDataFrame> clientSession) {
+    public BigStringClientSession(ClientSession<TypeFrame> clientSession) {
         super(clientSession);
         charset = StandardCharsets.UTF_8;
     }
 
     @Override
-    protected String code(AssemblyDataFrame typeFrame) {
+    protected String code(TypeFrame typeFrame) {
         return new String(typeFrame.getData());
     }
 
     @Override
-    protected AssemblyDataFrame decode(String s) {
-        return new AssemblyDataFrame(s.getBytes(charset));
+    protected TypeFrame decode(String s) {
+        return new TypeFrame(s.getBytes(charset));
     }
 
 }

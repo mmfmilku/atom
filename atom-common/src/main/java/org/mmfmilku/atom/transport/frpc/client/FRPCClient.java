@@ -58,7 +58,7 @@ public class FRPCClient {
             // double check 同步，保证不超上限
             synchronized (clientList) {
                 if (clientList.size() < maxConnect) {
-                    FRPCSession frpcSession = new FRPCSession(FClients.openTypeClientSession(fClient));
+                    FRPCSession frpcSession = new FRPCSession(FClients.openAssemblySession(fClient));
                     // 局部变量，无需上锁
                     FRPCReturn result = frpcSession.call(frpcParam);
                     // 调用完后再添加至连接列表，避免被其他线程抢夺

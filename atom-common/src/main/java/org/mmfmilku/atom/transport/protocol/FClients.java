@@ -20,6 +20,10 @@ public class FClients {
         return new StringClientSession(openTypeClientSession(fClient));
     }
 
+    public static AssemblyClientSession openAssemblySession(FClient fClient) {
+        return new AssemblyClientSession(openTypeClientSession(fClient));
+    }
+
     public static BigStringClientSession openBigStringSession(FClient fClient) {
         return new BigStringClientSession(new AssemblyClientSession(openTypeClientSession(fClient)));
     }
