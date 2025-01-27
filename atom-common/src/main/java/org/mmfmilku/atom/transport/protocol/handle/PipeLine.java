@@ -45,6 +45,10 @@ public class PipeLine {
         return connector.getAttrMap().get(key);
     }
 
+    public Object removeAttr(Object key) {
+        return connector.getAttrMap().remove(key);
+    }
+
     private List<Object> decode(Object input) {
         List<Object> outputs = new ArrayList();
         outputs.add(input);

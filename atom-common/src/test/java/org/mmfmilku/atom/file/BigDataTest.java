@@ -57,10 +57,17 @@ public class BigDataTest {
 
         StringBuilder big = new StringBuilder();
 
-        checkBigFrame(session, big, 100);
         checkBigFrame(session, big, 1000);
-        checkBigFrame(session, big, 10_000);
-        checkBigFrame(session, big, 100_000);
+        checkBigFrame(session, big, 10000);
+        checkBigFrame(session, big, 100000);
+        checkBigFrame(session, big, 500000);
+        // 1MB
+        checkBigFrame(session, big, 1_000_000);
+        // 5MB
+//        checkBigFrame(session, big, 5_000_000);
+        // 10MB
+//        checkBigFrame(session, big, 10_000_000);
+        checkBigFrame(session, big, 19);
     }
 
     private void checkBigFrame(BigStringClientSession session, StringBuilder big, int len) {
@@ -68,9 +75,9 @@ public class BigDataTest {
         big.setLength(0);
         big.append("start-");
         for (int i = 0; i < len; i++) {
-            big.append(i);
+            big.append(i % 10);
         }
-        big.append("\r");
+        big.append("end\r");
         read = session.sendThenRead(big.toString());
         assertEquals("big:" + big.toString(), read);
     }

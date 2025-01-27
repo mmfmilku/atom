@@ -11,6 +11,7 @@ public class ArrayUtils {
         int addLen = 0;
         for (byte[] bytes : byteArrArr) {
             System.arraycopy(bytes, 0, allByte, addLen, bytes.length);
+            addLen += bytes.length;
         }
         return allByte;
     }

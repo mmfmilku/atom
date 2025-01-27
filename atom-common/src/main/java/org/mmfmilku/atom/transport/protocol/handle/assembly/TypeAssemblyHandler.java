@@ -30,10 +30,6 @@ public class TypeAssemblyHandler implements ServerHandle<TypeFrame, TypeFrame> {
         return codec.decode(new AssemblyDataFrame(typeFrame.getData()));
     }
 
-    private AssemblyDataFrame codeList(List<TypeFrame> typeFrames) {
-        return codec.code(typeFrames);
-    }
-
     @Override
     public void handle(TypeFrame typeFrame, PipeLine pipeLine) {
 
@@ -46,8 +42,10 @@ public class TypeAssemblyHandler implements ServerHandle<TypeFrame, TypeFrame> {
             if (typeFrames.size() < total) {
                 pipeLine.setAttr(this, typeFrames);
             } else {
+                // 清除
+                pipeLine.removeAttr(this);
                 // 聚合所有帧
-                AssemblyDataFrame assemblyDataFrame = codeList(typeFrames);
+                AssemblyDataFrame assemblyDataFrame = codec.code(typeFrames);
                 pipeLine.handleNext(assemblyDataFrame);
             }
         } else {
@@ -56,7 +54,7 @@ public class TypeAssemblyHandler implements ServerHandle<TypeFrame, TypeFrame> {
             typeFrames.add(typeFrame);
             if (total == 1) {
                 // 无需聚合
-                AssemblyDataFrame assemblyDataFrame = codeList(typeFrames);
+                AssemblyDataFrame assemblyDataFrame = codec.code(typeFrames);
                 pipeLine.handleNext(assemblyDataFrame);
             } else {
                 // 需要聚合，保存首帧
