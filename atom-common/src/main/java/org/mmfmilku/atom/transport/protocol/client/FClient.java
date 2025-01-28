@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -27,6 +28,8 @@ public class FClient {
     private ConcurrentLinkedQueue<ClientSession> connectList;
 
     private String connectPath;
+
+    private Consumer<Connector> closeCallback;
 
     // 读取完整帧超时时间，毫秒
     private long readTimeOutMillis;
@@ -64,6 +67,10 @@ public class FClient {
         }, 0, 300, TimeUnit.MILLISECONDS);
     }
 
+    public void setCloseCallback(Consumer<Connector> closeCallback) {
+        this.closeCallback = closeCallback;
+    }
+
     public FClientSession connect() {
         String uuid = UUID.randomUUID().toString();
         return connect(uuid);
@@ -91,7 +98,7 @@ public class FClient {
         try {
             inputStream = new FileInputStream(responseFile);
             outputStream = new FileOutputStream(requestFile);
-            Connector ctx = new Connector(inputStream, outputStream, null);
+            Connector ctx = new Connector(inputStream, outputStream, closeCallback);
             FFrame ping = ctx.read(readTimeOutMillis);
             if (ping != null) {
                 if (MessageUtils.decodeInt(ping.getLen()) == 0) {

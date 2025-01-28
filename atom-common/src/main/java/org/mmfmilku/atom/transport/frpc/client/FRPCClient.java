@@ -9,6 +9,7 @@ import org.mmfmilku.atom.transport.protocol.handle.type.TypeFrame;
 import org.mmfmilku.atom.util.IOUtils;
 
 import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,6 +47,9 @@ public class FRPCClient {
 
     private FRPCClient(String fDir) {
         fClient = new FClient(fDir);
+        fClient.setCloseCallback(connector -> {
+
+        });
     }
 
     public FRPCReturn call(FRPCParam frpcParam) {

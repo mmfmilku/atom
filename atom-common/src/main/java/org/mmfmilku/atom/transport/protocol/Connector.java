@@ -143,9 +143,6 @@ public class Connector implements Closeable {
     public void close() {
         System.out.println("关闭连接");
         write(MessageUtils.packFFrame());
-        if (closeCallback != null) {
-            closeCallback.accept(this);
-        }
         if (inputStream != null) {
             try {
                 inputStream.close();
@@ -161,6 +158,9 @@ public class Connector implements Closeable {
             }
         }
         close = true;
+        if (closeCallback != null) {
+            closeCallback.accept(this);
+        }
     }
 
 }
