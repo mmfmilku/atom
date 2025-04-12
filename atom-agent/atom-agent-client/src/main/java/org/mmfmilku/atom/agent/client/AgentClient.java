@@ -21,17 +21,21 @@ import java.util.stream.Collectors;
  */
 public class AgentClient {
 
-    public static List<VirtualMachineDescriptor> listVM() {
+    private static List<VirtualMachineDescriptor> listVM() {
         return VirtualMachine.list();
     }
-    
+
     public static List<Map<String, String>> listVMMap() {
-        return listVM().stream().map(vm -> {
-            Map<String, String> map = new HashMap<>();
-            map.put("vmId", vm.id());
-            map.put("displayName", vm.displayName());
-            return map;
-        }).collect(Collectors.toList());
+        String command = System.getProperty("sun.java.command");
+        return listVM().stream()
+                // attach列表排除控制台本身
+                .filter(vmDescriptor -> !vmDescriptor.displayName().equals(command))
+                .map(vm -> {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("vmId", vm.id());
+                    map.put("displayName", vm.displayName());
+                    return map;
+                }).collect(Collectors.toList());
     }
 
     @Deprecated
