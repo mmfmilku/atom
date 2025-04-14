@@ -8,8 +8,6 @@ import org.mmfmilku.atom.transport.protocol.FClients;
 import org.mmfmilku.atom.transport.protocol.handle.type.TypeFrame;
 import org.mmfmilku.atom.util.IOUtils;
 
-import java.util.Base64;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,7 +18,7 @@ public class FRPCClient {
 
     private int maxConnect = 10;
     private FClient fClient;
-    private final List<FRPCSession> clientList = new CopyOnWriteArrayList<>();
+    private final List<FRPCSession> sessionList = new CopyOnWriteArrayList<>();
 //    private Lock lock = new ReentrantLock(false);
 //    private Condition waitCall = lock.newCondition();
 
@@ -53,20 +51,27 @@ public class FRPCClient {
     }
 
     public FRPCReturn call(FRPCParam frpcParam) {
-        for (FRPCSession frpcSession : clientList) {
+        for (int i = 0; i < sessionList.size(); i++) {
+            FRPCSession frpcSession = sessionList.get(i);
             if (frpcSession.idle() && frpcSession.lock()) {
-                return frpcSession.call(frpcParam);
+                try {
+                    return frpcSession.call(frpcParam);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    sessionList.remove(i);
+                    throw e;
+                }
             }
         }
-        if (clientList.size() < maxConnect) {
+        if (sessionList.size() < maxConnect) {
             // double check 同步，保证不超上限
-            synchronized (clientList) {
-                if (clientList.size() < maxConnect) {
+            synchronized (sessionList) {
+                if (sessionList.size() < maxConnect) {
                     FRPCSession frpcSession = new FRPCSession(FClients.openAssemblySession(fClient));
                     // 局部变量，无需上锁
                     FRPCReturn result = frpcSession.call(frpcParam);
                     // 调用完后再添加至连接列表，避免被其他线程抢夺
-                    clientList.add(frpcSession);
+                    sessionList.add(frpcSession);
                     return result;
                 }
             }
@@ -79,7 +84,7 @@ public class FRPCClient {
     private FRPCSession lockSession() {
         while (true) {
             // TODO 使用等待唤起
-            for (FRPCSession frpcSession : clientList) {
+            for (FRPCSession frpcSession : sessionList) {
                 if (frpcSession.lock()) {
                     return frpcSession;
                 }
@@ -94,7 +99,7 @@ public class FRPCClient {
     }
 
     public void close() {
-        clientList.forEach(FRPCSession::close);
+        sessionList.forEach(FRPCSession::close);
     }
 
     static class FRPCSession implements ClientSession<FRPCParam> {

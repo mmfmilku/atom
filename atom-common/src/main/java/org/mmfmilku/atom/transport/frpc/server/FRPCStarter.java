@@ -51,6 +51,7 @@ public class FRPCStarter {
 
     private void run() {
         try {
+            System.out.println("fServer listen " + fDir);
             fServer = new FServer(fDir)
                     .addHandle(new TypeHandler())
                     .addHandle(new TypeAssemblyHandler())

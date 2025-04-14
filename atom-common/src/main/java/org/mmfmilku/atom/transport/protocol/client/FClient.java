@@ -25,7 +25,7 @@ public class FClient {
     // TODO 定时获取服务端消息
     private ScheduledExecutorService clientExecutor;
 
-    private ConcurrentLinkedQueue<ClientSession> connectList;
+    private ConcurrentLinkedQueue<ClientSession> sessionList;
 
     private String connectPath;
 
@@ -41,7 +41,7 @@ public class FClient {
     }
 
     private void init() {
-        this.connectList =  new ConcurrentLinkedQueue<>();
+        this.sessionList =  new ConcurrentLinkedQueue<>();
         this.clientExecutor = Executors.newScheduledThreadPool(1,
                 new ThreadFactory() {
                     private final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -59,7 +59,7 @@ public class FClient {
                 });
 
         clientExecutor.scheduleAtFixedRate(() -> {
-            for (ClientSession clientSession : connectList) {
+            for (ClientSession clientSession : sessionList) {
                 // TODO 定时读取
                 // TODO 并发控制
             }
@@ -108,7 +108,9 @@ public class FClient {
                 ctx.write(MessageUtils.packFFrame(pong));
                 FFrame accept = ctx.read(readTimeOutMillis);
                 if (accept != null && accept.getData()[0] == 1) {
-                    return new FClientSession(ctx);
+                    FClientSession fClientSession = new FClientSession(ctx);
+                    sessionList.add(fClientSession);
+                    return fClientSession;
                 } else {
                     throw new ConnectException("连接失败");
                 }

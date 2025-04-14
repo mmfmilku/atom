@@ -123,6 +123,7 @@ public class Connector implements Closeable {
             outputStream.write(fFrame.getData());
         } catch (IOException e) {
             e.printStackTrace();
+            release();
             throw new ConnectException(e);
         }
     }
@@ -143,6 +144,14 @@ public class Connector implements Closeable {
     public void close() {
         System.out.println("关闭连接");
         write(MessageUtils.packFFrame());
+        release();
+        close = true;
+        if (closeCallback != null) {
+            closeCallback.accept(this);
+        }
+    }
+
+    private void release() {
         if (inputStream != null) {
             try {
                 inputStream.close();

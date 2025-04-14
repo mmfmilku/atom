@@ -295,6 +295,7 @@ post('agent/vmInfo?vmId=' + vmId).then(res => {
     }
     vmInfo.displayName = res.displayName
     pageEdit.querySelector('.edit-title').innerText = vmInfo.displayName
+    pageEdit.querySelector('.edit-operate-bar').classList.remove('hide')
 
     if (res.hasAgent) {
         // 已经连接过
