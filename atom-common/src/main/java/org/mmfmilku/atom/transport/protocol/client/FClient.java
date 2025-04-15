@@ -132,7 +132,12 @@ public class FClient {
 
     private void checkListen() {
         File connectDir = new File(connectPath);
-        waitCount(o -> connectDir.exists());
+        if (!connectDir.exists()) {
+            throw new ConnectException("找不到服务器");
+        }
+        if (!new File(connectPath, FServer.LISTEN_FILE).exists()) {
+            throw new ConnectException("找不到服务器");
+        }
     }
 
     private void waitCount(Function<Integer, Boolean> function) {
