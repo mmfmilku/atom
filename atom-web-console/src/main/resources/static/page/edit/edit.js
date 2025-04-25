@@ -43,7 +43,7 @@ let listClass = clickDom => {
 
 // 获取重写列表
 let listFile = clickDom => {
-    btnClickChange(pageEdit.querySelector('.listFileBtn'))
+    btnClickChange(clickDom)
     onlyShow('listFile')
     post('config/listOrd?appName=' + vmInfo.displayName)
         .then(res => {
@@ -65,6 +65,14 @@ let listStrategy = clickDom => {
     fileListDom.innerHTML = '待支持'
 }
 
+// 可执行控制台
+let executeConsole = clickDom => {
+    btnClickChange(clickDom)
+    onlyShow('executeConsole')
+    let fileListDom = pageEdit.querySelector('.executeConsole')
+    fileListDom.innerHTML = '待支持阿啊😫'
+}
+
 let classToFile = () => {
     let ordFileName = contextTarget.innerText + '.java'
     // 避免已存在重写文件被覆盖，先查询
@@ -77,9 +85,11 @@ let classToFile = () => {
                         return post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${contextTarget.innerText}`)
                     })
                     .then(text => {
+                        btnClickChange(pageEdit.querySelector('.listFileBtn'))
                         doAddFile(ordFileName, text)
                     })
             } else {
+                btnClickChange(pageEdit.querySelector('.listFileBtn'))
                 // 已存在直接读取
                 readText(ordFileName)
                 listFile()
