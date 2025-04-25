@@ -9,6 +9,7 @@ import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.agent.instrument.transformer.LoadOrdTransformer;
 import org.mmfmilku.atom.agent.instrument.transformer.StopOrdTransformer;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
+import org.mmfmilku.atom.agent.util.OrdUtils;
 import org.mmfmilku.atom.api.InstrumentApi;
 import org.mmfmilku.atom.exception.BizException;
 import org.mmfmilku.atom.transport.frpc.server.FRPCService;
@@ -106,17 +107,7 @@ public class InstrumentApiImpl implements InstrumentApi {
     @Override
     public void loadOrdFile(String file) {
         Map<String, ClassORDDefine> defineMap = OverrideBodyHolder.parseOverrideFile(file);
-        LoadOrdTransformer ordTransformer = new LoadOrdTransformer(defineMap);
-        InstrumentationContext.addTransformer(ordTransformer);
-        try {
-            Class[] classes = defineMap.keySet().stream().map(InstrumentationContext::searchClass).toArray(Class[]::new);
-            System.out.println("retransformClasses：" + Arrays.toString(classes));
-            InstrumentationContext.retransformClasses(classes);
-        } catch (UnmodifiableClassException e) {
-            e.printStackTrace();
-            throw new BizException(e.getMessage());
-        }
-        InstrumentationContext.removeTransformer(ordTransformer);
+        OrdUtils.loadOrd(defineMap);
     }
 
     @Override
