@@ -19,6 +19,9 @@ public class OrdUtils {
         try {
             Class[] classes = defineMap.keySet().stream().map(InstrumentationContext::searchClass).toArray(Class[]::new);
             System.out.println("retransformClasses：" + Arrays.toString(classes));
+            if (classes == null || classes.length == 0) {
+                throw new BizException("no loadOrd class found");
+            }
             InstrumentationContext.retransformClasses(classes);
         } catch (UnmodifiableClassException e) {
             e.printStackTrace();

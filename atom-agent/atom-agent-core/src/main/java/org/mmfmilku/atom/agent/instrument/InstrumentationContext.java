@@ -84,13 +84,16 @@ public class InstrumentationContext {
     }
 
     public static Class<?> searchClass(String searchClassName) {
+        System.out.println("searchClass for:" + searchClassName);
         InstrumentationContext instance = getInstance();
         Class<?>[] loadedClasses = instance.inst.getAllLoadedClasses();
         for (Class<?> loadedClass : loadedClasses) {
             if (loadedClass.getName().equals(searchClassName)) {
+                System.out.println("searchClass for:" + searchClassName + " get " + loadedClass);
                 return loadedClass;
             }
         }
+        System.out.println("searchClass for:" + searchClassName + " get null");
         return null;
     }
     

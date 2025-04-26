@@ -74,7 +74,7 @@ let executeConsole = clickDom => {
             let fileListDom = pageEdit.querySelector('.executeConsole')
             fileListDom.innerHTML = res.map(e =>
                 `
-                    <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD')" 
+                    <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD', 3)" 
                     class="edit-file text-wrap">${e.ordName}</div>
                     `
             ).join('')
@@ -122,6 +122,10 @@ let typeArr = [
     {
         type: 'strategy',
         '0': '<button onclick="saveText()">保存</button>'
+    },
+    {
+        type: 'executeConsole',
+        '0': '<button onclick="executeGoal()">运行</button>'
     }
 ]
 let setType = (typeIdx, prop = '0') => {
@@ -141,7 +145,7 @@ let doAddFile = (ordFileName, text = '') => {
         })
 }
 
-let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD') => {
+let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD', type = 1) => {
     post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=${ordEnum}`)
         .then(res => {
             // 文件选中
@@ -151,7 +155,7 @@ let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD') => {
 
             // 文件标题反显
             pageEdit.querySelector('.edit-code-title').innerText = ordFileName
-            setType(1, res.running)
+            setType(type, res.running)
 
             // 文件内容反显
             pageEdit.querySelector('#ordFileText').value = res.text
@@ -215,6 +219,18 @@ let stopOrd = () => {
             UI.showMessage(res)
             readText(ordFileName)
             listFile()
+        })
+}
+
+let executeGoal = () => {
+    let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
+    if (!ordFileName) {
+        UI.showMessage('请先选择文件')
+        return
+    }
+    post(`executeConsole/execute?appName=${vmInfo.displayName}&executeFile=${ordFileName}`)
+        .then(res => {
+            UI.showMessage(res.success)
         })
 }
 
