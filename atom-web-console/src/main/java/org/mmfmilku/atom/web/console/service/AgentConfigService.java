@@ -2,7 +2,9 @@ package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.util.CodeUtils;
+import org.mmfmilku.atom.util.StringUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
@@ -21,10 +23,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -109,12 +108,14 @@ public class AgentConfigService implements IAgentConfigService {
         agentConfig.setFDir(agentConfig.getAppBaseDir() + File.separator + "fserver");
         agentConfig.setOrdDir(agentConfig.getAppBaseDir() + File.separator + "ord");
         agentConfig.setTmpDir(agentConfig.getAppBaseDir() + File.separator + "tmp");
+        agentConfig.setExecuteDir(agentConfig.getAppBaseDir() + File.separator + "execute");
         agentConfig.setConfFile(agentConfig.getAppBaseDir() + File.separator + ".conf");
 
         try {
             Files.createDirectories(Paths.get(agentConfig.getAppBaseDir()));
             Files.createDirectories(Paths.get(agentConfig.getOrdDir()));
             Files.createDirectories(Paths.get(agentConfig.getTmpDir()));
+            Files.createDirectories(Paths.get(agentConfig.getExecuteDir()));
             Paths.get(agentConfig.getConfFile()).toFile().createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
@@ -145,16 +146,26 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public List<OrdRunInfo> listOrd(String appName) {
-        Map<String, Object> runningOrdClass = instrumentService.getRunningOrdClass(appName);
+    public List<OrdRunInfo> listOrd(String appName, OrdEnum ordEnum, String childPath) {
+        Map<String, Object> runningOrdClass =
+                OrdEnum.BASE_ORD == ordEnum
+                        ? instrumentService.getRunningOrdClass(appName)
+                        : Collections.emptyMap();
         AgentConfig config = getConfigByName(appName);
-        List<OrdRunInfo> ordRunInfoList = ordFileOperation.listFiles(config).stream().map(ordFileName -> {
-            OrdRunInfo ordRunInfo = new OrdRunInfo();
-            ordRunInfo.setOrdName(ordFileName);
-            ordRunInfo.setRunning(
-                    runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
-            return ordRunInfo;
-        }).collect(Collectors.toList());
+        List<String> listFiles = StringUtils.isEmpty(childPath) ?
+                ordFileOperation.listFiles(config, ordEnum)
+                : ordFileOperation.listFiles(config, ordEnum, childPath);
+        List<OrdRunInfo> ordRunInfoList = listFiles
+                .stream()
+                .map(ordFileName -> {
+                    OrdRunInfo ordRunInfo = new OrdRunInfo();
+                    ordRunInfo.setOrdName(ordFileName);
+                    if (OrdEnum.BASE_ORD == ordEnum) {
+                        ordRunInfo.setRunning(
+                                runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
+                    }
+                    return ordRunInfo;
+                }).collect(Collectors.toList());
         return ordRunInfoList;
     }
 

@@ -3,6 +3,7 @@ package org.mmfmilku.atom.agent.util;
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
 import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.agent.instrument.transformer.LoadOrdTransformer;
+import org.mmfmilku.atom.agent.instrument.transformer.StopOrdTransformer;
 import org.mmfmilku.atom.exception.BizException;
 
 import java.lang.instrument.UnmodifiableClassException;
@@ -22,14 +23,32 @@ public class OrdUtils {
         } catch (UnmodifiableClassException e) {
             e.printStackTrace();
             throw new BizException(e.getMessage());
+        } finally {
+            InstrumentationContext.removeTransformer(ordTransformer);
         }
-        InstrumentationContext.removeTransformer(ordTransformer);
     }
 
-    public static void loadOrd(String loadClass, ClassORDDefine classORDDefine) {
+    public static void loadOrd(ClassORDDefine classORDDefine) {
         Map<String, ClassORDDefine> defineMap = new HashMap<>();
-        defineMap.put(loadClass, classORDDefine);
+        defineMap.put(classORDDefine.getName(), classORDDefine);
         loadOrd(defineMap);
+    }
+
+    public static void stopOrd(String stopFullClassName) {
+        StopOrdTransformer ordTransformer = new StopOrdTransformer(stopFullClassName);
+        InstrumentationContext.addTransformer(ordTransformer);
+        try {
+            Class<?> stopClazz = InstrumentationContext.searchClass(stopFullClassName);
+            System.out.println("retransformClasses：" + stopClazz);
+            if (stopClazz != null) {
+                InstrumentationContext.retransformClasses(stopClazz);
+            }
+        } catch (UnmodifiableClassException e) {
+            e.printStackTrace();
+            throw new BizException(e.getMessage());
+        } finally {
+            InstrumentationContext.removeTransformer(ordTransformer);
+        }
     }
 
 }

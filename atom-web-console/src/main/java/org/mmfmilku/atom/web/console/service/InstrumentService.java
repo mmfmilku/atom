@@ -1,7 +1,9 @@
 package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.api.AppInfoApi;
+import org.mmfmilku.atom.api.ExecutableApi;
 import org.mmfmilku.atom.api.InstrumentApi;
+import org.mmfmilku.atom.api.dto.ExecuteResult;
 import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
@@ -102,6 +104,13 @@ public class InstrumentService implements IInstrumentService {
     @Override
     public void stopClassOrd(String appName, String fullClassName) {
         getApi(appName).stopOrd(fullClassName);
+    }
+
+    @Override
+    public ExecuteResult execute(String appName, String executeFile, Object... args) {
+        AgentConfig config = agentConfigService.getConfigByName(appName);
+        return getApi(appName, ExecutableApi.class)
+                .execute(Paths.get(config.getExecuteDir(), executeFile).toString(), args);
     }
 
     @Override

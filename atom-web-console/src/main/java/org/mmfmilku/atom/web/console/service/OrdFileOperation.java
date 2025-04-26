@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.stereotype.Service;
@@ -23,10 +24,17 @@ import java.util.Objects;
 public class OrdFileOperation implements IOrdFileOperation {
     
     @Override
-    public List<String> listFiles(AgentConfig config) {
-        return Arrays.asList(Objects.requireNonNull(new File(config.getOrdDir()).list()));
+    public List<String> listFiles(AgentConfig config, OrdEnum ordEnum) {
+        return Arrays.asList(Objects.requireNonNull
+                (new File(ordEnum.getDirGetter().apply(config)).list()));
     }
-    
+
+    @Override
+    public List<String> listFiles(AgentConfig config, OrdEnum ordEnum, String childPath) {
+        return Arrays.asList(Objects.requireNonNull
+                (new File(ordEnum.getDirGetter().apply(config), childPath).list()));
+    }
+
     private File getFile(AgentConfig config, OrdFile ordFile) {
         return new File(config.getOrdDir(), ordFile.getFileName());
     }

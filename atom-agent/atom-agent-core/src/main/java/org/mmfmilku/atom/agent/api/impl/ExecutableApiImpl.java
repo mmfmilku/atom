@@ -2,17 +2,20 @@ package org.mmfmilku.atom.agent.api.impl;
 
 import org.mmfmilku.atom.agent.api.ExecuteGoal;
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
+import org.mmfmilku.atom.agent.config.OverrideBodyHolder;
 import org.mmfmilku.atom.agent.util.OrdUtils;
 import org.mmfmilku.atom.api.ExecutableApi;
 import org.mmfmilku.atom.api.dto.ExecuteResult;
+
+import java.util.Map;
 
 public class ExecutableApiImpl implements ExecutableApi {
     @Override
     public ExecuteResult execute(String toExecute, Object... args) {
 
         // 将待执行程序写入执行目标 TODO
-        ClassORDDefine classORDDefine = null;
-        OrdUtils.loadOrd(ExecuteGoal.class.getName(), classORDDefine);
+        Map<String, ClassORDDefine> defineMap = OverrideBodyHolder.parseOverrideFile(toExecute);
+        OrdUtils.loadOrd(defineMap);
 
         ExecuteResult result = new ExecuteResult();
         ExecuteGoal executeGoal = new ExecuteGoal();

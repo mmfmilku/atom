@@ -37,6 +37,11 @@ public class AgentConfig {
     private String tmpDir;
 
     /**
+     * 执行控制台文件保存的路径
+     * */
+    private String executeDir;
+
+    /**
      * 应用配置文件
      * */
     private String confFile;
@@ -45,6 +50,14 @@ public class AgentConfig {
      * 可修改配置
      * */
     private Map<String, String> configData = new HashMap<>();
+
+    public String getExecuteDir() {
+        return executeDir;
+    }
+
+    public void setExecuteDir(String executeDir) {
+        this.executeDir = executeDir;
+    }
 
     public Map<String, String> getConfigData() {
         return configData;

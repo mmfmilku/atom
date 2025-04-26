@@ -112,18 +112,6 @@ public class InstrumentApiImpl implements InstrumentApi {
 
     @Override
     public void stopOrd(String stopFullClassName) {
-        StopOrdTransformer ordTransformer = new StopOrdTransformer(stopFullClassName);
-        InstrumentationContext.addTransformer(ordTransformer);
-        try {
-            Class<?> stopClazz = InstrumentationContext.searchClass(stopFullClassName);
-            System.out.println("retransformClasses：" + stopClazz);
-            if (stopClazz != null) {
-                InstrumentationContext.retransformClasses(stopClazz);
-            }
-        } catch (UnmodifiableClassException e) {
-            e.printStackTrace();
-            throw new BizException(e.getMessage());
-        }
-        InstrumentationContext.removeTransformer(ordTransformer);
+        OrdUtils.stopOrd(stopFullClassName);
     }
 }

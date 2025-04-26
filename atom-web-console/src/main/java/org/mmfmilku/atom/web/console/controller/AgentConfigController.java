@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.web.console.controller;
 
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
@@ -37,9 +38,9 @@ public class AgentConfigController {
         return "success";
     }
 
-    @RequestMapping("listOrd")
-    public List<OrdRunInfo> listOrd(@RequestParam String appName) {
-        return agentConfigService.listOrd(appName);
+    @RequestMapping("listBaseOrd")
+    public List<OrdRunInfo> listBaseOrd(@RequestParam String appName) {
+        return agentConfigService.listOrd(appName, OrdEnum.BASE_ORD, "");
     }
 
     @RequestMapping("deleteOrd")

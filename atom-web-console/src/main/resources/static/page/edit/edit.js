@@ -45,7 +45,7 @@ let listClass = clickDom => {
 let listFile = clickDom => {
     btnClickChange(clickDom)
     onlyShow('listFile')
-    post('config/listOrd?appName=' + vmInfo.displayName)
+    post('config/listBaseOrd?appName=' + vmInfo.displayName)
         .then(res => {
             let fileListDom = pageEdit.querySelector('.listFile')
             fileListDom.innerHTML = res.map(e =>

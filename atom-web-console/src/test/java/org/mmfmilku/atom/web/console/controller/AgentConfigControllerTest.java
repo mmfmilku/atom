@@ -39,17 +39,17 @@ public class AgentConfigControllerTest {
 
     @Test
     public void listOrd() {
-        System.out.println(configController.listOrd(appName));
+        System.out.println(configController.listBaseOrd(appName));
     }
 
     @Test
     public void testCase() {
-        List<OrdRunInfo> listOrd = configController.listOrd(appName);
+        List<OrdRunInfo> listOrd = configController.listBaseOrd(appName);
         for (OrdRunInfo ord : listOrd) {
             configController.deleteOrd(appName, ord.getOrdName());
         }
         // 删除后为0
-        assertEquals(0, configController.listOrd(appName).size());
+        assertEquals(0, configController.listBaseOrd(appName).size());
 
         OrdFile ordFile = new OrdFile();
         ordFile.setFileName("a");
@@ -62,7 +62,7 @@ public class AgentConfigControllerTest {
         configController.writeOrd(appName, ordFile);
 
         // 测试添加，查询
-        assertEquals(2, configController.listOrd(appName).size());
+        assertEquals(2, configController.listBaseOrd(appName).size());
 
         // 测试读取
         OrdFile readOrd = configController.readOrd(appName, "a.ord");
@@ -70,12 +70,12 @@ public class AgentConfigControllerTest {
         readOrd = configController.readOrd(appName, "b.ord");
         assertEquals("this is test ord text2", readOrd.getText().trim());
 
-        listOrd = configController.listOrd(appName);
+        listOrd = configController.listBaseOrd(appName);
         for (OrdRunInfo ord : listOrd) {
             configController.deleteOrd(appName, ord.getOrdName());
         }
         // 测试删除
-        assertEquals(0, configController.listOrd(appName).size());
+        assertEquals(0, configController.listBaseOrd(appName).size());
     }
 
 }
