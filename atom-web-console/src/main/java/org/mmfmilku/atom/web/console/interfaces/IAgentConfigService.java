@@ -27,7 +27,7 @@ public interface IAgentConfigService {
 
     void deleteOrd(String appName, String ordFileName);
     
-    OrdFile readOrd(String appName, String ordFileName);
+    OrdFile readOrd(String appName, String ordFileName, OrdEnum ordEnum);
     
     void writeOrd(String appName, OrdFile ordFile);
     

@@ -40,11 +40,11 @@ public class OrdFileOperation implements IOrdFileOperation {
     }
 
     @Override
-    public OrdFile getOrd(AgentConfig config, String ordName) {
+    public OrdFile getOrd(AgentConfig config, String ordName, OrdEnum ordEnum) {
         OrdFile ordFile = new OrdFile();
         ordFile.setFileName(ordName);
         ordFile.setOrdId(config.getId());
-        File file = new File(config.getOrdDir(), ordFile.getFileName());
+        File file = new File(ordEnum.getDirGetter().apply(config), ordFile.getFileName());
         if (!file.exists()) {
 //            ordFile.setText("");
             return ordFile;

@@ -50,8 +50,10 @@ public class AgentConfigController {
     }
 
     @RequestMapping("readOrd")
-    public OrdFile readOrd(@RequestParam String appName, @RequestParam String ordFileName) {
-        return agentConfigService.readOrd(appName, ordFileName);
+    public OrdFile readOrd(@RequestParam String appName,
+                           @RequestParam String ordFileName,
+                           @RequestParam String ordEnum) {
+        return agentConfigService.readOrd(appName, ordFileName, OrdEnum.valueOf(ordEnum));
     }
 
     @RequestMapping("writeOrd")

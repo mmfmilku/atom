@@ -65,9 +65,9 @@ public class AgentConfigControllerTest {
         assertEquals(2, configController.listBaseOrd(appName).size());
 
         // 测试读取
-        OrdFile readOrd = configController.readOrd(appName, "a.ord");
+        OrdFile readOrd = configController.readOrd(appName, "a.ord", "BASE_ORD");
         assertEquals("this is test ord text1", readOrd.getText().trim());
-        readOrd = configController.readOrd(appName, "b.ord");
+        readOrd = configController.readOrd(appName, "b.ord", "BASE_ORD");
         assertEquals("this is test ord text2", readOrd.getText().trim());
 
         listOrd = configController.listBaseOrd(appName);

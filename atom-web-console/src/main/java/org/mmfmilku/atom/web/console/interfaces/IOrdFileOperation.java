@@ -18,7 +18,7 @@ public interface IOrdFileOperation {
 
     List<String> listFiles(AgentConfig config, OrdEnum ordEnum, String childPath);
 
-    OrdFile getOrd(AgentConfig config, String ordName);
+    OrdFile getOrd(AgentConfig config, String ordName, OrdEnum ordEnum);
     
     void setText(AgentConfig config, OrdFile ordFile);
     

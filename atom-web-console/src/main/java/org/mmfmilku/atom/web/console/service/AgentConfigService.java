@@ -179,9 +179,9 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public OrdFile readOrd(String appName, String ordFileName) {
+    public OrdFile readOrd(String appName, String ordFileName, OrdEnum ordEnum) {
         AgentConfig config = getConfigByName(appName);
-        OrdFile ord = ordFileOperation.getOrd(config, ordFileName);
+        OrdFile ord = ordFileOperation.getOrd(config, ordFileName, ordEnum);
         Map<String, Object> runningOrdClass = instrumentService.getRunningOrdClass(appName);
         ord.setRunning(runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
         return ord;

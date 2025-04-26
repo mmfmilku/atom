@@ -74,7 +74,8 @@ let executeConsole = clickDom => {
             let fileListDom = pageEdit.querySelector('.executeConsole')
             fileListDom.innerHTML = res.map(e =>
                 `
-                    <div>${e.ordName}</div>
+                    <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD')" 
+                    class="edit-file text-wrap">${e.ordName}</div>
                     `
             ).join('')
         })
@@ -83,7 +84,7 @@ let executeConsole = clickDom => {
 let classToFile = () => {
     let ordFileName = contextTarget.innerText + '.java'
     // 避免已存在重写文件被覆盖，先查询
-    post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
+    post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=BASE_ORD`)
         .then(res => {
             if (res.text == null) {
                 UI.openConfirmDialog('新建重写' + ordFileName)
@@ -140,8 +141,8 @@ let doAddFile = (ordFileName, text = '') => {
         })
 }
 
-let readText = (ordFileName, clickDom) => {
-    post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
+let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD') => {
+    post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=${ordEnum}`)
         .then(res => {
             // 文件选中
             let oldSelect = pageEdit.querySelector('.edit-file-select')
