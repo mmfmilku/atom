@@ -29,7 +29,8 @@ public class ExecuteConsoleController {
     }
 
     @RequestMapping("listExecuteOrd")
-    public List<OrdRunInfo> listExecuteOrd(@RequestParam String appName, @RequestParam String childPath) {
+    public List<OrdRunInfo> listExecuteOrd(@RequestParam String appName,
+                                           @RequestParam(required = false) String childPath) {
         return agentConfigService.listOrd(appName, OrdEnum.EXECUTE_ORD, childPath);
     }
 

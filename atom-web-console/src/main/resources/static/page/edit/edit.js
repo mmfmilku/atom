@@ -69,8 +69,15 @@ let listStrategy = clickDom => {
 let executeConsole = clickDom => {
     btnClickChange(clickDom)
     onlyShow('executeConsole')
-    let fileListDom = pageEdit.querySelector('.executeConsole')
-    fileListDom.innerHTML = '待支持阿啊😫'
+    post('executeConsole/listExecuteOrd?appName=' + vmInfo.displayName)
+        .then(res => {
+            let fileListDom = pageEdit.querySelector('.executeConsole')
+            fileListDom.innerHTML = res.map(e =>
+                `
+                    <div>${e.ordName}</div>
+                    `
+            ).join('')
+        })
 }
 
 let classToFile = () => {
