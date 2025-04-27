@@ -342,15 +342,20 @@ post('agent/vmInfo?vmId=' + vmId).then(res => {
 let contextmenu
 let fileRightMenu
 let classRightMenu
+let consoleRightMenu
 let contextTarget
 
-atom.SPA.loadHtml('/page/edit/fileRightMenu.html')
+atom.SPA.loadHtml('/page/edit/rightMenu/fileRightMenu.html')
     .then(html => {
         fileRightMenu = html
     })
-atom.SPA.loadHtml('/page/edit/classRightMenu.html')
+atom.SPA.loadHtml('/page/edit/rightMenu/classRightMenu.html')
     .then(html => {
         classRightMenu = html
+    })
+atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightMenu.html')
+    .then(html => {
+        consoleRightMenu = html
     })
 
 let openBlock = (event, blockHtml) => {
@@ -361,13 +366,21 @@ let openBlock = (event, blockHtml) => {
     }
     contextTarget = event.target
     contextmenu = UI.showBlock(blockHtml)
-    contextmenu.style.left = event.pageX + 'px';
-    contextmenu.style.top = event.pageY + 'px';
-    contextmenu.style.display = 'block';
+    contextmenu.style.left = event.pageX + 'px'
+    contextmenu.style.top = event.pageY + 'px'
+    contextmenu.style.display = 'block'
 }
 
+let openChildBlock = (event, blockHtml, parent) => {
+    let childBlock = UI.showBlock(blockHtml)
+    childBlock.style.left = parent.offsetLeft + event.target.offsetWidth + 'px'
+    childBlock.style.top = parent.offsetTop + event.target.offsetTop + 'px'
+    childBlock.style.display = 'block'
+}
+
+// 右键菜单事件
 document.addEventListener('contextmenu', function(event) {
-    event.preventDefault();
+    event.preventDefault()
     let parentClassList = event.target.parentNode.classList
     if (parentClassList.contains('listFile')) {
         // 在重写文件上右键
@@ -375,13 +388,20 @@ document.addEventListener('contextmenu', function(event) {
     } else if (parentClassList.contains('listClass')) {
         // 在类文件上右键
         openBlock(event, classRightMenu)
+    } else if (parentClassList.contains('executeConsole')) {
+        // 在类文件上右键
+        openBlock(event, consoleRightMenu)
     }
 })
 
 // 隐藏菜单当用户点击其他地方
 document.addEventListener('click', function(event) {
     if (contextmenu) {
-        document.body.removeChild(contextmenu)
+        let rightMenus = document.querySelectorAll('.right-menu')
+        rightMenus && rightMenus.forEach(e => {
+            e.remove()
+        })
+        // document.body.removeChild(contextmenu)
         contextmenu = null
     }
 })

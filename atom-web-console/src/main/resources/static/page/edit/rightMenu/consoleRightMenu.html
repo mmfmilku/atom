@@ -1,0 +1,15 @@
+<style>
+    #consoleRightMenu {
+        /*padding: 5px 10px;*/
+    }
+</style>
+<div id="consoleRightMenu" class="right-menu button-container-column">
+    <div class="button-container-btn2" onclick="">删除</div>
+    <div class="button-container-btn2"
+         onmouseover="atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightChildMenu.html')
+        .then(html => {
+            openChildBlock(event, html, contextmenu)
+        })"
+    >新增
+    </div>
+</div>
