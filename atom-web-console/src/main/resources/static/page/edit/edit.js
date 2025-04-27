@@ -359,11 +359,7 @@ atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightMenu.html')
     })
 
 let openBlock = (event, blockHtml) => {
-    if (contextmenu) {
-        document.body.removeChild(contextmenu)
-        contextmenu = null
-        contextTarget = null
-    }
+    clearRightMenu()
     contextTarget = event.target
     contextmenu = UI.showBlock(blockHtml)
     contextmenu.style.left = event.pageX + 'px'
@@ -396,6 +392,10 @@ document.addEventListener('contextmenu', function(event) {
 
 // 隐藏菜单当用户点击其他地方
 document.addEventListener('click', function(event) {
+    clearRightMenu()
+})
+
+let clearRightMenu = () => {
     if (contextmenu) {
         let rightMenus = document.querySelectorAll('.right-menu')
         rightMenus && rightMenus.forEach(e => {
@@ -404,4 +404,4 @@ document.addEventListener('click', function(event) {
         // document.body.removeChild(contextmenu)
         contextmenu = null
     }
-})
+}
