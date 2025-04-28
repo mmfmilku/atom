@@ -1,0 +1,13 @@
+<div id="consoleRightMenuNew" class="right-menu button-container-column">
+    <div class="button-container-btn2"
+         onmouseover="atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightChildMenu.html')
+        .then(html => {
+            // 移除上一次的子菜单
+            clearRightChildMenu()
+            // 打开子菜单
+            openChildBlock(event, html, contextmenu)
+        })"
+         onclick=""
+    >新增
+    </div>
+</div>

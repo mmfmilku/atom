@@ -33,7 +33,9 @@ let listClass = clickDom => {
             let fileListDom = pageEdit.querySelector('.listClass')
             let showHtml = res.map(e =>
                 `
-                    <div onclick="genCode('${e}', this)" class="edit-file text-wrap">${e}</div>
+                    <div onclick="genCode('${e}', this)" 
+                    rightClickEvent="classRightMenu" 
+                    class="edit-file text-wrap">${e}</div>
                     `
             ).join('')
             fileListDom.innerHTML = showHtml
@@ -51,6 +53,7 @@ let listFile = clickDom => {
             fileListDom.innerHTML = res.map(e =>
                 `
                     <div onclick="readText('${e.ordName}', this)" 
+                    rightClickEvent="fileRightMenu"
                     class="edit-file text-wrap ${e.running === '1' ? 'ord-running' : ''}">${e.ordName}</div>
                     `
             ).join('')
@@ -75,6 +78,7 @@ let executeConsole = clickDom => {
             fileListDom.innerHTML = res.map(e =>
                 `
                     <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD', 3)" 
+                    rightClickEvent="consoleRightMenu"
                     class="edit-file text-wrap">${e.ordName}</div>
                     `
             ).join('')
@@ -343,6 +347,7 @@ let contextmenu
 let fileRightMenu
 let classRightMenu
 let consoleRightMenu
+let consoleRightMenuNew
 let contextTarget
 
 atom.SPA.loadHtml('/page/edit/rightMenu/fileRightMenu.html')
@@ -356,6 +361,10 @@ atom.SPA.loadHtml('/page/edit/rightMenu/classRightMenu.html')
 atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightMenu.html')
     .then(html => {
         consoleRightMenu = html
+    })
+atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightMenuNew.html')
+    .then(html => {
+        consoleRightMenuNew = html
     })
 
 let openBlock = (event, blockHtml) => {
@@ -374,20 +383,24 @@ let openChildBlock = (event, blockHtml, parent) => {
     childBlock.style.display = 'block'
 }
 
+/**
+ * 右键菜单事件
+ * 如 <div rightClickEvent="fileRightMenu"></div>
+ * 右键将触发fileRightMenu对应事件
+ * */
+let rightClickEventMap = {
+    fileRightMenu: event => openBlock(event, fileRightMenu),
+    classRightMenu: event => openBlock(event, classRightMenu),
+    consoleRightMenu: event => openBlock(event, consoleRightMenu),
+    // 无删除的右键菜单
+    consoleRightMenuNew: event => openBlock(event, consoleRightMenuNew),
+}
+
 // 右键菜单事件
 document.addEventListener('contextmenu', function(event) {
     event.preventDefault()
-    let parentClassList = event.target.parentNode.classList
-    if (parentClassList.contains('listFile')) {
-        // 在重写文件上右键
-        openBlock(event, fileRightMenu)
-    } else if (parentClassList.contains('listClass')) {
-        // 在类文件上右键
-        openBlock(event, classRightMenu)
-    } else if (parentClassList.contains('executeConsole')) {
-        // 在类文件上右键
-        openBlock(event, consoleRightMenu)
-    }
+    let rightClickEvent = event.target.getAttribute('rightClickEvent')
+    rightClickEvent && rightClickEventMap[rightClickEvent](event)
 })
 
 // 隐藏菜单当用户点击其他地方
