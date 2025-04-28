@@ -405,3 +405,10 @@ let clearRightMenu = () => {
         contextmenu = null
     }
 }
+
+let clearRightChildMenu = () => {
+    let rightChildMenus = document.querySelectorAll('.right-child-menu')
+    rightChildMenus && rightChildMenus.forEach(e => {
+        e.remove()
+    })
+}
