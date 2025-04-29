@@ -20,8 +20,8 @@ public interface IOrdFileOperation {
 
     OrdFile getOrd(AgentConfig config, String ordName, OrdEnum ordEnum);
     
-    void setText(AgentConfig config, OrdFile ordFile);
+    void setText(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum);
     
-    void delete(AgentConfig config, OrdFile ordFile);
+    void delete(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum);
     
 }

@@ -6,7 +6,10 @@ public enum OrdEnum {
 
     BASE_ORD("1", "重写文件", AgentConfig::getOrdDir),
     STRATEGY_ORD("2", "重写策略", AgentConfig::getOrdDir),
-    EXECUTE_ORD("3", "可执行重写", AgentConfig::getExecuteDir),
+    EXECUTE_ORD("3", "执行终端", AgentConfig::getExecuteDir),
+    FOLDER_ORD("4", "文件夹", AgentConfig::getExecuteDir),
+    SCRIPT_ORD("5", "脚本化文件", AgentConfig::getExecuteDir),
+    RESOURCE_ORD("6", "资源文件", AgentConfig::getExecuteDir),
     ;
 
     private OrdEnum(String type, String desc, Function<AgentConfig, String> dirGetter) {

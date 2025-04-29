@@ -146,7 +146,7 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public List<OrdRunInfo> listOrd(String appName, OrdEnum ordEnum, String childPath) {
+    public List<OrdRunInfo> listOrd(String appName, String childPath, OrdEnum ordEnum) {
         Map<String, Object> runningOrdClass =
                 OrdEnum.BASE_ORD == ordEnum
                         ? instrumentService.getRunningOrdClass(appName)
@@ -170,12 +170,12 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public void deleteOrd(String appName, String ordFileName) {
+    public void deleteOrd(String appName, String childPath, OrdEnum ordEnum) {
         AgentConfig config = getConfigByName(appName);
         OrdFile ordFile = new OrdFile();
-        ordFile.setFileName(ordFileName);
+        ordFile.setFileName(childPath);
         ordFile.setOrdId(config.getId());
-        ordFileOperation.delete(config, ordFile);
+        ordFileOperation.delete(config, ordFile, ordEnum);
     }
 
     @Override
@@ -188,11 +188,11 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public void writeOrd(String appName, OrdFile ordFile) {
+    public void writeOrd(String appName, OrdFile ordFile, OrdEnum ordEnum) {
         AgentConfig config = getConfigByName(appName);
         ordFile.setOrdId(config.getId());
         ordFile.setFileName(ordFileNameFormat(ordFile.getFileName()));
-        ordFileOperation.setText(config, ordFile);
+        ordFileOperation.setText(config, ordFile, ordEnum);
     }
     
     private String ordFileNameFormat(String ordFileName) {

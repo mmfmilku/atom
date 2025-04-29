@@ -35,8 +35,8 @@ public class OrdFileOperation implements IOrdFileOperation {
                 (new File(ordEnum.getDirGetter().apply(config), childPath).list()));
     }
 
-    private File getFile(AgentConfig config, OrdFile ordFile) {
-        return new File(config.getOrdDir(), ordFile.getFileName());
+    private File getFile(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum) {
+        return new File(ordEnum.getDirGetter().apply(config), ordFile.getFileName());
     }
 
     @Override
@@ -44,7 +44,7 @@ public class OrdFileOperation implements IOrdFileOperation {
         OrdFile ordFile = new OrdFile();
         ordFile.setFileName(ordName);
         ordFile.setOrdId(config.getId());
-        File file = new File(ordEnum.getDirGetter().apply(config), ordFile.getFileName());
+        File file = getFile(config, ordFile, ordEnum);
         if (!file.exists()) {
 //            ordFile.setText("");
             return ordFile;
@@ -65,10 +65,10 @@ public class OrdFileOperation implements IOrdFileOperation {
     }
 
     @Override
-    public void setText(AgentConfig config, OrdFile ordFile) {
+    public void setText(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum) {
 
         String ordFileText = ordFile.getText();
-        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(getFile(config, ordFile)))) {
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(getFile(config, ordFile, ordEnum)))) {
             out.write(ordFileText.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
@@ -77,8 +77,8 @@ public class OrdFileOperation implements IOrdFileOperation {
     }
 
     @Override
-    public void delete(AgentConfig config, OrdFile ordFile) {
-        File file = getFile(config, ordFile);
+    public void delete(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum) {
+        File file = getFile(config, ordFile, ordEnum);
         if (file.exists() && !file.delete()) {
             throw new RuntimeException("delete ord dir fail:" + ordFile);
         }

@@ -23,12 +23,12 @@ public interface IAgentConfigService {
 
     AgentConfig getConfigByName(String appName);
 
-    List<OrdRunInfo> listOrd(String appName, OrdEnum ordEnum, String childPath);
+    List<OrdRunInfo> listOrd(String appName, String childPath, OrdEnum ordEnum);
 
-    void deleteOrd(String appName, String ordFileName);
+    void deleteOrd(String appName, String childPath, OrdEnum ordEnum);
     
-    OrdFile readOrd(String appName, String ordFileName, OrdEnum ordEnum);
+    OrdFile readOrd(String appName, String childPath, OrdEnum ordEnum);
     
-    void writeOrd(String appName, OrdFile ordFile);
+    void writeOrd(String appName, OrdFile ordFile, OrdEnum ordEnum);
     
 }

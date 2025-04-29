@@ -40,12 +40,14 @@ public class AgentConfigController {
 
     @RequestMapping("listBaseOrd")
     public List<OrdRunInfo> listBaseOrd(@RequestParam String appName) {
-        return agentConfigService.listOrd(appName, OrdEnum.BASE_ORD, "");
+        return agentConfigService.listOrd(appName, "", OrdEnum.BASE_ORD);
     }
 
     @RequestMapping("deleteOrd")
-    public String deleteOrd(@RequestParam String appName, @RequestParam String ordFileName) {
-        agentConfigService.deleteOrd(appName, ordFileName);
+    public String deleteOrd(@RequestParam String appName,
+                            @RequestParam String ordFileName,
+                            @RequestParam OrdEnum ordEnum) {
+        agentConfigService.deleteOrd(appName, ordFileName, ordEnum);
         return "success";
     }
 
@@ -57,8 +59,10 @@ public class AgentConfigController {
     }
 
     @RequestMapping("writeOrd")
-    public String writeOrd(@RequestParam String appName, @RequestBody OrdFile ordFile) {
-        agentConfigService.writeOrd(appName, ordFile);
+    public String writeOrd(@RequestParam String appName,
+                           @RequestParam OrdEnum ordEnum,
+                           @RequestBody OrdFile ordFile) {
+        agentConfigService.writeOrd(appName, ordFile, ordEnum);
         return "success";
     }
 
