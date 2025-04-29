@@ -191,19 +191,24 @@ public class AgentConfigService implements IAgentConfigService {
     public void writeOrd(String appName, OrdFile ordFile, OrdEnum ordEnum) {
         AgentConfig config = getConfigByName(appName);
         ordFile.setOrdId(config.getId());
-        ordFile.setFileName(ordFileNameFormat(ordFile.getFileName()));
+        ordFile.setFileName(ordFileNameFormat(ordFile, ordEnum));
         ordFileOperation.setText(config, ordFile, ordEnum);
     }
     
-    private String ordFileNameFormat(String ordFileName) {
+    private String ordFileNameFormat(OrdFile ordFile, OrdEnum ordEnum) {
+        String ordFileName = ordFile.getFileName();
+        if (StringUtils.isEmpty(ordEnum.getSuffix())) {
+            return ordFileName;
+        }
+        String suffix = "." + ordEnum.getSuffix();
         // .ord 或 .java
-        if (ordFileName.endsWith(ORD_SUFFIX) || ordFileName.endsWith(CodeConst.JAVA_FILE_SUFFIX)) {
+        if (ordFileName.endsWith(suffix)) {
             return ordFileName;
         }
         if (ordFileName.endsWith(".")) {
-            return ordFileName + ORD_SUFFIX.substring(1);
+            return ordFileName + suffix.substring(1);
         }
-        return ordFileName + ORD_SUFFIX;
+        return ordFileName + suffix;
     }
 
 }

@@ -1,6 +1,18 @@
 <div id="consoleRightChildMenu" class="right-menu right-child-menu button-container-column">
-    <div class="button-container-btn2" onclick="alert('1')">新建终端</div>
-    <div class="button-container-btn2" onclick="alert('2')">文件夹</div>
-    <div class="button-container-btn2" onclick="alert('3')">脚本化</div>
-    <div class="button-container-btn2" onclick="alert('4')">资源</div>
+    <div class="button-container-btn2"
+         onclick="addFile('输入终端名称', 'EXECUTE_ORD', '', executeConsole)"
+    >新建终端
+    </div>
+    <div class="button-container-btn2"
+         onclick="addFile('输入文件夹名称', 'FOLDER_ORD', '', executeConsole)"
+    >文件夹
+    </div>
+    <div class="button-container-btn2"
+         onclick="addFile('输入脚本化名称', 'SCRIPT_ORD', '', executeConsole)"
+    >脚本化
+    </div>
+    <div class="button-container-btn2"
+         onclick="addFile('输入资源名称', 'RESOURCE_ORD', '', executeConsole)"
+    >资源
+    </div>
 </div>

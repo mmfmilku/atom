@@ -77,7 +77,7 @@ let executeConsole = clickDom => {
             let fileListDom = pageEdit.querySelector('.executeConsole')
             fileListDom.innerHTML = res.map(e =>
                 `
-                    <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD', 3)" 
+                    <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD')" 
                     rightClickEvent="consoleRightMenu"
                     class="edit-file text-wrap">${e.ordName}</div>
                     `
@@ -98,7 +98,7 @@ let classToFile = () => {
                     })
                     .then(text => {
                         btnClickChange(pageEdit.querySelector('.listFileBtn'))
-                        doAddFile(ordFileName, text)
+                        doAddFile(ordFileName, 'BASE_ORD', text, listFile)
                     })
             } else {
                 btnClickChange(pageEdit.querySelector('.listFileBtn'))
@@ -111,45 +111,57 @@ let classToFile = () => {
 }
 
 // 设置编辑类型，同时设置是否可编辑
-let typeArr = [
-    {
+let typeArr = {
+    // 类源码
+    "0": {
         type: '',
+        readOnly: true,
         '0': '类(只读)'
     },
-    {
+    // 重写ord文件
+    "BASE_ORD": {
         type: 'file',
-        '0': '<button onclick="saveText()">保存</button>' +
+        '0': '<button onclick="saveText(\'BASE_ORD\')">保存</button>' +
             '<button onclick="executeOrd()">执行</button>',
-        '1': '<button onclick="saveText()">保存</button>' +
-            '<button onclick="stopOrd()">终止</button>'
+        '1': '<button onclick="saveText(\'BASE_ORD\')">保存</button>' +
+            '<button onclick="stopOrd()">还原</button>'
     },
-    {
+    // 重写策略文件
+    "STRATEGY_ORD": {
         type: 'strategy',
         '0': '<button onclick="saveText()">保存</button>'
     },
-    {
+    // 控制台执行文件
+    "EXECUTE_ORD": {
         type: 'executeConsole',
         '0': '<button onclick="executeGoal()">运行</button>'
     }
-]
-let setType = (typeIdx, prop = '0') => {
-    // class 类型不可编辑
-    pageEdit.querySelector('#ordFileText').readOnly = !typeIdx
-    pageEdit.querySelector('.edit-code-desc').innerHTML = typeArr[typeIdx][prop]
+}
+let setType = (ordEnum, prop = '0') => {
+    pageEdit.querySelector('#ordFileText').readOnly = typeArr[ordEnum].readOnly
+    pageEdit.querySelector('.edit-code-desc').innerHTML = typeArr[ordEnum][prop]
 }
 
-let doAddFile = (ordFileName, text = '') => {
-    post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`
+let addFile = (title = '', ordEnum, text = '', callBack) => {
+    UI.openInputDialog(title)
+        .then(ordFileName => {
+            doAddFile(ordFileName, ordEnum, text, callBack)
+        })
+}
+
+let doAddFile = (ordFileName, ordEnum, text = '', callBack) => {
+    post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=${ordEnum}`
         , {fileName: ordFileName, text: text}
     )
         .then(res => {
             UI.showMessage(res)
-            readText(ordFileName)
-            listFile()
+            readText(ordFileName, null, ordEnum)
+            callBack && callBack()
+            // listFile()
         })
 }
 
-let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD', type = 1) => {
+let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD') => {
     post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=${ordEnum}`)
         .then(res => {
             // 文件选中
@@ -159,14 +171,14 @@ let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD', type = 1) => {
 
             // 文件标题反显
             pageEdit.querySelector('.edit-code-title').innerText = ordFileName
-            setType(type, res.running)
+            setType(ordEnum, res.running)
 
             // 文件内容反显
             pageEdit.querySelector('#ordFileText').value = res.text
         })
 }
 
-let saveText = () => {
+let saveText = (ordEnum) => {
     if (pageEdit.querySelector('#ordFileText').readOnly) {
         UI.showError('不可编辑')
         return
@@ -177,7 +189,7 @@ let saveText = () => {
         return
     }
     let ordText = pageEdit.querySelector('#ordFileText').value
-    post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`
+    post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=${ordEnum}`
         , {fileName: ordFileName, text: ordText}
     )
         .then(res => {
@@ -185,13 +197,15 @@ let saveText = () => {
         })
 }
 
-let deleteFile = () => {
+let deleteFile = (ordEnum, callBack) => {
     UI.openConfirmDialog('确认删除' + contextTarget.innerText)
         .then(() => {
-            post(`config/deleteOrd?appName=${vmInfo.displayName}&ordFileName=${contextTarget.innerText}`)
+            // TODO ordEnum从 contextTarget 获取
+            post(`config/deleteOrd?appName=${vmInfo.displayName}&ordFileName=${contextTarget.innerText}&ordEnum=${ordEnum}`)
                 .then(res => {
                     UI.showMessage(res)
-                    listFile()
+                    callBack && callBack()
+                    // listFile()
                 })
         })
 }
@@ -348,6 +362,8 @@ let fileRightMenu
 let classRightMenu
 let consoleRightMenu
 let consoleRightMenuNew
+
+// 用于保存右键菜单点击的目标对象dom
 let contextTarget
 
 atom.SPA.loadHtml('/page/edit/rightMenu/fileRightMenu.html')

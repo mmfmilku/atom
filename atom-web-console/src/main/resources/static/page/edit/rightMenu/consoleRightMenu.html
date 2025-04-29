@@ -6,7 +6,7 @@
 <div id="consoleRightMenu" class="right-menu button-container-column">
     <div class="button-container-btn2"
          onmouseover="clearRightChildMenu()"
-         onclick="alert('删除')"
+         onclick="deleteFile('EXECUTE_ORD', executeConsole)"
     >删除</div>
     <div class="button-container-btn2"
          onmouseover="atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightChildMenu.html')
@@ -16,7 +16,6 @@
             // 打开子菜单
             openChildBlock(event, html, contextmenu)
         })"
-         onclick=""
     >新增
     </div>
 </div>
