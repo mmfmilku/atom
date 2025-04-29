@@ -76,6 +76,7 @@ let executeConsole = clickDom => {
         .then(res => {
             let fileListDom = pageEdit.querySelector('.executeConsole')
             fileListDom.innerHTML = res.map(e =>
+                // TODO 先写死为 EXECUTE_ORD 类型，后面需要改为从后端获取
                 `
                     <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD')" 
                     rightClickEvent="consoleRightMenu"
@@ -134,7 +135,8 @@ let typeArr = {
     // 控制台执行文件
     "EXECUTE_ORD": {
         type: 'executeConsole',
-        '0': '<button onclick="executeGoal()">运行</button>'
+        '0': '<button onclick="saveText(\'EXECUTE_ORD\')">保存</button>' +
+            '<button onclick="executeGoal()">运行</button>'
     }
 }
 let setType = (ordEnum, prop = '0') => {
