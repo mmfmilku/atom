@@ -1,6 +1,5 @@
 package org.mmfmilku.atom.web.console.service;
 
-import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.util.CodeUtils;
 import org.mmfmilku.atom.util.StringUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
