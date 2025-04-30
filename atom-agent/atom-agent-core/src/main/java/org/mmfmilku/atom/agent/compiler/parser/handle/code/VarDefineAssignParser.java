@@ -1,16 +1,20 @@
-package org.mmfmilku.atom.agent.compiler.parser.handle;
+package org.mmfmilku.atom.agent.compiler.parser.handle.code;
 
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
+import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
 
+/**
+ * 变量定义或同时赋值
+ * */
 public class VarDefineAssignParser extends VarDefineParser {
 
     @Override
     public VarDefineStatement parse(ParserDispatcher.ParserIterator iterator) {
         VarDefineStatement varDefine = super.parse(iterator);
-        if (iterator.isNext(TokenType.Symbol, EQUAL)) {
+        if (iterator.isNext(TokenType.Symbol, ParserHandle.EQUAL)) {
             // 变量定义并且赋值
             // 指向等号后一位
             iterator.needNext();

@@ -18,6 +18,14 @@ public interface ParserHandle<T extends Node> {
 
     String EQUAL = "=";
 
+    /**
+     * 是否匹配
+     * */
+    boolean match(ParserDispatcher.ParserIterator iterator);
+
+    /**
+     * 解析
+     * */
     T parse(ParserDispatcher.ParserIterator iterator);
 
     /**

@@ -5,6 +5,9 @@ import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.handle.*;
+import org.mmfmilku.atom.agent.compiler.parser.handle.code.*;
+import org.mmfmilku.atom.agent.compiler.parser.handle.struct.ImportParser;
+import org.mmfmilku.atom.agent.compiler.parser.handle.struct.PackageParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
@@ -79,6 +82,11 @@ public class ParserDispatcher {
             saveCurr = null;
         }
 
+        @Override
+        public boolean match(ParserIterator iterator) {
+            return true;
+        }
+
         public JavaAST parse(ParserIterator iterator) {
             javaAST = new JavaAST();
             curr = 0;
@@ -104,13 +112,15 @@ public class ParserDispatcher {
                 if (dealToken.getType() == TokenType.Words) {
                     String value = dealToken.getValue();
                     if ("package".equals(dealToken.getValue())) {
-                        Package node = parsePackage();
+                        PackageParser packageParser = new PackageParser();
+                        Package node = packageParser.parse(iterator);
                         javaAST.setPackageNode(node);
                         curr++;
                         continue;
                     }
                     if ("import".equals(value)) {
-                        Import node = parseImport();
+                        ImportParser importParser = new ImportParser();
+                        Import node = importParser.parse(iterator);
                         javaAST.getImports().add(node);
                         curr++;
                         continue;
@@ -209,15 +219,6 @@ public class ParserDispatcher {
             return paramDefines;
         }
 
-        private Package parsePackage() {
-            Token token = needNext(TokenType.Words);
-            Package aPackage = new Package();
-            String value = parseWordsPoint();
-            needNext(TokenType.Symbol, SEMICOLONS);
-            aPackage.setValue(value);
-            return aPackage;
-        }
-
         /**
          * 获取如 xx.xx.xx 的字符
          * */
@@ -233,33 +234,6 @@ public class ParserDispatcher {
                 value.append(POINT).append(next.getValue());
             }
             return value.toString();
-        }
-
-        private Import parseImport() {
-            Import anImport = new Import();
-            if (isNext(TokenType.Words, "static")) {
-                // 处理 import static xxx
-                anImport.setStaticImp(true);
-                needNext();
-            }
-            Token token = needNext(TokenType.Words);
-            StringBuilder value = new StringBuilder(token.getValue());
-            while (!isNext(TokenType.Symbol, SEMICOLONS)) {
-                needNext(TokenType.Symbol, POINT);
-                Token next = needNext();
-                value.append(POINT).append(next.getValue());
-                if (next.getType() != TokenType.Words) {
-                    if ("*".equals(next.getValue())) {
-                        // import xx.xx.* 最后一个为*
-                        break;
-                    } else {
-                        throwIllegalToken(next.getValue());
-                    }
-                }
-            }
-            needNext(TokenType.Symbol, SEMICOLONS);
-            anImport.setValue(value.toString());
-            return anImport;
         }
 
         private Class parseClass() {
@@ -605,16 +579,8 @@ public class ParserDispatcher {
                 return new ExpStatement(expression);
             }
             if ("return".equals(value)) {
-                if (isNext(TokenType.Symbol, SEMICOLONS)) {
-                    // 直接return的情况
-                    needNext(TokenType.Symbol, SEMICOLONS);
-                    return new ReturnStatement();
-                }
-                // return具体的值
-                needNext();
-                Expression expression = parseExpression();
-                needNext(TokenType.Symbol, SEMICOLONS);
-                return new ReturnStatement(expression);
+                ReturnParser returnParser = new ReturnParser();
+                return returnParser.parse(iterator);
             }
             if ("try".equals(value)) {
                 TryParser tryParser = new TryParser();

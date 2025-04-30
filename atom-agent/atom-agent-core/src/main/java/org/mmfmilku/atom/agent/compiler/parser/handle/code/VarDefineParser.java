@@ -1,14 +1,22 @@
-package org.mmfmilku.atom.agent.compiler.parser.handle;
+package org.mmfmilku.atom.agent.compiler.parser.handle.code;
 
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
+import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
+import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
 
 /**
- * 变量定义解析
+ * 变量仅定义解析
  * */
 public class VarDefineParser implements ParserHandle {
+
+    @Override
+    public boolean match(ParserDispatcher.ParserIterator iterator) {
+        // TODO
+        return false;
+    }
 
     @Override
     public VarDefineStatement parse(ParserDispatcher.ParserIterator iterator) {

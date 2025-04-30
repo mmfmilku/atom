@@ -1,12 +1,20 @@
-package org.mmfmilku.atom.agent.compiler.parser.handle;
+package org.mmfmilku.atom.agent.compiler.parser.handle.code;
 
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
+import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
+import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.SyncCodeBlock;
 
 public class SyncCodeBlockParser implements ParserHandle {
+
+    @Override
+    public boolean match(ParserDispatcher.ParserIterator iterator) {
+        return iterator.isCurr(TokenType.Words, "synchronized");
+    }
+
     @Override
     public SyncCodeBlock parse(ParserDispatcher.ParserIterator iterator) {
         iterator.checkCurr(TokenType.Words, "synchronized");
