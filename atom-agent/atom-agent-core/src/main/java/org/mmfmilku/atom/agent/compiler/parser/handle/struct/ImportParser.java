@@ -4,10 +4,10 @@ import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
-import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.handle.StructParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Import;
 
-public class ImportParser implements ParserHandle {
+public class ImportParser implements StructParserHandle {
     @Override
     public boolean match(ParserIterator iterator) {
         return iterator.isCurr(TokenType.Words, "import");

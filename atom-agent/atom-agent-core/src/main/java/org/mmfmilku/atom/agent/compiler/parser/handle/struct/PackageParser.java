@@ -3,10 +3,10 @@ package org.mmfmilku.atom.agent.compiler.parser.handle.struct;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
-import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.handle.StructParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
 
-public class PackageParser implements ParserHandle {
+public class PackageParser implements StructParserHandle {
 
     @Override
     public boolean match(ParserIterator iterator) {
