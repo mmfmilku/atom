@@ -1,6 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser.handle;
 
-import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
+import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 
 /**
@@ -21,12 +21,12 @@ public interface ParserHandle<T extends Node> {
     /**
      * 是否匹配
      * */
-    boolean match(ParserDispatcher.ParserIterator iterator);
+    boolean match(ParserIterator iterator);
 
     /**
      * 解析
      * */
-    T parse(ParserDispatcher.ParserIterator iterator);
+    T parse(ParserIterator iterator);
 
     /**
      * 支持的解析范围，类内部、方法内部、代码块内部

@@ -1,24 +1,22 @@
-package org.mmfmilku.atom.agent.compiler.parser.handle.code;
+package org.mmfmilku.atom.agent.compiler.parser.handle.code.keyword;
 
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
-import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
-import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
-import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
+import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
+import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.ReturnStatement;
 
 /**
  * 解析return语句
  * */
-public class ReturnParser implements ParserHandle {
+public class ReturnParser implements CodeParserHandle {
     @Override
-    public boolean match(ParserDispatcher.ParserIterator iterator) {
+    public boolean match(ParserIterator iterator) {
         return iterator.isCurr(TokenType.Words, "return");
     }
 
     @Override
-    public ReturnStatement parse(ParserDispatcher.ParserIterator iterator) {
+    public ReturnStatement parse(ParserIterator iterator) {
         iterator.checkCurr(TokenType.Words, "return");
         if (iterator.isNext(TokenType.Symbol, SEMICOLONS)) {
             // 直接return的情况
@@ -32,8 +30,4 @@ public class ReturnParser implements ParserHandle {
         return new ReturnStatement(expression);
     }
 
-    @Override
-    public int parseScope() {
-        return HandleScope.assembly(HandleScope.IN_CODE_BLOCK);
-    }
 }

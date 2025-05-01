@@ -6,6 +6,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.handle.*;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.*;
+import org.mmfmilku.atom.agent.compiler.parser.handle.code.keyword.*;
 import org.mmfmilku.atom.agent.compiler.parser.handle.struct.ImportParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.struct.PackageParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
@@ -16,7 +17,6 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.exception.SystemException;
-import org.mmfmilku.atom.util.AssertUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +50,7 @@ public class ParserDispatcher {
         return handle.getExpression();
     }
 
-    private class ParserHelper implements ParserHandle {
+    class ParserHelper implements ParserHandle {
         List<Token> tokens;
         int curr = 0;
         Integer saveCurr = null;
@@ -222,7 +222,7 @@ public class ParserDispatcher {
         /**
          * 获取如 xx.xx.xx 的字符
          * */
-        private String parseWordsPoint() {
+        String parseWordsPoint() {
             Token token = tokens.get(curr);
             if (token.getType() != TokenType.Words) {
                 throwParserErr(TokenType.Words, token.getType());
@@ -427,23 +427,12 @@ public class ParserDispatcher {
             return throwList;
         }
 
-        private CodeBlock parseCodeBlock() {
-            CodeBlock codeBlock = new CodeBlock();
-            Token token = tokens.get(curr);
-            if (token.getType() != TokenType.LBrace) {
-                Statement statement = parseStatement();
-                codeBlock.getStatements().add(statement);
-                return codeBlock;
-            }
-            // 跳过 {
-            while (needNext().getType() != TokenType.RBrace) {
-                Statement statement = parseStatement();
-                codeBlock.getStatements().add(statement);
-            }
-            return codeBlock;
+        CodeBlock parseCodeBlock() {
+            CodeBlockParser parser = iterator.getParser(CodeBlockParser.class);
+            return parser.parse(iterator);
         }
 
-        private Statement parseStatement() {
+        Statement parseStatement() {
             Token token = tokens.get(curr);
             if (SEMICOLONS.equals(token.getValue())) {
                 // ; skip
@@ -452,7 +441,8 @@ public class ParserDispatcher {
             }
             if (isKeywords(token)) {
                 // 关键字语句
-                return parseKeywordStatement();
+                KeywordStatementParser parser = iterator.getParser(KeywordStatementParser.class);
+                return parser.parse(iterator);
             }
             if (token.getType() == TokenType.LBrace) {
                 // 代码块
@@ -549,7 +539,7 @@ public class ParserDispatcher {
             return new VarDefineAssignParser().parse(iterator);
         }
 
-        private boolean isOperator(Token token) {
+        boolean isOperator(Token token) {
             String value = token.getValue();
             return GrammarUtil.isOperator(value);
         }
@@ -562,10 +552,12 @@ public class ParserDispatcher {
             Token token = tokens.get(curr);
             String value = token.getValue();
             if ("if".equals(value)) {
-                return parseIf();
+                IfParser parser = iterator.getParser(IfParser.class);
+                return parser.parse(iterator);
             }
             if ("for".equals(value)) {
-                return parseFor();
+                ForParser parser = iterator.getParser(ForParser.class);
+                return parser.parse(iterator);
             }
             if ("while".equals(value)) {
                 return parseWhile();
@@ -603,30 +595,6 @@ public class ParserDispatcher {
                     && GrammarUtil.isCodeKeywords(token.getValue());
         }
 
-        private Statement parseIf() {
-            needNext(TokenType.LParen);
-            needNext();
-            Expression condition = parseExpression();
-            needNext(TokenType.RParen);
-            needNext();
-            Statement trueStatement = parseCodeBlock();
-            Statement falseStatement = null;
-            while (isNext(TokenType.Words, "else")) {
-                readNext();
-                if (isNext(TokenType.Words, "if")) {
-                    readNext();
-                    falseStatement = parseIf();
-                } else {
-                    needNext();
-                    falseStatement = parseCodeBlock();
-                    break;
-                }
-            }
-            IfStatement ifStatement = new IfStatement(condition, trueStatement);
-            ifStatement.setFalseStatement(falseStatement);
-            return ifStatement;
-        }
-
         private Statement parseWhile() {
             needNext(TokenType.LParen);
             needNext();
@@ -649,41 +617,6 @@ public class ParserDispatcher {
             return new WhileStatement(condition, loopBody);
         }
 
-        private Statement parseFor() {
-            needNext(TokenType.LParen);
-            needNext();
-            // parseStatement已经包含读取分号
-            Statement beforeStatement = parseStatementLine();
-            LoopStatement loopStatement;
-            if (isNext(TokenType.Symbol, SEMICOLONS)) {
-                // 普通for循环
-                needNext();
-                needNext();
-                Expression loopCondition = parseExpression();
-                needNext(TokenType.Symbol, SEMICOLONS);
-                Statement afterStatement;
-                if (isNext(TokenType.RParen)) {
-                    afterStatement = EMPTY;
-                } else {
-                    needNext();
-                    afterStatement = parseStatementLine();
-                }
-                loopStatement = new ForStatement(beforeStatement, afterStatement, loopCondition);
-            } else {
-                needNext(TokenType.Symbol, COLON);
-                Token token = needNext(TokenType.Words);
-                AssertUtil.isTrue(beforeStatement instanceof VarDefineStatement,
-                        "is not var define:" + beforeStatement.getStatementSource());
-                loopStatement = new EnhanceForStatement((VarDefineStatement) beforeStatement,
-                        new Identifier(token.getValue()));
-            }
-            needNext(TokenType.RParen);
-            needNext(TokenType.LBrace);
-            CodeBlock loopBody = parseCodeBlock();
-            loopStatement.setLoopBody(loopBody);
-            return loopStatement;
-        }
-
         private Expression parseObjectNew() {
             Token className = needNext(TokenType.Words);
             ConstructorCall constructorCall = new ConstructorCall(className.getValue());
@@ -696,7 +629,7 @@ public class ParserDispatcher {
         /**
          * 解析表达式
          * */
-        private Expression parseExpression() {
+        Expression parseExpression() {
             Token token = tokens.get(curr);
             if (token.getType() == TokenType.LParen) {
                 // 左括号
@@ -830,7 +763,7 @@ public class ParserDispatcher {
             return value;
         }
 
-        private boolean isPlusMinus(String value) {
+        boolean isPlusMinus(String value) {
             return "+".equals(value) || "-".equals(value);
         }
 
@@ -920,7 +853,7 @@ public class ParserDispatcher {
         /**
          * 判断当前token，不移动指针
          */
-        private boolean isCurr(TokenType type, String value) {
+        boolean isCurr(TokenType type, String value) {
             Token currToken = tokens.get(this.curr);
             return currToken != null && currToken.getType() == type && value.equals(currToken.getValue());
         }
@@ -928,7 +861,7 @@ public class ParserDispatcher {
         /**
          * 判断下一个token，不移动指针
          */
-        private boolean isNext(TokenType type) {
+        boolean isNext(TokenType type) {
             Token next = peekNext();
             return next != null && next.getType() == type;
         }
@@ -943,7 +876,7 @@ public class ParserDispatcher {
         /**
          * 判断下n个token，不移动指针
          */
-        private boolean isNext(int n, TokenType type, String value) {
+        boolean isNext(int n, TokenType type, String value) {
             Token next = peekNext(n);
             return next != null && next.getType() == type && value.equals(next.getValue());
         }
@@ -958,7 +891,7 @@ public class ParserDispatcher {
         /**
          * 窥探下一个token，不移动指针
          */
-        private Token peekNext(int n) {
+        Token peekNext(int n) {
             int peekPoint = curr + n;
             if (peekPoint < tokens.size()) {
                 return tokens.get(peekPoint);
@@ -997,7 +930,7 @@ public class ParserDispatcher {
         /**
          * 读取下一个token，移动指针
          */
-        private Token readNext() {
+        Token readNext() {
             curr++;
             if (curr < tokens.size()) {
                 return tokens.get(curr);
@@ -1008,7 +941,7 @@ public class ParserDispatcher {
         /**
          * 需要的下一个token，移动指针
          */
-        private Token needNext() {
+        Token needNext() {
             Token token = readNext();
             if (token == null) {
                 printParsed();
@@ -1020,7 +953,7 @@ public class ParserDispatcher {
         /**
          * 需要的下一个token，移动指针，判断类型
          */
-        private Token needNext(TokenType type) {
+        Token needNext(TokenType type) {
             Token token = readNext();
             if (token == null) {
                 printParsed();
@@ -1036,7 +969,7 @@ public class ParserDispatcher {
         /**
          * 需要的下一个token，移动指针，判断类型
          */
-        private Token needNext(TokenType type, String value) {
+        Token needNext(TokenType type, String value) {
             Token token = readNext();
             if (token == null) {
                 throwParserErr(type, value);
@@ -1055,7 +988,7 @@ public class ParserDispatcher {
             throw new RuntimeException("非法字符 " + value);
         }
 
-        private void throwParserErr(TokenType needType, String needValue) {
+        void throwParserErr(TokenType needType, String needValue) {
             printParsed();
             throw new RuntimeException("缺少" + needType + "值 " + needValue);
         }
@@ -1069,14 +1002,14 @@ public class ParserDispatcher {
             throwParserErr(needType, inputType, needValue, inputType.getFixValue());
         }
 
-        private void throwParserErr(TokenType needType, TokenType inputType,
-                                    String needValue, String inputValue) {
+        void throwParserErr(TokenType needType, TokenType inputType,
+                            String needValue, String inputValue) {
             printParsed();
             throw new RuntimeException("缺少" + needType + "值 " + needValue
                     + " 输入" + inputType + "值 " + inputValue);
         }
 
-        private void printParsed() {
+        void printParsed() {
             StringBuilder parsed = new StringBuilder();
             for (int i = 0; i < curr && i < tokens.size(); i++) {
                 parsed.append(tokens.get(i).showCode() + "\n");
@@ -1087,114 +1020,4 @@ public class ParserDispatcher {
 
     }
 
-    public class ParserIterator {
-        ParserHelper helper;
-
-        public ParserIterator(ParserHelper helper) {
-            this.helper = helper;
-        }
-
-        public Expression parseExpression() {
-            return helper.parseExpression();
-        }
-
-        public CodeBlock parseBlock() {
-            return helper.parseCodeBlock();
-        }
-
-        public Statement parseStatement() {
-            return helper.parseStatement();
-        }
-
-        /**
-         * 获取如 xx.xx.xx 的字符
-         * */
-        public String parseWordsPoint() {
-            return helper.parseWordsPoint();
-        }
-
-        public Token getCurr() {
-            return helper.tokens.get(helper.curr);
-        }
-
-        public boolean isCurr(TokenType type, String value) {
-            return helper.isCurr(type, value);
-        }
-
-        public void checkCurr(TokenType type, String value) {
-            Token token = getCurr();
-            if (token == null) {
-                helper.throwParserErr(type, value);
-            }
-            if (token.getType() != type) {
-                helper.throwParserErr(type, token.getType(), value, token.getValue());
-            }
-            if (!token.getValue().equals(value)) {
-                helper.throwParserErr(type, token.getType(), value, token.getValue());
-            }
-        }
-
-        /**
-         * 判断下一个token，不移动指针
-         */
-        public boolean isNext(TokenType type) {
-            return helper.isNext(type);
-        }
-
-        /**
-         * 判断下一个token，不移动指针
-         */
-        public boolean isNext(TokenType type, String value) {
-            return helper.isNext(1, type, value);
-        }
-
-        /**
-         * 判断下n个token，不移动指针
-         */
-        public boolean isNext(int n, TokenType type, String value) {
-            return helper.isNext(n, type, value);
-        }
-
-        /**
-         * 窥探下一个token，不移动指针
-         */
-        public Token peekNext() {
-            return helper.peekNext(1);
-        }
-
-        /**
-         * 窥探下一个token，不移动指针
-         */
-        public Token peekNext(int n) {
-            return helper.peekNext(n);
-        }
-
-        /**
-         * 读取下一个token，移动指针
-         */
-        public Token readNext() {
-            return helper.readNext();
-        }
-
-        /**
-         * 需要的下一个token，移动指针
-         */
-        public Token needNext() {
-            return helper.needNext();
-        }
-
-        /**
-         * 需要的下一个token，移动指针，判断类型
-         */
-        public Token needNext(TokenType type) {
-            return helper.needNext(type);
-        }
-
-        /**
-         * 需要的下一个token，移动指针，判断类型
-         */
-        public Token needNext(TokenType type, String value) {
-            return helper.needNext(type, value);
-        }
-    }
 }

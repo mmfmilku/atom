@@ -1,9 +1,10 @@
-package org.mmfmilku.atom.agent.compiler.parser.handle.code;
+package org.mmfmilku.atom.agent.compiler.parser.handle.code.keyword;
 
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
-import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
-import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
-import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
+import org.mmfmilku.atom.agent.compiler.parser.handle.code.CodeBlockParser;
+import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.handle.code.VarDefineAssignParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.TryStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
@@ -11,15 +12,15 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStateme
 import java.util.ArrayList;
 import java.util.List;
 
-public class TryParser implements ParserHandle {
+public class TryParser implements CodeParserHandle {
 
     @Override
-    public boolean match(ParserDispatcher.ParserIterator iterator) {
+    public boolean match(ParserIterator iterator) {
         return iterator.isCurr(TokenType.Words, "try");
     }
 
     @Override
-    public TryStatement parse(ParserDispatcher.ParserIterator iterator) {
+    public TryStatement parse(ParserIterator iterator) {
         iterator.checkCurr(TokenType.Words, "try");
         TryStatement tryStatement = new TryStatement();
         if (iterator.isNext(TokenType.LParen)) {
@@ -44,7 +45,8 @@ public class TryParser implements ParserHandle {
 
         // 解析try代码块
         iterator.needNext(TokenType.LBrace);
-        CodeBlock tryBody = iterator.parseBlock();
+        CodeBlockParser codeBlockParser = iterator.getParser(CodeBlockParser.class);
+        CodeBlock tryBody = codeBlockParser.parse(iterator);
         tryStatement.setTryBody(tryBody);
 
         while (iterator.isNext(TokenType.Words, "catch")) {
@@ -69,7 +71,7 @@ public class TryParser implements ParserHandle {
 
             // 解析catch代码块
             iterator.needNext(TokenType.LBrace);
-            CodeBlock codeBlock = iterator.parseBlock();
+            CodeBlock codeBlock = codeBlockParser.parse(iterator);
 
             tryStatement.getThrowableCatches().put(throwableCatch, codeBlock);
         }
@@ -78,13 +80,9 @@ public class TryParser implements ParserHandle {
             // 解析finally代码块
             iterator.needNext();
             iterator.needNext(TokenType.LBrace);
-            tryStatement.setFinallyBody(iterator.parseBlock());
+            tryStatement.setFinallyBody(codeBlockParser.parse(iterator));
         }
         return tryStatement;
     }
 
-    @Override
-    public int parseScope() {
-        return HandleScope.assembly(HandleScope.IN_CODE_BLOCK);
-    }
 }
