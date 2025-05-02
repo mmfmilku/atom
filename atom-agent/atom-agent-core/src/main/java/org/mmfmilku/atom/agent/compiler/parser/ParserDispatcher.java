@@ -31,8 +31,6 @@ import java.util.stream.Collectors;
  */
 public class ParserDispatcher {
 
-    private static Statement EMPTY = new CodeBlock();
-
     private Lexer lexer;
 
     public ParserDispatcher(Lexer lexer) {
