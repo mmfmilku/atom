@@ -113,6 +113,10 @@ public class ParserIterator {
         return tokens.get(curr);
     }
 
+    public void beforeFirst() {
+        this.curr = -1;
+    }
+
     public void back() {
         this.curr--;
     }

@@ -1,12 +1,10 @@
 package org.mmfmilku.atom.agent.compiler.parser;
 
-import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.handle.*;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.*;
-import org.mmfmilku.atom.agent.compiler.parser.handle.code.keyword.*;
 import org.mmfmilku.atom.agent.compiler.parser.handle.struct.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
@@ -15,12 +13,9 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
-import org.mmfmilku.atom.exception.SystemException;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -47,6 +42,76 @@ public class ParserDispatcher {
         return handle.getExpression();
     }
 
+    /**
+     * 语法组合
+     * */
+    private class ParserAssembly {
+
+        ParserIterator iterator;
+
+        List<AssemblyUnit> assemblyUnits = new ArrayList<>();
+
+        public ParserAssembly() {
+            List<Token> tokens = lexer.getTokens()
+                    .stream()
+                    .filter(token -> token.getType() != TokenType.BlockComment && token.getType() != TokenType.Comment)
+                    .collect(Collectors.toList());
+            iterator = new ParserIterator(tokens);
+        }
+
+        public <T extends ParserHandle<? extends Node>> void registry(
+                java.lang.Class<T> clazz) {
+            registry(clazz, true);
+        }
+
+        public <T extends ParserHandle<? extends Node>> void registry(
+                java.lang.Class<T> clazz, boolean canAbsent) {
+
+        }
+
+        public <T extends ParserHandle<? extends Node>> void registryList(
+                java.lang.Class<T> clazz) {
+            registryList(clazz, true);
+        }
+
+        public <T extends ParserHandle<? extends Node>> void registryList(
+                java.lang.Class<T> clazz, boolean canAbsent) {
+
+        }
+
+        public Node parse() {
+            for (AssemblyUnit assemblyUnit : assemblyUnits) {
+                ParserHandle handle = assemblyUnit.parserHandle;
+                if (assemblyUnit.isList) {
+                    List<Node> nodes = new ArrayList<>();
+                    while (handle.match(iterator)) {
+                        Node parse = handle.parse(iterator);
+                        nodes.add(parse);
+                        iterator.needNext();
+                    }
+                } else {
+                    Node parse = handle.parse(iterator);
+                    iterator.needNext();
+                }
+            }
+            return null;
+        }
+
+    }
+
+    private static class AssemblyUnit {
+        ParserHandle parserHandle;
+
+        boolean canAbsent;
+
+        boolean isList;
+
+
+    }
+
+    /**
+     * 解析java文件
+     * */
     private class ParserHelper {
         JavaAST javaAST;
         ParserIterator iterator;
@@ -59,7 +124,7 @@ public class ParserDispatcher {
             iterator = new ParserIterator(tokens);
         }
 
-        public JavaAST parse() {
+        private JavaAST parse() {
             javaAST = new JavaAST();
             while (iterator.hasNext()) {
                 parseProgram();
@@ -72,7 +137,7 @@ public class ParserDispatcher {
         }
 
         private void parseProgram() {
-            iterator.back();
+            iterator.beforeFirst();
             while (iterator.hasNext()) {
                 Token dealToken = iterator.needNext();
                 if (dealToken.getType() == TokenType.Words) {
