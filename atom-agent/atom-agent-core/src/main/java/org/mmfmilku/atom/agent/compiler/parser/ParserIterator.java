@@ -12,26 +12,32 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.exception.SystemException;
 import org.mmfmilku.atom.util.ReflectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ParserIterator {
 
-    String SEMICOLONS = ";";
+    public static String SEMICOLONS = ";";
 
-    String COLON = ":";
+    public static String COLON = ":";
 
-    String COMMA = ",";
+    public static String COMMA = ",";
 
-    String POINT = ".";
+    public static String POINT = ".";
 
-    String EQUAL = "=";
+    public static String EQUAL = "=";
 
-    private ParserDispatcher.ParserHelper helper;
+    List<Token> tokens;
+
+    int curr = 0;
+
+    Integer saveCurr = null;
 
     public static Statement EMPTY = new CodeBlock();
 
@@ -40,8 +46,11 @@ public class ParserIterator {
      * */
     private Map<String, ParserHandle> parserHandleMap = new HashMap<>();
 
-    public ParserIterator(ParserDispatcher.ParserHelper helper) {
-        this.helper = helper;
+    public ParserIterator(List<Token> tokens) {
+        if (tokens == null || tokens.isEmpty()) {
+            throw new RuntimeException("tokens is null or empty");
+        }
+        this.tokens = tokens;
         try {
             initHandleMap();
         } catch (IllegalAccessException | InstantiationException e) {
@@ -85,7 +94,7 @@ public class ParserIterator {
     public String parseWordsPoint() {
         Token token = getCurr();
         if (token.getType() != TokenType.Words) {
-            helper.throwParserErr(TokenType.Words, token.getType());
+            throwParserErr(TokenType.Words, token.getType());
         }
         StringBuilder value = new StringBuilder(token.getValue());
         while (isNext(TokenType.Symbol, POINT)) {
@@ -96,42 +105,58 @@ public class ParserIterator {
         return value.toString();
     }
 
+    public boolean hasNext() {
+        return curr < tokens.size() - 1;
+    }
+
     public Token getCurr() {
-        return helper.tokens.get(helper.curr);
+        return tokens.get(curr);
     }
 
     public void back() {
-        helper.back();
+        this.curr--;
     }
 
+    /**
+     * 判断当前token，不移动指针
+     */
+    public boolean isCurr(TokenType type) {
+        Token currToken = tokens.get(this.curr);
+        return currToken != null && currToken.getType() == type;
+    }
+
+    /**
+     * 判断当前token，不移动指针
+     */
     public boolean isCurr(TokenType type, String value) {
-        return helper.isCurr(type, value);
+        Token currToken = tokens.get(this.curr);
+        return currToken != null && currToken.getType() == type && value.equals(currToken.getValue());
     }
 
     public boolean isLast() {
-        return helper.curr == helper.tokens.size() - 1;
+        return this.curr == this.tokens.size() - 1;
     }
 
     public void checkCurr(TokenType type) {
         Token token = getCurr();
         if (token == null) {
-            helper.throwParserErr(type, type.getFixValue());
+            this.throwParserErr(type, type.getFixValue());
         }
         if (token.getType() != type) {
-            helper.throwParserErr(type, token.getType());
+            this.throwParserErr(type, token.getType());
         }
     }
 
     public void checkCurr(TokenType type, String value) {
         Token token = getCurr();
         if (token == null) {
-            helper.throwParserErr(type, value);
+            this.throwParserErr(type, value);
         }
         if (token.getType() != type) {
-            helper.throwParserErr(type, token.getType(), value, token.getValue());
+            this.throwParserErr(type, token.getType(), value, token.getValue());
         }
         if (!token.getValue().equals(value)) {
-            helper.throwParserErr(type, token.getType(), value, token.getValue());
+            this.throwParserErr(type, token.getType(), value, token.getValue());
         }
     }
 
@@ -139,77 +164,143 @@ public class ParserIterator {
      * 判断下一个token，不移动指针
      */
     public boolean isNext(TokenType type) {
-        return helper.isNext(type);
+        Token next = peekNext();
+        return next != null && next.getType() == type;
     }
 
     /**
      * 判断下一个token，不移动指针
      */
     public boolean isNext(TokenType type, String value) {
-        return helper.isNext(1, type, value);
+        return isNext(1, type, value);
     }
 
     /**
      * 判断下n个token，不移动指针
      */
     public boolean isNext(int n, TokenType type, String value) {
-        return helper.isNext(n, type, value);
+        Token next = peekNext(n);
+        return next != null && next.getType() == type && value.equals(next.getValue());
     }
 
     /**
      * 窥探下一个token，不移动指针
      */
     public Token peekNext() {
-        return helper.peekNext(1);
+        return peekNext(1);
     }
 
     /**
      * 窥探下一个token，不移动指针
      */
     public Token peekNext(int n) {
-        return helper.peekNext(n);
+        int peekPoint = curr + n;
+        if (peekPoint < tokens.size()) {
+            return tokens.get(peekPoint);
+        }
+        return null;
+    }
+
+    /**
+     * 读取至某个类型前，移动指针
+     */
+    public List<Token> readBefore(TokenType type) {
+        List<Token> beforeTokens = new ArrayList<>();
+        while (true) {
+            beforeTokens.add(this.tokens.get(curr));
+            if (curr == tokens.size() - 1 || isNext(type)) {
+                break;
+            }
+            curr++;
+        }
+        return beforeTokens;
+    }
+
+    /**
+     * 读取至某个类型前，移动指针
+     */
+    public void readBefore(TokenType type, Consumer<Token> consumer) {
+        while (true) {
+            consumer.accept(tokens.get(curr));
+            if (curr == tokens.size() - 1 || isNext(type)) {
+                break;
+            }
+            curr++;
+        }
     }
 
     /**
      * 读取下一个token，移动指针
      */
     public Token readNext() {
-        return helper.readNext();
+        curr++;
+        if (curr < tokens.size()) {
+            return tokens.get(curr);
+        }
+        return null;
     }
 
     /**
      * 需要的下一个token，移动指针
      */
     public Token needNext() {
-        return helper.needNext();
+        Token token = readNext();
+        if (token == null) {
+            printParsed();
+            throw new RuntimeException("字符不完整");
+        }
+        return token;
     }
 
     /**
      * 需要的下一个token，移动指针，判断类型
      */
     public Token needNext(TokenType type) {
-        return helper.needNext(type);
+        Token token = readNext();
+        if (token == null) {
+            printParsed();
+            throw new RuntimeException("缺少" + type + "值 " + type.getFixValue());
+        }
+        if (token.getType() != type) {
+            printParsed();
+            throw new RuntimeException("缺少" + type + "值 " + type.getFixValue() + " 输入" + token.getType() + "值 " + token.getValue());
+        }
+        return token;
     }
 
     /**
      * 需要的下一个token，移动指针，判断类型
      */
     public Token needNext(TokenType type, String value) {
-        return helper.needNext(type, value);
+        Token token = readNext();
+        if (token == null) {
+            throwParserErr(type, value);
+        }
+        if (token.getType() != type) {
+            throwParserErr(type, token.getType(), value, token.getValue());
+        }
+        if (!token.getValue().equals(value)) {
+            throwParserErr(type, token.getType(), value, token.getValue());
+        }
+        return token;
     }
 
     /**
      * 存档指针，仅保存一次的
      * */
     public void saveIdx() {
-        helper.saveIdx();
+        saveCurr = curr;
     }
 
     /**
      * 读取指针，读取前需要保存，仅支持读取一次
      * */
     public void readIdx() {
-        helper.readIdx();
+        if (saveCurr == null) {
+            throw new SystemException("parser idx did not save");
+        }
+        curr = saveCurr;
+        saveCurr = null;
     }
 
     public boolean isOperator(Token token) {
@@ -219,11 +310,6 @@ public class ParserIterator {
 
     public boolean isPlusMinus(String operator) {
         return "+".equals(operator) || "-".equals(operator);
-    }
-
-    public void throwIllegalToken(String value) {
-        helper.printParsed();
-        throw new RuntimeException("非法字符 " + value);
     }
 
     public boolean isKeywords(Token token) {
@@ -344,5 +430,40 @@ public class ParserIterator {
             throwList.add(throwE.getValue());
         } while (isNext(TokenType.Symbol, COMMA));
         return throwList;
+    }
+
+    public void throwIllegalToken(String value) {
+        printParsed();
+        throw new RuntimeException("非法字符 " + value);
+    }
+
+    private void throwParserErr(TokenType needType, String needValue) {
+        printParsed();
+        throw new RuntimeException("缺少" + needType + "值 " + needValue);
+    }
+
+    private void throwParserErr(TokenType needType, TokenType inputType) {
+        throwParserErr(needType, inputType, needType.getFixValue(), inputType.getFixValue());
+    }
+
+    private void throwParserErr(TokenType needType, TokenType inputType,
+                                String needValue) {
+        throwParserErr(needType, inputType, needValue, inputType.getFixValue());
+    }
+
+    private void throwParserErr(TokenType needType, TokenType inputType,
+                        String needValue, String inputValue) {
+        printParsed();
+        throw new RuntimeException("缺少" + needType + "值 " + needValue
+                + " 输入" + inputType + "值 " + inputValue);
+    }
+
+    private void printParsed() {
+        StringBuilder parsed = new StringBuilder();
+        for (int i = 0; i < curr && i < tokens.size(); i++) {
+            parsed.append(tokens.get(i).showCode() + "\n");
+        }
+        System.out.println("当前已解析语法");
+        System.out.println(parsed.toString());
     }
 }
