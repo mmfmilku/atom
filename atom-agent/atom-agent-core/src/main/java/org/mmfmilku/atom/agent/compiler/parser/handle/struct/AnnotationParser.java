@@ -11,7 +11,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import java.util.Collections;
 import java.util.List;
 
-public class AnnotationParser implements StructParserHandle {
+public class AnnotationParser implements StructParserHandle<Annotation> {
     @Override
     public boolean match(ParserIterator iterator) {
         Token curr = iterator.getCurr();

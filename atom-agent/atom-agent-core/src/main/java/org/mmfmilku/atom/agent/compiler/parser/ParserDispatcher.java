@@ -16,6 +16,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -42,14 +43,18 @@ public class ParserDispatcher {
         return handle.getExpression();
     }
 
+    public ParserAssembly newAssembly() {
+        return new ParserAssembly();
+    }
+
     /**
      * 语法组合
      * */
-    private class ParserAssembly {
+    public class ParserAssembly {
 
-        ParserIterator iterator;
+        private ParserIterator iterator;
 
-        List<AssemblyUnit> assemblyUnits = new ArrayList<>();
+        private List<AssemblyUnit> assemblyUnits = new ArrayList<>();
 
         public ParserAssembly() {
             List<Token> tokens = lexer.getTokens()
@@ -59,54 +64,89 @@ public class ParserDispatcher {
             iterator = new ParserIterator(tokens);
         }
 
-        public <T extends ParserHandle<? extends Node>> void registry(
-                java.lang.Class<T> clazz) {
-            registry(clazz, true);
+        public <T extends ParserHandle<U>, U extends Node> void registry(
+                java.lang.Class<T> clazz, Consumer<U> nodeAccept) {
+            registry(clazz, nodeAccept, true);
         }
 
-        public <T extends ParserHandle<? extends Node>> void registry(
-                java.lang.Class<T> clazz, boolean canAbsent) {
-
+        public <T extends ParserHandle<U>, U extends Node> void registry(
+                java.lang.Class<T> clazz, Consumer<U> nodeAccept, boolean canAbsent) {
+            assemblyUnits.add(new AssemblyUnit<>(iterator.getParser(clazz), nodeAccept, canAbsent, false));
         }
 
-        public <T extends ParserHandle<? extends Node>> void registryList(
-                java.lang.Class<T> clazz) {
-            registryList(clazz, true);
+        public <T extends ParserHandle<U>, U extends Node> void registryList(
+                java.lang.Class<T> clazz, Consumer<List<U>> nodeAccept) {
+            registryList(clazz, nodeAccept, true);
         }
 
-        public <T extends ParserHandle<? extends Node>> void registryList(
-                java.lang.Class<T> clazz, boolean canAbsent) {
-
+        public <T extends ParserHandle<U>, U extends Node> void registryList(
+                java.lang.Class<T> clazz, Consumer<List<U>> nodeAccept, boolean canAbsent) {
+            assemblyUnits.add(new AssemblyUnit<>(iterator.getParser(clazz), nodeAccept, canAbsent, true));
         }
 
-        public Node parse() {
+        public void parse() {
+            iterator.beforeFirst();
             for (AssemblyUnit assemblyUnit : assemblyUnits) {
+                // 语法非必要，并且是最后一位，跳过
+                if (assemblyUnit.canAbsent && iterator.isLast()) {
+                    continue;
+                }
+                iterator.needNext();
                 ParserHandle handle = assemblyUnit.parserHandle;
-                if (assemblyUnit.isList) {
+                if (assemblyUnit.loop) {
+                    // 一条都匹配不到
+                    if (!handle.match(iterator)) {
+                        if (assemblyUnit.canAbsent) {
+                            // 非必要，回退，用于后续语法解析
+                            iterator.back();
+                            continue;
+                        } else {
+                            iterator.throwIllegalToken(iterator.getCurr().getValue());
+                        }
+                    }
+                    // 至少匹配一条
                     List<Node> nodes = new ArrayList<>();
                     while (handle.match(iterator)) {
                         Node parse = handle.parse(iterator);
                         nodes.add(parse);
-                        iterator.needNext();
+                        // 判断是否继续下一条
+                        if (iterator.hasNext()) {
+                            iterator.needNext();
+                            if (!handle.match(iterator)) {
+                                // 下一条不匹配
+                                iterator.back();
+                                break;
+                            }
+                        } else {
+                            // 解析结束
+                            break;
+                        }
                     }
+                    assemblyUnit.nodeAccept.accept(nodes);
                 } else {
                     Node parse = handle.parse(iterator);
-                    iterator.needNext();
+                    assemblyUnit.nodeAccept.accept(parse);
                 }
             }
-            return null;
         }
 
     }
 
-    private static class AssemblyUnit {
-        ParserHandle parserHandle;
+    private static class AssemblyUnit<T extends Node> {
+        ParserHandle<T> parserHandle;
+
+        Consumer<?> nodeAccept;
 
         boolean canAbsent;
 
-        boolean isList;
+        boolean loop;
 
-
+        public AssemblyUnit(ParserHandle<T> parserHandle, Consumer<?> nodeAccept, boolean canAbsent, boolean loop) {
+            this.parserHandle = parserHandle;
+            this.nodeAccept = nodeAccept;
+            this.canAbsent = canAbsent;
+            this.loop = loop;
+        }
     }
 
     /**

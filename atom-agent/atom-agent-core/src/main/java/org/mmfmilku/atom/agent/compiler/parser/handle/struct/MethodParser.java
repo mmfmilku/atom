@@ -14,7 +14,7 @@ import java.util.List;
  * 解析方法，不包含解析修饰符
  * returnType methodName(...) {...}
  * */
-public class MethodParser implements StructParserHandle {
+public class MethodParser implements StructParserHandle<Method> {
     @Override
     public boolean match(ParserIterator iterator) {
         return false;

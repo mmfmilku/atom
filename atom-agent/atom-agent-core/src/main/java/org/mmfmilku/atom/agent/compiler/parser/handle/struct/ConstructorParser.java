@@ -13,7 +13,7 @@ import java.util.List;
  * 解析构造器，不包含解析修饰符
  * ClassName(...) {...}
  * */
-public class ConstructorParser implements StructParserHandle {
+public class ConstructorParser implements StructParserHandle<Constructor> {
     @Override
     public boolean match(ParserIterator iterator) {
         return false;
