@@ -10,7 +10,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 /**
  * 解析复杂嵌套语句，包含结束符 ;
  * */
-public class StatementParser implements CodeParserHandle {
+public class StatementParser implements CodeParserHandle<Statement> {
     @Override
     public boolean match(ParserIterator iterator) {
         return true;
