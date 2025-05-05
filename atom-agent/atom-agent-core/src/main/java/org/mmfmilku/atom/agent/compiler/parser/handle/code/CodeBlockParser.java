@@ -8,7 +8,7 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
-public class CodeBlockParser implements CodeParserHandle {
+public class CodeBlockParser implements CodeParserHandle<CodeBlock> {
     @Override
     public boolean match(ParserIterator iterator) {
         return true;
