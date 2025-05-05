@@ -15,20 +15,30 @@ public class ExecutableApiImpl implements ExecutableApi {
 
     @Override
     public ExecuteResult execute(String toExecute, Object... args) {
-
-        ExecuteResult result = new ExecuteResult();
         try {
-            String text = FileUtils.readText(toExecute).trim();
+            String jScript = FileUtils.readText(toExecute).trim();
             // 执行JScript
-            JScriptResult jScriptResult = JScript.execute(text);
-            result.setSuccess(jScriptResult.isSuccess());
-            result.setThrowable(jScriptResult.getThrowable());
-            result.setExecuteReturn(jScriptResult.getExecuteReturn());
+            return executeJScript(jScript);
         } catch (IOException e) {
             e.printStackTrace();
             throw new SystemException(e.getMessage());
         }
+    }
+
+    @Override
+    public ExecuteResult executeJScript(String jScript, Object... args) {
+        ExecuteResult result = new ExecuteResult();
+        // 执行JScript
+        JScriptResult jScriptResult = JScript.execute(jScript);
+        result.setSuccess(jScriptResult.isSuccess());
+        result.setThrowable(jScriptResult.getThrowable());
+        result.setExecuteReturn(jScriptResult.getExecuteReturn());
 
         return result;
+    }
+
+    @Override
+    public ExecuteResult executeTerminal(String terminalId, String code, Object... args) {
+        return null;
     }
 }
