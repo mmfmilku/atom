@@ -26,7 +26,7 @@ public class JScriptTest {
                 "import org.junit.Test;\n" +
                 "import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;\n" +
                 "\n" +
-                "class ExecuteGoal {\n" +
+                "class JScriptExecutor {\n" +
                 "java.lang.Object execute() {System.out.println(\"ttttt\");\n" +
                 "int a = 133;\n" +
                 "int g = 67;\n" +

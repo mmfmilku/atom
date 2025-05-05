@@ -1,28 +1,24 @@
 package org.mmfmilku.atom.agent.console;
 
+import org.mmfmilku.atom.agent.compiler.CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.struct.ImportParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Class;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import org.mmfmilku.atom.agent.util.OrdUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class JScript {
 
-    private static final ExecuteGoal executor = new ExecuteGoal();
+    private static final JScriptExecutor executor = new JScriptExecutor();
 
     // 执行方法名约定为execute
-    private static final String EXECUTE_METHOD_NAME = "execute";
+    public static final String EXECUTE_METHOD_NAME = "execute";
 
     public static JScriptResult execute(String code, Object... args) {
         JavaAST javaAST = parseJScript(code);
@@ -73,35 +69,11 @@ public class JScript {
     }
 
     public static JavaAST parseJScript(List<Import> importList, List<Statement> statementList) {
-        java.lang.Class<ExecuteGoal> nativeClass = ExecuteGoal.class;
-
-        JavaAST javaAST = new JavaAST();
+        JavaAST javaAST = CompilerUtil.newEmptyJavaAST(JScriptExecutor.class);
         javaAST.setImports(importList);
-
-        Package aPackage = new Package();
-        aPackage.setValue(nativeClass.getPackage().getName());
-        javaAST.setPackageNode(aPackage);
-
-        Class aClass = new Class(nativeClass.getSimpleName());
-        Method method = new Method();
-        method.setMethodName(EXECUTE_METHOD_NAME);
-        method.setModifier(Modifier.DEFAULT);
-        method.setAnnotations(Collections.emptyList());
-        method.setMethodParams(Collections.emptyList());
-        method.setReturnType(Object.class.getName());
-        // TODO 补充方法参数
-
-        CodeBlock codeBlock = new CodeBlock();
-        codeBlock.setStatements(statementList);
-        method.setCodeBlock(codeBlock);
-
-        aClass.setMethods(Arrays.asList(method));
-        aClass.setModifier(Modifier.DEFAULT);
-        aClass.setAnnotations(Collections.emptyList());
-        aClass.setMembers(Collections.emptyList());
-        aClass.setConstructors(Collections.emptyList());
-
-        javaAST.setClassList(Arrays.asList(aClass));
+        javaAST.getClassList().get(0)
+                .getMethods().get(0)
+                .getCodeBlock().setStatements(statementList);
 
         return javaAST;
     }
