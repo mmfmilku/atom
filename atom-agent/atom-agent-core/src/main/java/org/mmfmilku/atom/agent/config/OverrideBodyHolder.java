@@ -2,8 +2,7 @@ package org.mmfmilku.atom.agent.config;
 
 import org.mmfmilku.atom.agent.compiler.CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
-import org.mmfmilku.atom.agent.util.ByteCodeUtils;
-import org.mmfmilku.atom.exception.BizException;
+import org.mmfmilku.atom.agent.util.OrdUtils;
 import org.mmfmilku.atom.exception.SystemException;
 import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.FileUtils;
@@ -12,7 +11,6 @@ import org.mmfmilku.atom.consts.CodeConst;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * OverrideBodyHolder
@@ -22,16 +20,20 @@ import java.util.stream.Collectors;
  */
 public class OverrideBodyHolder {
 
+    @Deprecated
     private static final Map<String, ClassORDDefine> overrideClassMap = new HashMap<>();
 
+    @Deprecated
     public static Map<String, ClassORDDefine> getORClassMap() {
         return overrideClassMap;
     }
 
+    @Deprecated
     public static ClassORDDefine getORMethodMap(String classFullName) {
         return overrideClassMap.get(classFullName);
     }
 
+    @Deprecated
     public static MethodORDDefine getORMethodBody(String classFullName, String methodName) {
         if (!overrideClassMap.containsKey(classFullName)) {
             return null;
@@ -39,6 +41,7 @@ public class OverrideBodyHolder {
         return overrideClassMap.get(classFullName).getMethodORDMap().get(methodName);
     }
 
+    @Deprecated
     public static void load(String basePath) {
         System.out.println("------------------agent ord load-----------------------");
         if (overrideClassMap.size() > 0) {
@@ -64,6 +67,7 @@ public class OverrideBodyHolder {
         }
     }
 
+    @Deprecated
     public static void loadFile(String filePath) {
         System.out.println("------------------agent ord load-----------------------");
         synchronized (overrideClassMap) {
@@ -94,24 +98,7 @@ public class OverrideBodyHolder {
             try {
                 String text = FileUtils.readText(file).trim();
                 JavaAST javaAST = CompilerUtil.parseAST(text);
-                ByteCodeUtils.toJavassistCode(javaAST);
-                return javaAST.getClassList()
-                        .stream()
-                        .map(clazz -> {
-                            Map<String, MethodORDDefine> methodORDMap = clazz.getMethods()
-                                    .stream()
-                                    .map(method -> {
-                                        MethodORDDefine methodORDDefine = new MethodORDDefine(method.getMethodName());
-                                        methodORDDefine.setSrcMap(Collections.singletonMap(
-                                                Keywords.METHOD,
-                                                method.getCodeBlock().getSourceCode()));
-                                        return methodORDDefine;
-                                    }).collect(Collectors.toMap(MethodORDDefine::getMethodName, v -> v));
-                            ClassORDDefine ordDefine = new ClassORDDefine();
-                            ordDefine.setName(clazz.getClassFullName());
-                            ordDefine.setMethodORDMap(methodORDMap);
-                            return ordDefine;
-                        }).collect(Collectors.toMap(ClassORDDefine::getName, v -> v));
+                return OrdUtils.astToOrd(javaAST);
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new SystemException(e.getMessage());
@@ -122,6 +109,7 @@ public class OverrideBodyHolder {
         }
     }
 
+    @Deprecated
     private static void loadOverrideFile(String file) {
         // 将文件定义的方法覆写体，读取到map中
         Map<String, ClassORDDefine> defineMap = parseOverrideFile(file);

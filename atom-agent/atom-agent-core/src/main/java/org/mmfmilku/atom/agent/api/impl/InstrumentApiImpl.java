@@ -89,6 +89,7 @@ public class InstrumentApiImpl implements InstrumentApi {
     }
 
     @Override
+    @Deprecated
     public void retransformClass(String className) {
         checkClass(className);
         // TODO 如何清理

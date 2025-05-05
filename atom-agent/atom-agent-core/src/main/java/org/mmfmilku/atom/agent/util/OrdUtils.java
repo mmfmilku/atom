@@ -1,6 +1,9 @@
 package org.mmfmilku.atom.agent.util;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
+import org.mmfmilku.atom.agent.config.Keywords;
+import org.mmfmilku.atom.agent.config.MethodORDDefine;
 import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.agent.instrument.transformer.LoadOrdTransformer;
 import org.mmfmilku.atom.agent.instrument.transformer.StopOrdTransformer;
@@ -8,8 +11,10 @@ import org.mmfmilku.atom.exception.BizException;
 
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class OrdUtils {
 
@@ -35,6 +40,33 @@ public class OrdUtils {
         Map<String, ClassORDDefine> defineMap = new HashMap<>();
         defineMap.put(classORDDefine.getName(), classORDDefine);
         loadOrd(defineMap);
+    }
+
+    public static void loadOrd(JavaAST javaAST) {
+        Map<String, ClassORDDefine> defineMap = astToOrd(javaAST);
+        loadOrd(defineMap);
+    }
+
+    public static Map<String, ClassORDDefine> astToOrd(JavaAST javaAST) {
+        // 执行useImport
+        ByteCodeUtils.toJavassistCode(javaAST);
+        return javaAST.getClassList()
+                .stream()
+                .map(clazz -> {
+                    Map<String, MethodORDDefine> methodORDMap = clazz.getMethods()
+                            .stream()
+                            .map(method -> {
+                                MethodORDDefine methodORDDefine = new MethodORDDefine(method.getMethodName());
+                                methodORDDefine.setSrcMap(Collections.singletonMap(
+                                        Keywords.METHOD,
+                                        method.getCodeBlock().getSourceCode()));
+                                return methodORDDefine;
+                            }).collect(Collectors.toMap(MethodORDDefine::getMethodName, v -> v));
+                    ClassORDDefine ordDefine = new ClassORDDefine();
+                    ordDefine.setName(clazz.getClassFullName());
+                    ordDefine.setMethodORDMap(methodORDMap);
+                    return ordDefine;
+                }).collect(Collectors.toMap(ClassORDDefine::getName, v -> v));
     }
 
     public static void stopOrd(String stopFullClassName) {

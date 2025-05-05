@@ -141,7 +141,7 @@ public class ParserDispatcher {
 
         boolean loop;
 
-        public AssemblyUnit(ParserHandle<T> parserHandle, Consumer<?> nodeAccept, boolean canAbsent, boolean loop) {
+        AssemblyUnit(ParserHandle<T> parserHandle, Consumer<?> nodeAccept, boolean canAbsent, boolean loop) {
             this.parserHandle = parserHandle;
             this.nodeAccept = nodeAccept;
             this.canAbsent = canAbsent;
