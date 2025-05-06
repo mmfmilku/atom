@@ -57,7 +57,7 @@ public class CompilerUtil {
             // TODO 方法参数先写死
             method.setMethodParams(Collections.emptyList());
             // TODO 返回类型先写死
-            method.setReturnType(Object.class.getName());
+            method.setReturnType(Object.class.getSimpleName());
 
             CodeBlock codeBlock = new CodeBlock();
             codeBlock.setStatements(Collections.emptyList());

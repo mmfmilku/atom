@@ -31,6 +31,19 @@ public class ReflectUtils {
      * */
     public static Object invokeMethod(Object invokeObj, String invokeMethod, Object ...params) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Class<?> clazz = invokeObj.getClass();
+        Method method = getMethod(clazz, invokeMethod, params);
+        return method.invoke(invokeObj, params);
+    }
+
+    /**
+     * 调用静态方法
+     * */
+    public static Object invokeStaticMethod(Class<?> clazz, String invokeMethod, Object ...params) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = getMethod(clazz, invokeMethod, params);
+        return method.invoke(null, params);
+    }
+
+    private static Method getMethod(Class<?> clazz, String invokeMethod, Object[] params) throws NoSuchMethodException {
         Class<?>[] paramsType = new Class[params.length];
         for (int i = 0; i < params.length; i++) {
             Object param = params[i];
@@ -38,7 +51,7 @@ public class ReflectUtils {
         }
         Method method = clazz.getDeclaredMethod(invokeMethod, paramsType);
         method.setAccessible(true);
-        return method.invoke(invokeObj, params);
+        return method;
     }
 
     /**

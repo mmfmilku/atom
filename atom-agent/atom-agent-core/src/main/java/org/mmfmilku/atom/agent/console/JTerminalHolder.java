@@ -36,16 +36,8 @@ public class JTerminalHolder {
             throw new BizException("终端不存在:" + id);
         }
 
-        JTerminal jTerminal = jTerminalMap.get(code);
-        // 使用全局import
-        List<Import> importList = jTerminal.getImportList();
-        List<Statement> statementList = parseTerminalCode(code);
-
-        JavaAST javaAST = CompilerUtil.newEmptyJavaAST(JTerminalExecutor.class);
-        javaAST.setImports(importList);
-        javaAST.getClassList().get(0)
-                .getMethods().get(0)
-                .getCodeBlock().setStatements(statementList);
+        JTerminal jTerminal = jTerminalMap.get(id);
+        JavaAST javaAST = getJavaAST(code, jTerminal);
 
         JTerminalResult jTerminalResult = new JTerminalResult();
         // 锁执行类，同一个执行类，防止不同终端并发执行
@@ -70,6 +62,18 @@ public class JTerminalHolder {
         }
 
         return jTerminalResult;
+    }
+
+    private static JavaAST getJavaAST(String code, JTerminal jTerminal) {
+        List<Statement> statementList = parseTerminalCode(code);
+
+        JavaAST javaAST = CompilerUtil.newEmptyJavaAST(JTerminalExecutor.class);
+        // 使用全局import
+        javaAST.setImports(jTerminal.getImportList());
+        javaAST.getClassList().get(0)
+                .getMethods().get(0)
+                .getCodeBlock().setStatements(statementList);
+        return javaAST;
     }
 
     private static List<Statement> parseTerminalCode(String code) {
@@ -101,6 +105,19 @@ public class JTerminalHolder {
         // TODO 变量定义或赋值的操作
         if (statement instanceof VarDefineStatement) {
             VarDefineStatement varDefineStatement = (VarDefineStatement) statement;
+            // TODO 语句替换为语句块，并插入保存上下文的语句
+            String varName = varDefineStatement.getVarName();
+            // 插入语句 contextVars.put(varName, ${varName});
+            String addExp = String.format("contextVars.put(\"%s\", %s);", varName, varName);
+            Expression expression = CompilerUtil.parseExpression(addExp);
+            CodeBlock codeBlock = new CodeBlock();
+            codeBlock.setStatements(Arrays.asList(statement, new ExpStatement(expression)));
+            // 原statement替换为codeBlock
+            return codeBlock;
+            // TODO 变量获取的情况，需要从上下文获取
+        }
+        if (statement instanceof VarAssignStatement) {
+            VarAssignStatement varDefineStatement = (VarAssignStatement) statement;
             // TODO 语句替换为语句块，并插入保存上下文的语句
             String varName = varDefineStatement.getVarName();
             // 插入语句 contextVars.put(varName, ${varName});

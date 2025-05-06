@@ -27,7 +27,7 @@ public class JScriptTest {
                 "import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;\n" +
                 "\n" +
                 "class JScriptExecutor {\n" +
-                "java.lang.Object execute() {System.out.println(\"ttttt\");\n" +
+                "Object execute() {System.out.println(\"ttttt\");\n" +
                 "int a = 133;\n" +
                 "int g = 67;\n" +
                 "int z = a * b + 5;\n" +
