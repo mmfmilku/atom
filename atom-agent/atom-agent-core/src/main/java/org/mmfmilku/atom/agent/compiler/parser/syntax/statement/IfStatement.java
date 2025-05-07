@@ -3,11 +3,10 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class IfStatement implements SpecialStatement {
+public class IfStatement implements NestedStatement {
 
     /**
      * if中的条件表达式

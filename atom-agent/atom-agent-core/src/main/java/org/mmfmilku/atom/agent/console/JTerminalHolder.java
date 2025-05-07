@@ -4,11 +4,12 @@ import org.mmfmilku.atom.agent.compiler.CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementParser;
-import org.mmfmilku.atom.agent.compiler.parser.handle.struct.ImportParser;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Import;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarAssignStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.agent.util.OrdUtils;
 import org.mmfmilku.atom.exception.BizException;
 
@@ -91,7 +92,7 @@ public class JTerminalHolder {
     }
 
     private static Statement enhanceStatement(Statement statement) {
-        if (statement instanceof SpecialStatement) {
+        if (statement instanceof NestedStatement) {
             // 嵌套语句
             // TODO 获取其中嵌套的语句,例如语句块
             CodeBlock codeBlock = (CodeBlock) statement;

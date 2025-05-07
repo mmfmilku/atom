@@ -7,7 +7,7 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.VarDefineAssignParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.TryStatement;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 
 import java.util.ArrayList;
 import java.util.List;

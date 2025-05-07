@@ -11,7 +11,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.exception.SystemException;
 import org.mmfmilku.atom.util.ReflectUtils;
 

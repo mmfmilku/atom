@@ -8,9 +8,9 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.BinaryOperate;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.UnaryOperate;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.ExpStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarAssignStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarAssignStatement;
 
 /**
  * 解析一般单行语句，不包含结束符 ;

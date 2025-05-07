@@ -13,6 +13,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 
 import java.util.ArrayList;
 import java.util.List;

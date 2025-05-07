@@ -5,7 +5,7 @@ import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.StructParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Constructor;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 
 import java.util.List;
 

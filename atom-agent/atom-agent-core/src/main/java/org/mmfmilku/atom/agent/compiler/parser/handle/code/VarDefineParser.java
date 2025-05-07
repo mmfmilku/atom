@@ -5,7 +5,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 
 /**
  * 变量仅定义解析

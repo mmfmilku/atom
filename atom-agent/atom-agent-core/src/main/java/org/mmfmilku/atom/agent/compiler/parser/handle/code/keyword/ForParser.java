@@ -9,6 +9,7 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementLineParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.util.AssertUtil;
 
 public class ForParser implements CodeParserHandle {

@@ -5,7 +5,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.ExpStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
 public class KeywordStatementParser implements CodeParserHandle {

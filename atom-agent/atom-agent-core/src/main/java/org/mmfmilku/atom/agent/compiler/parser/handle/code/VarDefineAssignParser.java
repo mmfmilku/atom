@@ -4,7 +4,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 
 /**
  * 变量定义或同时赋值

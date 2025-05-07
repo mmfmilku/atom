@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class LoopStatement implements SpecialStatement {
+public abstract class LoopStatement implements NestedStatement {
 
     Expression loopCondition;
 

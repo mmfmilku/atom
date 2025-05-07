@@ -1,13 +1,12 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
+package org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExpStatement implements Statement {
+public class ExpStatement implements LeafStatement {
 
     private Expression expression;
 
