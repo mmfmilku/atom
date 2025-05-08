@@ -51,9 +51,12 @@ public class GrammarUtil {
 
     public static String toCallSourceCode(String calledMethod, List<Expression> passedParams) {
         return calledMethod + "(" +
-                passedParams.stream()
+                (
+                        passedParams == null ? "" :
+                        passedParams.stream()
                         .map(Node::getSourceCode)
                         .collect(Collectors.joining(", "))
+                )
                 + ")";
     }
 
