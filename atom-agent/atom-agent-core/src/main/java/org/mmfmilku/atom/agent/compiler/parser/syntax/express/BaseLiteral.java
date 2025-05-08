@@ -1,8 +1,10 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
-import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 字面量
+ * */
 public class BaseLiteral implements Expression {
 
     private String value;

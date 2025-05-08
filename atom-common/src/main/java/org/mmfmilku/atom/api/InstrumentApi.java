@@ -18,6 +18,7 @@ public interface InstrumentApi {
 
     String writeByteCodeFile(String fullClassName, String targetDir);
 
+    @Deprecated
     void retransformClass(String className);
 
     /**

@@ -36,6 +36,8 @@
         padding-left: 1%;
         padding-right: 1%;
         background-color: gray;
+        /* 高度设置为100%，为了保证右键事件触发范围 */
+        height: 100%;
     }
 
     .edit-file {
@@ -90,9 +92,9 @@
 </style>
 <div id="page-edit">
     <div>
-        <h1 class="edit-title">edit-title</h1>
+        <h1 class="edit-title">loading</h1>
         <div class="edit-frame">
-            <div class="edit-operate-bar">
+            <div class="edit-operate-bar hide">
                 <div class="vm-button-container">
                     <button onclick="configView()">设置</button>
                     <button id="loadAgentBtn" onclick="loadAgent()">载入</button>
@@ -105,12 +107,14 @@
                             <div class="button-container-btn button-container-select listClassBtn" onclick="listClass(this)">类列表</div>
                             <div class="button-container-btn listFileBtn" onclick="listFile(this)">重写列表</div>
                             <div class="button-container-btn listStrategyBtn" onclick="listStrategy(this)">重写策略</div>
+                            <div class="button-container-btn executeConsoleBtn" onclick="executeConsole(this)">控制台</div>
                         </div>
                     </div>
                     <div class="edit-left-bar-content scrollable-y">
                         <div class="edit-file-list listClass hide flex-column"></div>
                         <div class="edit-file-list listFile hide flex-column"></div>
                         <div class="edit-file-list listStrategy hide flex-column"></div>
+                        <div class="edit-file-list executeConsole hide flex-column" rightClickEvent="consoleRightMenuNew"></div>
                     </div>
                 </div>
                 <div class="edit-code-box">

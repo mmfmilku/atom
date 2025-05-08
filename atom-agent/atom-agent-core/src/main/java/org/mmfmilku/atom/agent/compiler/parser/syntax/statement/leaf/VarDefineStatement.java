@@ -1,16 +1,15 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
+package org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /***
  * 变量定义语句
  */
-public class VarDefineStatement implements Statement {
+public class VarDefineStatement implements LeafStatement {
 
     private String varType;
     private String varName;

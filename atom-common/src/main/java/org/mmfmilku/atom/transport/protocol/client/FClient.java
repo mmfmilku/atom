@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -24,9 +25,11 @@ public class FClient {
     // TODO 定时获取服务端消息
     private ScheduledExecutorService clientExecutor;
 
-    private ConcurrentLinkedQueue<ClientSession> connectList;
+    private ConcurrentLinkedQueue<ClientSession> sessionList;
 
     private String connectPath;
+
+    private Consumer<Connector> closeCallback;
 
     // 读取完整帧超时时间，毫秒
     private long readTimeOutMillis;
@@ -38,7 +41,7 @@ public class FClient {
     }
 
     private void init() {
-        this.connectList =  new ConcurrentLinkedQueue<>();
+        this.sessionList =  new ConcurrentLinkedQueue<>();
         this.clientExecutor = Executors.newScheduledThreadPool(1,
                 new ThreadFactory() {
                     private final AtomicInteger threadNumber = new AtomicInteger(1);
@@ -56,12 +59,16 @@ public class FClient {
                 });
 
         clientExecutor.scheduleAtFixedRate(() -> {
-            for (ClientSession clientSession : connectList) {
+            for (ClientSession clientSession : sessionList) {
                 // TODO 定时读取
                 // TODO 并发控制
             }
             // 300ms执行一次
         }, 0, 300, TimeUnit.MILLISECONDS);
+    }
+
+    public void setCloseCallback(Consumer<Connector> closeCallback) {
+        this.closeCallback = closeCallback;
     }
 
     public FClientSession connect() {
@@ -91,7 +98,7 @@ public class FClient {
         try {
             inputStream = new FileInputStream(responseFile);
             outputStream = new FileOutputStream(requestFile);
-            Connector ctx = new Connector(inputStream, outputStream, null);
+            Connector ctx = new Connector(inputStream, outputStream, closeCallback);
             FFrame ping = ctx.read(readTimeOutMillis);
             if (ping != null) {
                 if (MessageUtils.decodeInt(ping.getLen()) == 0) {
@@ -101,7 +108,9 @@ public class FClient {
                 ctx.write(MessageUtils.packFFrame(pong));
                 FFrame accept = ctx.read(readTimeOutMillis);
                 if (accept != null && accept.getData()[0] == 1) {
-                    return new FClientSession(ctx);
+                    FClientSession fClientSession = new FClientSession(ctx);
+                    sessionList.add(fClientSession);
+                    return fClientSession;
                 } else {
                     throw new ConnectException("连接失败");
                 }
@@ -123,7 +132,12 @@ public class FClient {
 
     private void checkListen() {
         File connectDir = new File(connectPath);
-        waitCount(o -> connectDir.exists());
+        if (!connectDir.exists()) {
+            throw new ConnectException("找不到服务器");
+        }
+        if (!new File(connectPath, FServer.LISTEN_FILE).exists()) {
+            throw new ConnectException("找不到服务器");
+        }
     }
 
     private void waitCount(Function<Integer, Boolean> function) {

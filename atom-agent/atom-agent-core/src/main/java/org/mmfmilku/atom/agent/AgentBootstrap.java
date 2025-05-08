@@ -43,6 +43,7 @@ public class AgentBootstrap {
         
         try {
             InstrumentationContext.init(inst);
+            System.out.println("init InstrumentationContext end");
 
             // 初始化配置
             if (Objects.nonNull(agentArgs)) {
@@ -60,7 +61,7 @@ public class AgentBootstrap {
                     System.out.println("classPool add appClassLoader " + appClassLoader);
                     ByteCodeUtils.appendClassPath(classLoader);
                 } else {
-                    System.out.println("classPool add appClassLoader fail");
+                    System.out.println("classPool add appClassLoader fail," + appClassLoader + " not exists");
                 }
             }
 
@@ -74,12 +75,15 @@ public class AgentBootstrap {
             String fServerDir = AgentProperties.getProperty(AgentProperties.PROP_FSERVER_DIR);
 
             if (AgentBootstrap.frpcStarter == null) {
+                System.out.println("run FRPCStarter");
                 FRPCStarter frpcStarter = new FRPCStarter("org.mmfmilku.atom.agent.api.impl", fServerDir);
                 AgentBootstrap.frpcStarter = frpcStarter;
                 frpcStarter.runServer();
 
                 Runtime.getRuntime().addShutdownHook(shutdownHook);
             }
+
+            System.out.println("agent end");
         } catch (Throwable e) {
             System.out.println("agent main error");
             e.printStackTrace();

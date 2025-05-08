@@ -13,10 +13,6 @@ public class FClientSession implements ClientSession<FFrame> {
         this.connector = connector;
     }
 
-    public void send(byte[] data) {
-        connector.write(MessageUtils.packFFrame(data));
-    }
-
     @Override
     public void send(FFrame data) {
         connector.write(data);

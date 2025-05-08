@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.web.console.controller;
 
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
@@ -37,25 +38,31 @@ public class AgentConfigController {
         return "success";
     }
 
-    @RequestMapping("listOrd")
-    public List<OrdRunInfo> listOrd(@RequestParam String appName) {
-        return agentConfigService.listOrd(appName);
+    @RequestMapping("listBaseOrd")
+    public List<OrdRunInfo> listBaseOrd(@RequestParam String appName) {
+        return agentConfigService.listOrd(appName, "", OrdEnum.BASE_ORD);
     }
 
     @RequestMapping("deleteOrd")
-    public String deleteOrd(@RequestParam String appName, @RequestParam String ordFileName) {
-        agentConfigService.deleteOrd(appName, ordFileName);
+    public String deleteOrd(@RequestParam String appName,
+                            @RequestParam String ordFileName,
+                            @RequestParam OrdEnum ordEnum) {
+        agentConfigService.deleteOrd(appName, ordFileName, ordEnum);
         return "success";
     }
 
     @RequestMapping("readOrd")
-    public OrdFile readOrd(@RequestParam String appName, @RequestParam String ordFileName) {
-        return agentConfigService.readOrd(appName, ordFileName);
+    public OrdFile readOrd(@RequestParam String appName,
+                           @RequestParam String ordFileName,
+                           @RequestParam String ordEnum) {
+        return agentConfigService.readOrd(appName, ordFileName, OrdEnum.valueOf(ordEnum));
     }
 
     @RequestMapping("writeOrd")
-    public String writeOrd(@RequestParam String appName, @RequestBody OrdFile ordFile) {
-        agentConfigService.writeOrd(appName, ordFile);
+    public String writeOrd(@RequestParam String appName,
+                           @RequestParam OrdEnum ordEnum,
+                           @RequestBody OrdFile ordFile) {
+        agentConfigService.writeOrd(appName, ordFile, ordEnum);
         return "success";
     }
 

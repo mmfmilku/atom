@@ -2,6 +2,9 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import java.util.Map;
 
+/**
+ * 括号包裹的 优先执行表达式
+ * */
 public class PriorityExpression implements Expression {
 
     private Expression expression;

@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.stereotype.Service;
@@ -23,20 +24,27 @@ import java.util.Objects;
 public class OrdFileOperation implements IOrdFileOperation {
     
     @Override
-    public List<String> listFiles(AgentConfig config) {
-        return Arrays.asList(Objects.requireNonNull(new File(config.getOrdDir()).list()));
-    }
-    
-    private File getFile(AgentConfig config, OrdFile ordFile) {
-        return new File(config.getOrdDir(), ordFile.getFileName());
+    public List<String> listFiles(AgentConfig config, OrdEnum ordEnum) {
+        return Arrays.asList(Objects.requireNonNull
+                (new File(ordEnum.getDirGetter().apply(config)).list()));
     }
 
     @Override
-    public OrdFile getOrd(AgentConfig config, String ordName) {
+    public List<String> listFiles(AgentConfig config, OrdEnum ordEnum, String childPath) {
+        return Arrays.asList(Objects.requireNonNull
+                (new File(ordEnum.getDirGetter().apply(config), childPath).list()));
+    }
+
+    private File getFile(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum) {
+        return new File(ordEnum.getDirGetter().apply(config), ordFile.getFileName());
+    }
+
+    @Override
+    public OrdFile getOrd(AgentConfig config, String ordName, OrdEnum ordEnum) {
         OrdFile ordFile = new OrdFile();
         ordFile.setFileName(ordName);
         ordFile.setOrdId(config.getId());
-        File file = new File(config.getOrdDir(), ordFile.getFileName());
+        File file = getFile(config, ordFile, ordEnum);
         if (!file.exists()) {
 //            ordFile.setText("");
             return ordFile;
@@ -57,10 +65,10 @@ public class OrdFileOperation implements IOrdFileOperation {
     }
 
     @Override
-    public void setText(AgentConfig config, OrdFile ordFile) {
+    public void setText(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum) {
 
         String ordFileText = ordFile.getText();
-        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(getFile(config, ordFile)))) {
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(getFile(config, ordFile, ordEnum)))) {
             out.write(ordFileText.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
@@ -69,8 +77,8 @@ public class OrdFileOperation implements IOrdFileOperation {
     }
 
     @Override
-    public void delete(AgentConfig config, OrdFile ordFile) {
-        File file = getFile(config, ordFile);
+    public void delete(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum) {
+        File file = getFile(config, ordFile, ordEnum);
         if (file.exists() && !file.delete()) {
             throw new RuntimeException("delete ord dir fail:" + ordFile);
         }

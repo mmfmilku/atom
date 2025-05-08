@@ -1,8 +1,9 @@
 package org.mmfmilku.atom.web.console.service;
 
-import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.util.CodeUtils;
+import org.mmfmilku.atom.util.StringUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
@@ -21,10 +22,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -109,12 +107,14 @@ public class AgentConfigService implements IAgentConfigService {
         agentConfig.setFDir(agentConfig.getAppBaseDir() + File.separator + "fserver");
         agentConfig.setOrdDir(agentConfig.getAppBaseDir() + File.separator + "ord");
         agentConfig.setTmpDir(agentConfig.getAppBaseDir() + File.separator + "tmp");
+        agentConfig.setExecuteDir(agentConfig.getAppBaseDir() + File.separator + "execute");
         agentConfig.setConfFile(agentConfig.getAppBaseDir() + File.separator + ".conf");
 
         try {
             Files.createDirectories(Paths.get(agentConfig.getAppBaseDir()));
             Files.createDirectories(Paths.get(agentConfig.getOrdDir()));
             Files.createDirectories(Paths.get(agentConfig.getTmpDir()));
+            Files.createDirectories(Paths.get(agentConfig.getExecuteDir()));
             Paths.get(agentConfig.getConfFile()).toFile().createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
@@ -145,54 +145,69 @@ public class AgentConfigService implements IAgentConfigService {
     }
 
     @Override
-    public List<OrdRunInfo> listOrd(String appName) {
-        Map<String, Object> runningOrdClass = instrumentService.getRunningOrdClass(appName);
+    public List<OrdRunInfo> listOrd(String appName, String childPath, OrdEnum ordEnum) {
+        Map<String, Object> runningOrdClass =
+                OrdEnum.BASE_ORD == ordEnum
+                        ? instrumentService.getRunningOrdClass(appName)
+                        : Collections.emptyMap();
         AgentConfig config = getConfigByName(appName);
-        List<OrdRunInfo> ordRunInfoList = ordFileOperation.listFiles(config).stream().map(ordFileName -> {
-            OrdRunInfo ordRunInfo = new OrdRunInfo();
-            ordRunInfo.setOrdName(ordFileName);
-            ordRunInfo.setRunning(
-                    runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
-            return ordRunInfo;
-        }).collect(Collectors.toList());
+        List<String> listFiles = StringUtils.isEmpty(childPath) ?
+                ordFileOperation.listFiles(config, ordEnum)
+                : ordFileOperation.listFiles(config, ordEnum, childPath);
+        List<OrdRunInfo> ordRunInfoList = listFiles
+                .stream()
+                .map(ordFileName -> {
+                    OrdRunInfo ordRunInfo = new OrdRunInfo();
+                    ordRunInfo.setOrdName(ordFileName);
+                    if (OrdEnum.BASE_ORD == ordEnum) {
+                        ordRunInfo.setRunning(
+                                runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
+                    }
+                    return ordRunInfo;
+                }).collect(Collectors.toList());
         return ordRunInfoList;
     }
 
     @Override
-    public void deleteOrd(String appName, String ordFileName) {
+    public void deleteOrd(String appName, String childPath, OrdEnum ordEnum) {
         AgentConfig config = getConfigByName(appName);
         OrdFile ordFile = new OrdFile();
-        ordFile.setFileName(ordFileName);
+        ordFile.setFileName(childPath);
         ordFile.setOrdId(config.getId());
-        ordFileOperation.delete(config, ordFile);
+        ordFileOperation.delete(config, ordFile, ordEnum);
     }
 
     @Override
-    public OrdFile readOrd(String appName, String ordFileName) {
+    public OrdFile readOrd(String appName, String ordFileName, OrdEnum ordEnum) {
         AgentConfig config = getConfigByName(appName);
-        OrdFile ord = ordFileOperation.getOrd(config, ordFileName);
+        OrdFile ord = ordFileOperation.getOrd(config, ordFileName, ordEnum);
         Map<String, Object> runningOrdClass = instrumentService.getRunningOrdClass(appName);
         ord.setRunning(runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
         return ord;
     }
 
     @Override
-    public void writeOrd(String appName, OrdFile ordFile) {
+    public void writeOrd(String appName, OrdFile ordFile, OrdEnum ordEnum) {
         AgentConfig config = getConfigByName(appName);
         ordFile.setOrdId(config.getId());
-        ordFile.setFileName(ordFileNameFormat(ordFile.getFileName()));
-        ordFileOperation.setText(config, ordFile);
+        ordFile.setFileName(ordFileNameFormat(ordFile, ordEnum));
+        ordFileOperation.setText(config, ordFile, ordEnum);
     }
     
-    private String ordFileNameFormat(String ordFileName) {
+    private String ordFileNameFormat(OrdFile ordFile, OrdEnum ordEnum) {
+        String ordFileName = ordFile.getFileName();
+        if (StringUtils.isEmpty(ordEnum.getSuffix())) {
+            return ordFileName;
+        }
+        String suffix = "." + ordEnum.getSuffix();
         // .ord 或 .java
-        if (ordFileName.endsWith(ORD_SUFFIX) || ordFileName.endsWith(CodeConst.JAVA_FILE_SUFFIX)) {
+        if (ordFileName.endsWith(suffix)) {
             return ordFileName;
         }
         if (ordFileName.endsWith(".")) {
-            return ordFileName + ORD_SUFFIX.substring(1);
+            return ordFileName + suffix.substring(1);
         }
-        return ordFileName + ORD_SUFFIX;
+        return ordFileName + suffix;
     }
 
 }

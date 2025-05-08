@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,43 +40,43 @@ public class AgentConfigControllerTest {
 
     @Test
     public void listOrd() {
-        System.out.println(configController.listOrd(appName));
+        System.out.println(configController.listBaseOrd(appName));
     }
 
     @Test
     public void testCase() {
-        List<OrdRunInfo> listOrd = configController.listOrd(appName);
+        List<OrdRunInfo> listOrd = configController.listBaseOrd(appName);
         for (OrdRunInfo ord : listOrd) {
-            configController.deleteOrd(appName, ord.getOrdName());
+            configController.deleteOrd(appName, ord.getOrdName(), OrdEnum.BASE_ORD);
         }
         // 删除后为0
-        assertEquals(0, configController.listOrd(appName).size());
+        assertEquals(0, configController.listBaseOrd(appName).size());
 
         OrdFile ordFile = new OrdFile();
         ordFile.setFileName("a");
         ordFile.setOrdId(configController.getConfig(appName).getId());
         ordFile.setText("this is test ord text1");
-        configController.writeOrd(appName, ordFile);
+        configController.writeOrd(appName, OrdEnum.BASE_ORD, ordFile);
 
         ordFile.setFileName("b");
         ordFile.setText("this is test ord text2");
-        configController.writeOrd(appName, ordFile);
+        configController.writeOrd(appName, OrdEnum.BASE_ORD, ordFile);
 
         // 测试添加，查询
-        assertEquals(2, configController.listOrd(appName).size());
+        assertEquals(2, configController.listBaseOrd(appName).size());
 
         // 测试读取
-        OrdFile readOrd = configController.readOrd(appName, "a.ord");
+        OrdFile readOrd = configController.readOrd(appName, "a.ord", "BASE_ORD");
         assertEquals("this is test ord text1", readOrd.getText().trim());
-        readOrd = configController.readOrd(appName, "b.ord");
+        readOrd = configController.readOrd(appName, "b.ord", "BASE_ORD");
         assertEquals("this is test ord text2", readOrd.getText().trim());
 
-        listOrd = configController.listOrd(appName);
+        listOrd = configController.listBaseOrd(appName);
         for (OrdRunInfo ord : listOrd) {
-            configController.deleteOrd(appName, ord.getOrdName());
+            configController.deleteOrd(appName, ord.getOrdName(), OrdEnum.BASE_ORD);
         }
         // 测试删除
-        assertEquals(0, configController.listOrd(appName).size());
+        assertEquals(0, configController.listBaseOrd(appName).size());
     }
 
 }

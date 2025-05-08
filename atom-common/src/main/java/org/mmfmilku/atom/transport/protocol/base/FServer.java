@@ -27,7 +27,7 @@ public class FServer {
 
     public static final String RESPONSE = ".response";
 
-    private static final String LISTEN_FILE = "fserver.listen";
+    public static final String LISTEN_FILE = "fserver.listen";
 
     /**
      * 用于标记已经处理过的连接
@@ -226,6 +226,7 @@ public class FServer {
         ctxMap.forEach((name, ctx) -> ctx.close());
         IOUtils.closeStream(listenStream);
         listenStream = null;
+        new File(listenPath, LISTEN_FILE).delete();
     }
 
     private void accept(File requestFile) {

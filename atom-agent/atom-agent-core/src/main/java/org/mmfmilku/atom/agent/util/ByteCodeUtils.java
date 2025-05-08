@@ -21,11 +21,10 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.VarDefineStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
 import org.mmfmilku.atom.agent.config.Keywords;
 import org.mmfmilku.atom.agent.config.MethodORDDefine;
-import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.exception.BizException;
 import org.mmfmilku.atom.util.CodeUtils;
 

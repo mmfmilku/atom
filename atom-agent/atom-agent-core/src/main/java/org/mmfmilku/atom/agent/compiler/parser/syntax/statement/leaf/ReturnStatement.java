@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
+package org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class ReturnStatement implements Statement {
+public class ReturnStatement implements LeafStatement {
 
     private Expression expression;
 

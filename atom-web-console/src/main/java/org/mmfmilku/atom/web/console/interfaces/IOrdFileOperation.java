@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.web.console.interfaces;
 
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdFile;
 
 import java.util.List;
@@ -13,12 +14,14 @@ import java.util.List;
  */
 public interface IOrdFileOperation {
     
-    List<String> listFiles(AgentConfig config);
+    List<String> listFiles(AgentConfig config, OrdEnum ordEnum);
 
-    OrdFile getOrd(AgentConfig config, String ordName);
+    List<String> listFiles(AgentConfig config, OrdEnum ordEnum, String childPath);
+
+    OrdFile getOrd(AgentConfig config, String ordName, OrdEnum ordEnum);
     
-    void setText(AgentConfig config, OrdFile ordFile);
+    void setText(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum);
     
-    void delete(AgentConfig config, OrdFile ordFile);
+    void delete(AgentConfig config, OrdFile ordFile, OrdEnum ordEnum);
     
 }

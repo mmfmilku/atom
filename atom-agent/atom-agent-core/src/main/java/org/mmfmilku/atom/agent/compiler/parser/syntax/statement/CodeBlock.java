@@ -3,12 +3,11 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CodeBlock implements SpecialStatement {
+public class CodeBlock implements NestedStatement {
 
     public static CodeBlock EMPTY = new CodeBlock();
 

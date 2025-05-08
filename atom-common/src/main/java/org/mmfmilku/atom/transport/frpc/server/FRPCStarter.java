@@ -6,6 +6,7 @@ import org.mmfmilku.atom.transport.protocol.handle.assembly.TypeAssemblyHandler;
 import org.mmfmilku.atom.transport.protocol.handle.type.TypeHandler;
 import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
+import org.mmfmilku.atom.util.ReflectUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +52,7 @@ public class FRPCStarter {
 
     private void run() {
         try {
+            System.out.println("fServer listen " + fDir);
             fServer = new FServer(fDir)
                     .addHandle(new TypeHandler())
                     .addHandle(new TypeAssemblyHandler())
@@ -73,62 +75,9 @@ public class FRPCStarter {
             throw new RuntimeException("错误的frpc扫描路径：" + scanPackage);
         }
 
-        // TODO，仅扫描了当前线程所在class路径
-        URL resource = Thread.currentThread().getContextClassLoader()
-                .getResource(scanPackage.replace(".", "/"));
-        if (resource == null) {
-            throw new RuntimeException("错误的frpc扫描路径：" + scanPackage);
-        }
-
-        String protocol = resource.getProtocol();
-        if ("jar".equals(protocol)) {
-            try {
-                JarURLConnection jarURLConnection = (JarURLConnection) resource.openConnection();
-                Enumeration<JarEntry> entries = jarURLConnection.getJarFile().entries();
-                while (entries.hasMoreElements()) {
-                    JarEntry jarEntry = entries.nextElement();
-                    if (jarEntry.getName().endsWith(CodeConst.CLASS_FILE_SUFFIX)) {
-                        String scanClassName = CodeUtils.toClassName(jarEntry.getName());
-                        if (scanClassName.startsWith(scanPackage)) {
-                            registerService(CodeUtils.toClassName(jarEntry.getName()));
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-        } else {
-            File scanDir = new File(resource.getFile());
-            scanDir(scanPackage, scanDir);
-            if (scanDir.getAbsolutePath().contains("test-classes")) {
-                // 单元测试
-                scanDir(scanPackage, new File(resource.getFile().replace("test-classes", "classes")));
-            }
-        }
-
-    }
-
-    private void scanDir(String basePath, File scanFile) {
-        if (scanFile.exists()) {
-            if (scanFile.isDirectory()) {
-                File[] files = scanFile.listFiles();
-                if (files == null) {
-                    return;
-                }
-                // 递归获取，传递包名
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        scanDir(basePath + "." + file.getName(), file);
-                    } else {
-                        if (file.getName().endsWith(CodeConst.CLASS_FILE_SUFFIX)) {
-                            String className = basePath + "." +
-                                    file.getName().replace(CodeConst.CLASS_FILE_SUFFIX, "");
-                            registerService(className);
-                        }
-                    }
-                }
-            }
+        List<String> scanClass = ReflectUtils.scanClass(scanPackage);
+        for (String className : scanClass) {
+            registerService(className);
         }
     }
 

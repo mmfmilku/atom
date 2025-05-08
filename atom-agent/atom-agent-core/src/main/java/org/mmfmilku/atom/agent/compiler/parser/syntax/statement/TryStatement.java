@@ -2,6 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
  * finally
  *      finallyBody
  * */
-public class TryStatement implements SpecialStatement {
+public class TryStatement implements NestedStatement {
 
     /**
      * try with resource,AutoCloseable var define

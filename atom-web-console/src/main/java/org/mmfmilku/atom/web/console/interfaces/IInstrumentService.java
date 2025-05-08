@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.web.console.interfaces;
 
+import org.mmfmilku.atom.api.dto.ExecuteResult;
+
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,11 @@ public interface IInstrumentService {
     void loadOrdFile(String appName, String file);
 
     void stopClassOrd(String appName, String fullClassName);
+
+    /**
+     * 执行程序相对于执行文件夹的路径名称
+     * */
+    ExecuteResult execute(String appName, String executeFile, Object... args);
 
     /**
      * 获取被重写的类

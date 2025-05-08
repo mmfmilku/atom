@@ -33,7 +33,9 @@ let listClass = clickDom => {
             let fileListDom = pageEdit.querySelector('.listClass')
             let showHtml = res.map(e =>
                 `
-                    <div onclick="genCode('${e}', this)" class="edit-file text-wrap">${e}</div>
+                    <div onclick="genCode('${e}', this)" 
+                    rightClickEvent="classRightMenu" 
+                    class="edit-file text-wrap">${e}</div>
                     `
             ).join('')
             fileListDom.innerHTML = showHtml
@@ -43,14 +45,15 @@ let listClass = clickDom => {
 
 // 获取重写列表
 let listFile = clickDom => {
-    btnClickChange(pageEdit.querySelector('.listFileBtn'))
+    btnClickChange(clickDom)
     onlyShow('listFile')
-    post('config/listOrd?appName=' + vmInfo.displayName)
+    post('config/listBaseOrd?appName=' + vmInfo.displayName)
         .then(res => {
             let fileListDom = pageEdit.querySelector('.listFile')
             fileListDom.innerHTML = res.map(e =>
                 `
                     <div onclick="readText('${e.ordName}', this)" 
+                    rightClickEvent="fileRightMenu"
                     class="edit-file text-wrap ${e.running === '1' ? 'ord-running' : ''}">${e.ordName}</div>
                     `
             ).join('')
@@ -65,10 +68,28 @@ let listStrategy = clickDom => {
     fileListDom.innerHTML = '待支持'
 }
 
+// 可执行控制台
+let executeConsole = clickDom => {
+    btnClickChange(clickDom)
+    onlyShow('executeConsole')
+    post('executeConsole/listExecuteOrd?appName=' + vmInfo.displayName)
+        .then(res => {
+            let fileListDom = pageEdit.querySelector('.executeConsole')
+            fileListDom.innerHTML = res.map(e =>
+                // TODO 先写死为 EXECUTE_ORD 类型，后面需要改为从后端获取
+                `
+                    <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD')" 
+                    rightClickEvent="consoleRightMenu"
+                    class="edit-file text-wrap">${e.ordName}</div>
+                    `
+            ).join('')
+        })
+}
+
 let classToFile = () => {
     let ordFileName = contextTarget.innerText + '.java'
     // 避免已存在重写文件被覆盖，先查询
-    post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
+    post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=BASE_ORD`)
         .then(res => {
             if (res.text == null) {
                 UI.openConfirmDialog('新建重写' + ordFileName)
@@ -77,9 +98,11 @@ let classToFile = () => {
                         return post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${contextTarget.innerText}`)
                     })
                     .then(text => {
-                        doAddFile(ordFileName, text)
+                        btnClickChange(pageEdit.querySelector('.listFileBtn'))
+                        doAddFile(ordFileName, 'BASE_ORD', text, listFile)
                     })
             } else {
+                btnClickChange(pageEdit.querySelector('.listFileBtn'))
                 // 已存在直接读取
                 readText(ordFileName)
                 listFile()
@@ -89,42 +112,59 @@ let classToFile = () => {
 }
 
 // 设置编辑类型，同时设置是否可编辑
-let typeArr = [
-    {
+let typeArr = {
+    // 类源码
+    "0": {
         type: '',
+        readOnly: true,
         '0': '类(只读)'
     },
-    {
+    // 重写ord文件
+    "BASE_ORD": {
         type: 'file',
-        '0': '<button onclick="saveText()">保存</button>' +
+        '0': '<button onclick="saveText(\'BASE_ORD\')">保存</button>' +
             '<button onclick="executeOrd()">执行</button>',
-        '1': '<button onclick="saveText()">保存</button>' +
-            '<button onclick="stopOrd()">终止</button>'
+        '1': '<button onclick="saveText(\'BASE_ORD\')">保存</button>' +
+            '<button onclick="stopOrd()">还原</button>'
     },
-    {
+    // 重写策略文件
+    "STRATEGY_ORD": {
         type: 'strategy',
         '0': '<button onclick="saveText()">保存</button>'
+    },
+    // 控制台执行文件
+    "EXECUTE_ORD": {
+        type: 'executeConsole',
+        '0': '<button onclick="saveText(\'EXECUTE_ORD\')">保存</button>' +
+            '<button onclick="executeGoal()">运行</button>'
     }
-]
-let setType = (typeIdx, prop = '0') => {
-    // class 类型不可编辑
-    pageEdit.querySelector('#ordFileText').readOnly = !typeIdx
-    pageEdit.querySelector('.edit-code-desc').innerHTML = typeArr[typeIdx][prop]
+}
+let setType = (ordEnum, prop = '0') => {
+    pageEdit.querySelector('#ordFileText').readOnly = typeArr[ordEnum].readOnly
+    pageEdit.querySelector('.edit-code-desc').innerHTML = typeArr[ordEnum][prop]
 }
 
-let doAddFile = (ordFileName, text = '') => {
-    post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`
+let addFile = (title = '', ordEnum, text = '', callBack) => {
+    UI.openInputDialog(title)
+        .then(ordFileName => {
+            doAddFile(ordFileName, ordEnum, text, callBack)
+        })
+}
+
+let doAddFile = (ordFileName, ordEnum, text = '', callBack) => {
+    post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=${ordEnum}`
         , {fileName: ordFileName, text: text}
     )
         .then(res => {
             UI.showMessage(res)
-            readText(ordFileName)
-            listFile()
+            readText(ordFileName, null, ordEnum)
+            callBack && callBack()
+            // listFile()
         })
 }
 
-let readText = (ordFileName, clickDom) => {
-    post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`)
+let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD') => {
+    post(`config/readOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=${ordEnum}`)
         .then(res => {
             // 文件选中
             let oldSelect = pageEdit.querySelector('.edit-file-select')
@@ -133,14 +173,14 @@ let readText = (ordFileName, clickDom) => {
 
             // 文件标题反显
             pageEdit.querySelector('.edit-code-title').innerText = ordFileName
-            setType(1, res.running)
+            setType(ordEnum, res.running)
 
             // 文件内容反显
             pageEdit.querySelector('#ordFileText').value = res.text
         })
 }
 
-let saveText = () => {
+let saveText = (ordEnum) => {
     if (pageEdit.querySelector('#ordFileText').readOnly) {
         UI.showError('不可编辑')
         return
@@ -151,7 +191,7 @@ let saveText = () => {
         return
     }
     let ordText = pageEdit.querySelector('#ordFileText').value
-    post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}`
+    post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=${ordEnum}`
         , {fileName: ordFileName, text: ordText}
     )
         .then(res => {
@@ -159,13 +199,15 @@ let saveText = () => {
         })
 }
 
-let deleteFile = () => {
+let deleteFile = (ordEnum, callBack) => {
     UI.openConfirmDialog('确认删除' + contextTarget.innerText)
         .then(() => {
-            post(`config/deleteOrd?appName=${vmInfo.displayName}&ordFileName=${contextTarget.innerText}`)
+            // TODO ordEnum从 contextTarget 获取
+            post(`config/deleteOrd?appName=${vmInfo.displayName}&ordFileName=${contextTarget.innerText}&ordEnum=${ordEnum}`)
                 .then(res => {
                     UI.showMessage(res)
-                    listFile()
+                    callBack && callBack()
+                    // listFile()
                 })
         })
 }
@@ -197,6 +239,18 @@ let stopOrd = () => {
             UI.showMessage(res)
             readText(ordFileName)
             listFile()
+        })
+}
+
+let executeGoal = () => {
+    let ordFileName = pageEdit.querySelector('.edit-code-title').innerText
+    if (!ordFileName) {
+        UI.showMessage('请先选择文件')
+        return
+    }
+    post(`executeConsole/execute?appName=${vmInfo.displayName}&executeFile=${ordFileName}`)
+        .then(res => {
+            UI.showMessage(res.success)
         })
 }
 
@@ -295,6 +349,7 @@ post('agent/vmInfo?vmId=' + vmId).then(res => {
     }
     vmInfo.displayName = res.displayName
     pageEdit.querySelector('.edit-title').innerText = vmInfo.displayName
+    pageEdit.querySelector('.edit-operate-bar').classList.remove('hide')
 
     if (res.hasAgent) {
         // 已经连接过
@@ -307,46 +362,84 @@ post('agent/vmInfo?vmId=' + vmId).then(res => {
 let contextmenu
 let fileRightMenu
 let classRightMenu
+let consoleRightMenu
+let consoleRightMenuNew
+
+// 用于保存右键菜单点击的目标对象dom
 let contextTarget
 
-atom.SPA.loadHtml('/page/edit/fileRightMenu.html')
+atom.SPA.loadHtml('/page/edit/rightMenu/fileRightMenu.html')
     .then(html => {
         fileRightMenu = html
     })
-atom.SPA.loadHtml('/page/edit/classRightMenu.html')
+atom.SPA.loadHtml('/page/edit/rightMenu/classRightMenu.html')
     .then(html => {
         classRightMenu = html
     })
+atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightMenu.html')
+    .then(html => {
+        consoleRightMenu = html
+    })
+atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightMenuNew.html')
+    .then(html => {
+        consoleRightMenuNew = html
+    })
 
 let openBlock = (event, blockHtml) => {
-    if (contextmenu) {
-        document.body.removeChild(contextmenu)
-        contextmenu = null
-        contextTarget = null
-    }
+    clearRightMenu()
     contextTarget = event.target
     contextmenu = UI.showBlock(blockHtml)
-    contextmenu.style.left = event.pageX + 'px';
-    contextmenu.style.top = event.pageY + 'px';
-    contextmenu.style.display = 'block';
+    contextmenu.style.left = event.pageX + 'px'
+    contextmenu.style.top = event.pageY + 'px'
+    contextmenu.style.display = 'block'
 }
 
+let openChildBlock = (event, blockHtml, parent) => {
+    let childBlock = UI.showBlock(blockHtml)
+    childBlock.style.left = parent.offsetLeft + event.target.offsetWidth + 'px'
+    childBlock.style.top = parent.offsetTop + event.target.offsetTop + 'px'
+    childBlock.style.display = 'block'
+}
+
+/**
+ * 右键菜单事件
+ * 如 <div rightClickEvent="fileRightMenu"></div>
+ * 右键将触发fileRightMenu对应事件
+ * */
+let rightClickEventMap = {
+    fileRightMenu: event => openBlock(event, fileRightMenu),
+    classRightMenu: event => openBlock(event, classRightMenu),
+    consoleRightMenu: event => openBlock(event, consoleRightMenu),
+    // 无删除的右键菜单
+    consoleRightMenuNew: event => openBlock(event, consoleRightMenuNew),
+}
+
+// 右键菜单事件
 document.addEventListener('contextmenu', function(event) {
-    event.preventDefault();
-    let parentClassList = event.target.parentNode.classList
-    if (parentClassList.contains('listFile')) {
-        // 在重写文件上右键
-        openBlock(event, fileRightMenu)
-    } else if (parentClassList.contains('listClass')) {
-        // 在类文件上右键
-        openBlock(event, classRightMenu)
-    }
+    event.preventDefault()
+    let rightClickEvent = event.target.getAttribute('rightClickEvent')
+    rightClickEvent && rightClickEventMap[rightClickEvent](event)
 })
 
 // 隐藏菜单当用户点击其他地方
 document.addEventListener('click', function(event) {
+    clearRightMenu()
+})
+
+let clearRightMenu = () => {
     if (contextmenu) {
-        document.body.removeChild(contextmenu)
+        let rightMenus = document.querySelectorAll('.right-menu')
+        rightMenus && rightMenus.forEach(e => {
+            e.remove()
+        })
+        // document.body.removeChild(contextmenu)
         contextmenu = null
     }
-})
+}
+
+let clearRightChildMenu = () => {
+    let rightChildMenus = document.querySelectorAll('.right-child-menu')
+    rightChildMenus && rightChildMenus.forEach(e => {
+        e.remove()
+    })
+}
