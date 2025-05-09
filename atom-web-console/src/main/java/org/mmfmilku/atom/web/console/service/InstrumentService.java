@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,6 +112,31 @@ public class InstrumentService implements IInstrumentService {
         AgentConfig config = agentConfigService.getConfigByName(appName);
         return getApi(appName, ExecutableApi.class)
                 .execute(Paths.get(config.getExecuteDir(), executeFile).toString(), args);
+    }
+
+    @Override
+    public ExecuteResult executeJTerminal(String appName, String terminalId, String code) {
+        return getApi(appName, ExecutableApi.class).executeTerminal(terminalId, code);
+    }
+
+    @Override
+    public List<String> listTerminalId(String appName) {
+        return getApi(appName, ExecutableApi.class).listTerminalId();
+    }
+
+    @Override
+    public Map<String, String> terminalInfo(String appName, String terminalId) {
+        return getApi(appName, ExecutableApi.class).terminalInfo(terminalId);
+    }
+
+    @Override
+    public String newTerminal(String appName, String terminalName) {
+        return getApi(appName, ExecutableApi.class).newTerminal(terminalName);
+    }
+
+    @Override
+    public void deleteTerminal(String appName, String terminalId) {
+        getApi(appName, ExecutableApi.class).deleteTerminal(terminalId);
     }
 
     @Override

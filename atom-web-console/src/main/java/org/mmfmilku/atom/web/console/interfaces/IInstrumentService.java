@@ -31,6 +31,19 @@ public interface IInstrumentService {
     ExecuteResult execute(String appName, String executeFile, Object... args);
 
     /**
+     * 执行JTerminal
+     * */
+    ExecuteResult executeJTerminal(String appName, String terminalId, String code);
+
+    List<String> listTerminalId(String appName);
+
+    Map<String, String> terminalInfo(String appName, String terminalId);
+
+    String newTerminal(String appName, String terminalName);
+
+    void deleteTerminal(String appName, String terminalId);
+
+    /**
      * 获取被重写的类
      * */
     Map<String, Object> getRunningOrdClass(String appName);

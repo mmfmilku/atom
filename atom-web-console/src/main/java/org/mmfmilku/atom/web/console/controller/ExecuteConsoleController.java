@@ -1,16 +1,19 @@
 package org.mmfmilku.atom.web.console.controller;
 
 import org.mmfmilku.atom.api.dto.ExecuteResult;
+import org.mmfmilku.atom.web.console.domain.CodeVO;
 import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("executeConsole")
@@ -27,6 +30,36 @@ public class ExecuteConsoleController {
         // TODO 入参待支持
         return instrumentService.execute(appName, executeFile);
     }
+
+    @RequestMapping("executeJTerminal")
+    public ExecuteResult executeJTerminal(@RequestParam String appName,
+                                          @RequestBody CodeVO codeVO) {
+        return instrumentService.executeJTerminal(appName, codeVO.getId(), codeVO.getCode());
+    }
+
+    @RequestMapping("listTerminalId")
+    public List<String> listTerminalId(@RequestParam String appName) {
+        return instrumentService.listTerminalId(appName);
+    }
+
+    @RequestMapping("terminalInfo")
+    public Map<String, String> terminalInfo(@RequestParam String appName,
+                                            @RequestParam String terminalId) {
+        return instrumentService.terminalInfo(appName, terminalId);
+    }
+
+    @RequestMapping("newTerminal")
+    public String newTerminal(@RequestParam String appName,
+                                          @RequestParam String terminalName) {
+        return instrumentService.newTerminal(appName, terminalName);
+    }
+    @RequestMapping("deleteTerminal")
+    public String deleteTerminal(@RequestParam String appName,
+                                 @RequestParam String terminalId) {
+        instrumentService.deleteTerminal(appName, terminalId);
+        return "success";
+    }
+
 
     @RequestMapping("listExecuteOrd")
     public List<OrdRunInfo> listExecuteOrd(@RequestParam String appName,

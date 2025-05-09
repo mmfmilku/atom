@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.agent.console;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
@@ -13,12 +14,22 @@ import static org.junit.Assert.*;
 
 public class JTerminalHolderTest {
 
-    private JTerminal jTerminal = JTerminalHolder.newTerminal("test-terminal");
+    private static JTerminal jTerminal = JTerminalHolder.newTerminal("test-terminal");
+
+    @Test
+    public void testNewTerminal() {
+        JTerminal test1 = JTerminalHolder.newTerminal("test-1");
+        assertEquals(2, JTerminalHolder.listId().size());
+        JTerminalHolder.deleteTerminal(test1.getId());
+        assertEquals(1, JTerminalHolder.listId().size());
+    }
 
 //    @Test
 //    public void executeTerminal() {
 //        String code = ""
-//                + ""
+//                + "String a = \"aaa\";"
+//                + "String b = \"bbb\";"
+//                + "String c = a + b;"
 //                ;
 //        JTerminalHolder.executeTerminal(jTerminal.getId(), code);
 //    }
