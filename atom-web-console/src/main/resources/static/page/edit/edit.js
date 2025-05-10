@@ -183,12 +183,9 @@ let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD') => {
             oldSelect && oldSelect.classList.remove('edit-file-select')
             clickDom && clickDom.classList.add('edit-file-select')
 
-            // 文件标题反显
-            pageEdit.querySelector('.edit-code-title').innerText = ordFileName
             setType(ordEnum, res.running)
-
-            // 文件内容反显
-            pageEdit.querySelector('#ordFileText').value = res.text
+            // 文件标题反显,文件内容反显
+            showOrdText(ordFileName, res.text)
         })
 }
 
@@ -266,6 +263,30 @@ let executeGoal = () => {
         })
 }
 
+// 主文本展示区域
+let showOrdText = (title, text) => {
+    // 标题
+    pageEdit.querySelector('.edit-code-title').innerText = title
+    // 内容
+    pageEdit.querySelector('#ordFileText').value = text
+    pageEdit.querySelector('#ordFileText').style.height = ''
+    // terminal部分移除
+    pageEdit.querySelector('.terminal-box').style.height = ''
+    pageEdit.querySelector('.terminal-box').innerHTML = ''
+}
+
+let showTerminalText = (title, history) => {
+    // 标题
+    pageEdit.querySelector('.edit-code-title').innerText = title
+    // 内容
+    pageEdit.querySelector('#ordFileText').value = ''
+    pageEdit.querySelector('#ordFileText').style.height = '24%'
+    // terminal历史命令部分
+    pageEdit.querySelector('.terminal-box').style.height = '70%'
+    pageEdit.querySelector('.terminal-box').innerHTML =
+        history.map(item => `<div class="terminal-his-line">${item}</div>`).join('')
+}
+
 // ---------------terminal相关-------------- beg
 let curJTerminal;
 let getTerminal = (ordFileName, clickDom) => {
@@ -279,13 +300,8 @@ let getTerminal = (ordFileName, clickDom) => {
             clickDom && clickDom.classList.add('edit-file-select')
 
             // 文件标题反显
-            pageEdit.querySelector('.edit-code-title').innerText = ordFileName
             setType('EXECUTE_ORD')
-
-            // TODO 内容反显
-            pageEdit.querySelector('.terminal-box').innerHTML =
-                res.history.map(item => `<div class="terminal-his-line">${item}</div>`).join('')
-            pageEdit.querySelector('#ordFileText').value = ''
+            showTerminalText(ordFileName, res.history)
         })
 }
 
@@ -302,6 +318,7 @@ let executeJTerminal = (input) => {
             // TODO 执行异常处理
             pageEdit.querySelector('.terminal-box').innerHTML += `<div class="terminal-his-line">${input}</div>`
             pageEdit.querySelector('.terminal-box').innerHTML += `<div class="terminal-his-line">${res.executeReturn}</div>`
+            pageEdit.querySelector('.terminal-box').scrollTop = pageEdit.querySelector('.terminal-box').scrollHeight
         })
 }
 // ---------------terminal相关-------------- end
@@ -384,10 +401,9 @@ let genCode = (javaName, clickDom) => {
     clickDom.classList.add('edit-file-select')
     post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${javaName}`)
         .then(res => {
-            // 文件标题反显
             setType(0)
-            pageEdit.querySelector('.edit-code-title').innerText = javaName
-            pageEdit.querySelector('#ordFileText').value = res
+            // 文件标题反显,文件内容反显
+            showOrdText(javaName, res)
         })
 }
 
