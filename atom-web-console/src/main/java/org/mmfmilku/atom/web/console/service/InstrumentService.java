@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.web.console.service;
 
+import com.alibaba.fastjson.JSON;
 import org.mmfmilku.atom.api.AppInfoApi;
 import org.mmfmilku.atom.api.ExecutableApi;
 import org.mmfmilku.atom.api.InstrumentApi;
@@ -8,9 +9,8 @@ import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
 import org.mmfmilku.atom.util.FileUtils;
-import org.mmfmilku.atom.web.console.domain.AgentConfig;
-import org.mmfmilku.atom.web.console.domain.OrdEnum;
-import org.mmfmilku.atom.web.console.domain.OrdFile;
+import org.mmfmilku.atom.util.StringUtils;
+import org.mmfmilku.atom.web.console.domain.*;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.mmfmilku.atom.web.console.util.Decompile;
@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -123,6 +122,36 @@ public class InstrumentService implements IInstrumentService {
     }
 
     @Override
+    public JTerminalInfo getTerminal(String appName, String terminalFile) {
+        OrdFile ordFile = agentConfigService.readOrd(appName, terminalFile, OrdEnum.EXECUTE_ORD);
+        String text = ordFile.getText();
+        JTerminalConfData confData = JSON.parseObject(text, JTerminalConfData.class);
+        ExecutableApi api = getApi(appName, ExecutableApi.class);
+        Map<String, Object> terminalInfo;
+        if (confData == null
+                || StringUtils.isEmpty(confData.getTerminalId())
+                || (terminalInfo = api.terminalInfo(confData.getTerminalId())) == null) {
+            if (confData == null) {
+                confData = new JTerminalConfData();
+            }
+            if (StringUtils.isEmpty(confData.getTerminalName())) {
+                confData.setTerminalName(terminalFile);
+            }
+            // 无对应终端，新建
+            String newId = api.newTerminal(confData.getTerminalName());
+            confData.setTerminalId(newId);
+            ordFile.setText(JSON.toJSONString(confData));
+            agentConfigService.writeOrd(appName, ordFile, OrdEnum.EXECUTE_ORD);
+
+            terminalInfo = api.terminalInfo(newId);
+        }
+
+        JTerminalInfo jTerminalInfo = new JTerminalInfo();
+        jTerminalInfo.setHistory((List<String>) terminalInfo.get("history"));
+        return jTerminalInfo;
+    }
+
+    @Override
     public ExecuteResult executeJTerminal(String appName, String terminalId, String code) {
         return getApi(appName, ExecutableApi.class).executeTerminal(terminalId, code);
     }
@@ -130,11 +159,6 @@ public class InstrumentService implements IInstrumentService {
     @Override
     public List<String> listTerminalId(String appName) {
         return getApi(appName, ExecutableApi.class).listTerminalId();
-    }
-
-    @Override
-    public Map<String, String> terminalInfo(String appName, String terminalId) {
-        return getApi(appName, ExecutableApi.class).terminalInfo(terminalId);
     }
 
     @Override

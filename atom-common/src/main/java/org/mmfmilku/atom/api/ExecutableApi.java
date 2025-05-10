@@ -34,7 +34,7 @@ public interface ExecutableApi {
 
     List<String> listTerminalId();
 
-    Map<String, String> terminalInfo(String terminalId);
+    Map<String, Object> terminalInfo(String terminalId);
 
     String newTerminal(String terminalName);
 

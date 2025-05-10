@@ -2,6 +2,7 @@ package org.mmfmilku.atom.web.console.controller;
 
 import org.mmfmilku.atom.api.dto.ExecuteResult;
 import org.mmfmilku.atom.web.console.domain.CodeVO;
+import org.mmfmilku.atom.web.console.domain.JTerminalInfo;
 import org.mmfmilku.atom.web.console.domain.OrdEnum;
 import org.mmfmilku.atom.web.console.domain.OrdRunInfo;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
@@ -37,27 +38,16 @@ public class ExecuteConsoleController {
         return instrumentService.executeJScript(appName, jScriptFile);
     }
 
+    @RequestMapping("getTerminal")
+    public JTerminalInfo getTerminal(@RequestParam String appName,
+                                     @RequestParam String terminalFile) {
+        return instrumentService.getTerminal(appName, terminalFile);
+    }
+
     @RequestMapping("executeJTerminal")
     public ExecuteResult executeJTerminal(@RequestParam String appName,
                                           @RequestBody CodeVO codeVO) {
         return instrumentService.executeJTerminal(appName, codeVO.getId(), codeVO.getCode());
-    }
-
-    @RequestMapping("listTerminalId")
-    public List<String> listTerminalId(@RequestParam String appName) {
-        return instrumentService.listTerminalId(appName);
-    }
-
-    @RequestMapping("terminalInfo")
-    public Map<String, String> terminalInfo(@RequestParam String appName,
-                                            @RequestParam String terminalId) {
-        return instrumentService.terminalInfo(appName, terminalId);
-    }
-
-    @RequestMapping("newTerminal")
-    public String newTerminal(@RequestParam String appName,
-                                          @RequestParam String terminalName) {
-        return instrumentService.newTerminal(appName, terminalName);
     }
 
     @RequestMapping("deleteTerminal")

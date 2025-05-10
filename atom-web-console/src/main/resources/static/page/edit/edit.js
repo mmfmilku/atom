@@ -76,7 +76,13 @@ let executeConsole = clickDom => {
         .then(res => {
             let fileListDom = pageEdit.querySelector('.executeConsole')
             fileListDom.innerHTML = res.map(e =>
-                // TODO 先写死为 EXECUTE_ORD 类型，后面需要改为从后端获取
+                e.ordEnum == 'EXECUTE_ORD'
+                ? `
+                    <div onclick="getTerminal('${e.ordName}', this)" 
+                    rightClickEvent="consoleRightMenu"
+                    class="edit-file text-wrap">${e.ordName}</div>
+                    `
+                :
                 `
                     <div onclick="readText('${e.ordName}', this, '${e.ordEnum}')" 
                     rightClickEvent="consoleRightMenu"
@@ -135,7 +141,7 @@ let typeArr = {
     // 控制台执行文件
     "EXECUTE_ORD": {
         type: 'executeConsole',
-        '0': '<button onclick="saveText(\'EXECUTE_ORD\')">保存</button>' +
+        '0': '<div>注意</div>' +
             ''
     },
     // 脚本化执行文件
@@ -259,6 +265,25 @@ let executeGoal = () => {
             UI.showMessage(res.executeReturn)
         })
 }
+
+// ---------------terminal相关-------------- beg
+let getTerminal = (ordFileName, clickDom) => {
+    post(`executeConsole/getTerminal?appName=${vmInfo.displayName}&terminalFile=${ordFileName}`)
+        .then(res => {
+            // 文件选中
+            let oldSelect = pageEdit.querySelector('.edit-file-select')
+            oldSelect && oldSelect.classList.remove('edit-file-select')
+            clickDom && clickDom.classList.add('edit-file-select')
+
+            // 文件标题反显
+            pageEdit.querySelector('.edit-code-title').innerText = ordFileName
+            setType('EXECUTE_ORD')
+
+            // 文件内容反显
+            pageEdit.querySelector('#ordFileText').value = res.history.join('\n')
+        })
+}
+// ---------------terminal相关-------------- end
 
 let loadAgent = () => {
     post(`agent/loadAgent?appName=${vmInfo.displayName}&vmId=${vmInfo.vmId}`)

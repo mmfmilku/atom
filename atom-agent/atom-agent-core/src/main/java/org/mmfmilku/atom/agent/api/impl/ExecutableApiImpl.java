@@ -8,6 +8,7 @@ import org.mmfmilku.atom.transport.frpc.server.FRPCService;
 import org.mmfmilku.atom.util.FileUtils;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,11 +55,15 @@ public class ExecutableApiImpl implements ExecutableApi {
     }
 
     @Override
-    public Map<String, String> terminalInfo(String terminalId) {
+    public Map<String, Object> terminalInfo(String terminalId) {
         JTerminal jTerminal = JTerminalHolder.terminalInfo(terminalId);
-        Map<String, String> data = new HashMap<>();
+        if (jTerminal == null) {
+            return null;
+        }
+        Map<String, Object> data = new HashMap<>();
         data.put("id", jTerminal.getId());
         data.put("name", jTerminal.getName());
+        data.put("history", jTerminal.getHistory());
         // TODO 历史命令、import列表待添加
         return data;
     }
