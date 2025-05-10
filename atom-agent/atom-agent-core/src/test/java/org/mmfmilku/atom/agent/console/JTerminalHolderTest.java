@@ -24,15 +24,13 @@ public class JTerminalHolderTest {
         assertEquals(1, JTerminalHolder.listId().size());
     }
 
-//    @Test
-//    public void executeTerminal() {
-//        String code = ""
-//                + "String a = \"aaa\";"
-//                + "String b = \"bbb\";"
-//                + "String c = a + b;"
-//                ;
-//        JTerminalHolder.executeTerminal(jTerminal.getId(), code);
-//    }
+    @Test
+    public void executeTerminal() {
+        String code = ""
+                + "a = \"\";"
+                ;
+        JTerminalHolder.executeTerminal(jTerminal.getId(), code);
+    }
 
     @Test
     public void parseTerminalCode() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {

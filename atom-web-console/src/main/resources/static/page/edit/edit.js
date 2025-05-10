@@ -141,8 +141,7 @@ let typeArr = {
     // 控制台执行文件
     "EXECUTE_ORD": {
         type: 'executeConsole',
-        '0': '<div>注意</div>' +
-            '<button onclick="executeJTerminal()">输入</button>'
+        '0': '<button onclick="submitJTerminal()">提交</button>'
     },
     // 脚本化执行文件
     "SCRIPT_ORD": {
@@ -268,8 +267,9 @@ let showOrdText = (title, text) => {
     // 标题
     pageEdit.querySelector('.edit-code-title').innerText = title
     // 内容
-    pageEdit.querySelector('#ordFileText').value = text
-    pageEdit.querySelector('#ordFileText').style.height = ''
+    let textDom = pageEdit.querySelector('#ordFileText')
+    textDom.value = text
+    textDom.style.height = ''
     // terminal部分移除
     pageEdit.querySelector('.terminal-box').style.height = ''
     pageEdit.querySelector('.terminal-box').innerHTML = ''
@@ -279,8 +279,26 @@ let showTerminalText = (title, history) => {
     // 标题
     pageEdit.querySelector('.edit-code-title').innerText = title
     // 内容
-    pageEdit.querySelector('#ordFileText').value = ''
-    pageEdit.querySelector('#ordFileText').style.height = '24%'
+    let textDom = pageEdit.querySelector('#ordFileText')
+    textDom.value = ''
+    // 流程高度展示历史命令
+    textDom.style.height = '24%'
+    // 监听回车
+    textDom.addEventListener('keydown', (event) => {
+        // 检查是否为回车键（Enter 的 keyCode 是 13，或直接判断 event.key）
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            if (event.ctrlKey) {
+                // ctrl加回车，换行行为
+                textDom.value += '\n'
+            } else {
+                // 只有回车，执行发送
+                event.preventDefault(); // 阻止默认行为（如表单提交或换行）
+                console.log('回车键被按下，输入内容：', textDom.value)
+                // 提交终端命令
+                submitJTerminal()
+            }
+        }
+    });
     // terminal历史命令部分
     pageEdit.querySelector('.terminal-box').style.height = '70%'
     pageEdit.querySelector('.terminal-box').innerHTML =
@@ -305,9 +323,11 @@ let getTerminal = (ordFileName, clickDom) => {
         })
 }
 
-let executeJTerminal = (input) => {
-    // TODO 暂时这么写
-    input = pageEdit.querySelector('#ordFileText').value
+let submitJTerminal = () => {
+    let input = pageEdit.querySelector('#ordFileText').value
+    if (!input) {
+        return
+    }
     post(`executeConsole/executeJTerminal?appName=${vmInfo.displayName}`,
         {
             id: curJTerminal.id,
@@ -316,9 +336,19 @@ let executeJTerminal = (input) => {
         .then(res => {
             // TODO 输入输出添加
             // TODO 执行异常处理
-            pageEdit.querySelector('.terminal-box').innerHTML += `<div class="terminal-his-line">${input}</div>`
-            pageEdit.querySelector('.terminal-box').innerHTML += `<div class="terminal-his-line">${res.executeReturn}</div>`
+            pageEdit.querySelector('.terminal-box').innerHTML +=
+                `<div class="terminal-his-line">${input}</div>`
+            if (res.success) {
+                pageEdit.querySelector('.terminal-box').innerHTML +=
+                    `<div class="terminal-his-line">${res.executeReturn}</div>`
+            } else {
+                // 异常展示
+                pageEdit.querySelector('.terminal-box').innerHTML +=
+                    `<div class="terminal-his-line text-err">${res.throwable.message}</div>`
+            }
             pageEdit.querySelector('.terminal-box').scrollTop = pageEdit.querySelector('.terminal-box').scrollHeight
+            // 上次内容清空
+            pageEdit.querySelector('#ordFileText').value = ''
         })
 }
 // ---------------terminal相关-------------- end
