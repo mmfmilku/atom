@@ -78,7 +78,7 @@ let executeConsole = clickDom => {
             fileListDom.innerHTML = res.map(e =>
                 // TODO 先写死为 EXECUTE_ORD 类型，后面需要改为从后端获取
                 `
-                    <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD')" 
+                    <div onclick="readText('${e.ordName}', this, '${e.ordEnum}')" 
                     rightClickEvent="consoleRightMenu"
                     class="edit-file text-wrap">${e.ordName}</div>
                     `
@@ -136,6 +136,12 @@ let typeArr = {
     "EXECUTE_ORD": {
         type: 'executeConsole',
         '0': '<button onclick="saveText(\'EXECUTE_ORD\')">保存</button>' +
+            ''
+    },
+    // 脚本化执行文件
+    "SCRIPT_ORD": {
+        type: 'jScript',
+        '0': '<button onclick="saveText(\'SCRIPT_ORD\')">保存</button>' +
             '<button onclick="executeGoal()">运行</button>'
     }
 }
@@ -248,9 +254,9 @@ let executeGoal = () => {
         UI.showMessage('请先选择文件')
         return
     }
-    post(`executeConsole/execute?appName=${vmInfo.displayName}&executeFile=${ordFileName}`)
+    post(`executeConsole/executeJScript?appName=${vmInfo.displayName}&jScriptFile=${ordFileName}`)
         .then(res => {
-            UI.showMessage(res.success)
+            UI.showMessage(res.executeReturn)
         })
 }
 

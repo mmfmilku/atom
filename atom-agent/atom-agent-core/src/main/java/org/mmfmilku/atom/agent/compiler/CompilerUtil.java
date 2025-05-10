@@ -67,6 +67,7 @@ public class CompilerUtil {
         }
 
         org.mmfmilku.atom.agent.compiler.parser.syntax.Class aClass = new org.mmfmilku.atom.agent.compiler.parser.syntax.Class(nativeClass.getSimpleName());
+        aClass.setClassFullName(nativeClass.getName());
         aClass.setMethods(methods);
         aClass.setModifier(Modifier.DEFAULT);
         aClass.setAnnotations(Collections.emptyList());

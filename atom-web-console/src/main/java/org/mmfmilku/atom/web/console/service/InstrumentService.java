@@ -9,6 +9,8 @@ import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
 import org.mmfmilku.atom.util.FileUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
+import org.mmfmilku.atom.web.console.domain.OrdEnum;
+import org.mmfmilku.atom.web.console.domain.OrdFile;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.mmfmilku.atom.web.console.util.Decompile;
@@ -112,6 +114,12 @@ public class InstrumentService implements IInstrumentService {
         AgentConfig config = agentConfigService.getConfigByName(appName);
         return getApi(appName, ExecutableApi.class)
                 .execute(Paths.get(config.getExecuteDir(), executeFile).toString(), args);
+    }
+
+    @Override
+    public ExecuteResult executeJScript(String appName, String jScriptFile) {
+        OrdFile ordFile = agentConfigService.readOrd(appName, jScriptFile, OrdEnum.SCRIPT_ORD);
+        return getApi(appName, ExecutableApi.class).executeJScript(ordFile.getText());
     }
 
     @Override

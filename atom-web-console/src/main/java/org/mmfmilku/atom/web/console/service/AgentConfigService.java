@@ -163,6 +163,7 @@ public class AgentConfigService implements IAgentConfigService {
                         ordRunInfo.setRunning(
                                 runningOrdClass.containsKey(CodeUtils.toClassName(ordFileName)) ? "1" : "0");
                     }
+                    ordRunInfo.setOrdEnum(OrdEnum.gussEnum(ordFileName));
                     return ordRunInfo;
                 }).collect(Collectors.toList());
         return ordRunInfoList;
@@ -199,7 +200,7 @@ public class AgentConfigService implements IAgentConfigService {
         if (StringUtils.isEmpty(ordEnum.getSuffix())) {
             return ordFileName;
         }
-        String suffix = "." + ordEnum.getSuffix();
+        String suffix = ordEnum.getSuffix();
         // .ord 或 .java
         if (ordFileName.endsWith(suffix)) {
             return ordFileName;

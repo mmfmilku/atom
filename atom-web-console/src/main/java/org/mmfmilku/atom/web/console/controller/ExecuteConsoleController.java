@@ -31,6 +31,12 @@ public class ExecuteConsoleController {
         return instrumentService.execute(appName, executeFile);
     }
 
+    @RequestMapping("executeJScript")
+    public ExecuteResult executeJScript(@RequestParam String appName,
+                                        @RequestParam String jScriptFile) {
+        return instrumentService.executeJScript(appName, jScriptFile);
+    }
+
     @RequestMapping("executeJTerminal")
     public ExecuteResult executeJTerminal(@RequestParam String appName,
                                           @RequestBody CodeVO codeVO) {
@@ -53,6 +59,7 @@ public class ExecuteConsoleController {
                                           @RequestParam String terminalName) {
         return instrumentService.newTerminal(appName, terminalName);
     }
+
     @RequestMapping("deleteTerminal")
     public String deleteTerminal(@RequestParam String appName,
                                  @RequestParam String terminalId) {
@@ -60,10 +67,10 @@ public class ExecuteConsoleController {
         return "success";
     }
 
-
     @RequestMapping("listExecuteOrd")
     public List<OrdRunInfo> listExecuteOrd(@RequestParam String appName,
                                            @RequestParam(required = false) String childPath) {
+        // TODO 三种执行类ord路径都相同，先写死传 EXECUTE_ORD
         return agentConfigService.listOrd(appName, childPath, OrdEnum.EXECUTE_ORD);
     }
 

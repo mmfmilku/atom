@@ -31,6 +31,11 @@ public interface IInstrumentService {
     ExecuteResult execute(String appName, String executeFile, Object... args);
 
     /**
+     * 执行脚本化java代码
+     * */
+    ExecuteResult executeJScript(String appName, String jScriptFile);
+
+    /**
      * 执行JTerminal
      * */
     ExecuteResult executeJTerminal(String appName, String terminalId, String code);
