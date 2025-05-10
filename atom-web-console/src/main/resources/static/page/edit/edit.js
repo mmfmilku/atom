@@ -142,7 +142,7 @@ let typeArr = {
     "EXECUTE_ORD": {
         type: 'executeConsole',
         '0': '<div>注意</div>' +
-            ''
+            '<button onclick="executeJTerminal()">输入</button>'
     },
     // 脚本化执行文件
     "SCRIPT_ORD": {
@@ -267,9 +267,12 @@ let executeGoal = () => {
 }
 
 // ---------------terminal相关-------------- beg
+let curJTerminal;
 let getTerminal = (ordFileName, clickDom) => {
+    curJTerminal = null
     post(`executeConsole/getTerminal?appName=${vmInfo.displayName}&terminalFile=${ordFileName}`)
         .then(res => {
+            curJTerminal = res
             // 文件选中
             let oldSelect = pageEdit.querySelector('.edit-file-select')
             oldSelect && oldSelect.classList.remove('edit-file-select')
@@ -279,8 +282,26 @@ let getTerminal = (ordFileName, clickDom) => {
             pageEdit.querySelector('.edit-code-title').innerText = ordFileName
             setType('EXECUTE_ORD')
 
-            // 文件内容反显
-            pageEdit.querySelector('#ordFileText').value = res.history.join('\n')
+            // TODO 内容反显
+            pageEdit.querySelector('.terminal-box').innerHTML =
+                res.history.map(item => `<div class="terminal-his-line">${item}</div>`).join('')
+            pageEdit.querySelector('#ordFileText').value = ''
+        })
+}
+
+let executeJTerminal = (input) => {
+    // TODO 暂时这么写
+    input = pageEdit.querySelector('#ordFileText').value
+    post(`executeConsole/executeJTerminal?appName=${vmInfo.displayName}`,
+        {
+            id: curJTerminal.id,
+            code: input
+        })
+        .then(res => {
+            // TODO 输入输出添加
+            // TODO 执行异常处理
+            pageEdit.querySelector('.terminal-box').innerHTML += `<div class="terminal-his-line">${input}</div>`
+            pageEdit.querySelector('.terminal-box').innerHTML += `<div class="terminal-his-line">${res.executeReturn}</div>`
         })
 }
 // ---------------terminal相关-------------- end

@@ -7,8 +7,10 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.Package;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 
 import java.lang.Class;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,8 +56,14 @@ public class CompilerUtil {
             method.setModifier(Modifier.DEFAULT);
             // TODO 注解先写死
             method.setAnnotations(Collections.emptyList());
-            // TODO 方法参数先写死
-            method.setMethodParams(Collections.emptyList());
+            // 方法参数
+            List<VarDefineStatement> methodParams = new ArrayList<>();
+            for (Parameter parameter : nativeClassMethod.getParameters()) {
+                VarDefineStatement varDefineStatement = new VarDefineStatement(
+                        parameter.getType().getName(), parameter.getName());
+                methodParams.add(varDefineStatement);
+            }
+            method.setMethodParams(methodParams);
             // TODO 返回类型先写死
             method.setReturnType(Object.class.getSimpleName());
 

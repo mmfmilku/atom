@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class OrdUtils {
 
     public static void loadOrd(Map<String, ClassORDDefine> defineMap) {
+        System.out.println("loadOrd for defineMap:\n" + defineMap.toString());
         LoadOrdTransformer ordTransformer = new LoadOrdTransformer(defineMap);
         InstrumentationContext.addTransformer(ordTransformer);
         try {
@@ -43,6 +44,7 @@ public class OrdUtils {
     }
 
     public static void loadOrd(JavaAST javaAST) {
+        System.out.println("loadOrd for javaAST:\n" + javaAST.getSourceCode());
         Map<String, ClassORDDefine> defineMap = astToOrd(javaAST);
         loadOrd(defineMap);
     }

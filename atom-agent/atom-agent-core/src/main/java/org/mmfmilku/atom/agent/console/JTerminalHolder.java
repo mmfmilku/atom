@@ -8,6 +8,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarAssignStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.agent.util.OrdUtils;
@@ -67,6 +68,12 @@ public class JTerminalHolder {
 
     private static JavaAST getJavaAST(String code, JTerminal jTerminal) {
         List<Statement> statementList = parseTerminalCode(code);
+        // 处理return语句
+        Statement statement = statementList.get(statementList.size() - 1);
+        // TODO 代理处理
+        if (!(statement instanceof ReturnStatement)) {
+            statementList.add(new ReturnStatement(CompilerUtil.parseExpression("\"success\"")));
+        }
 
         JavaAST javaAST = CompilerUtil.newEmptyJavaAST(JTerminalExecutor.class);
         // 使用全局import
@@ -89,10 +96,10 @@ public class JTerminalHolder {
         return statementList.stream()
                 .map(JTerminalHolder::enhanceStatement)
                 .collect(Collectors.toList());
-        // TODO return 语句的添加
     }
 
     private static Statement enhanceStatement(Statement statement) {
+        // TODO 由于变量上下文map中的value只能存储对象类型，代码中的基础变量需要装箱处理
         if (statement instanceof NestedStatement) {
             // 嵌套语句
             // TODO 获取其中嵌套的语句,例如语句块
@@ -109,8 +116,8 @@ public class JTerminalHolder {
             VarDefineStatement varDefineStatement = (VarDefineStatement) statement;
             // TODO 语句替换为语句块，并插入保存上下文的语句
             String varName = varDefineStatement.getVarName();
-            // 插入语句 contextVars.put(varName, ${varName});
-            String addExp = String.format("contextVars.put(\"%s\", %s);", varName, varName);
+            // 插入语句 arg0.put(varName, ${varName});
+            String addExp = String.format("arg0.put(\"%s\", %s);", varName, varName);
             Expression expression = CompilerUtil.parseExpression(addExp);
             CodeBlock codeBlock = new CodeBlock();
             codeBlock.setStatements(Arrays.asList(statement, new ExpStatement(expression)));

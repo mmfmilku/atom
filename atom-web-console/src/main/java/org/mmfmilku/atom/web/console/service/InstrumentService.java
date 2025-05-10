@@ -148,6 +148,7 @@ public class InstrumentService implements IInstrumentService {
 
         JTerminalInfo jTerminalInfo = new JTerminalInfo();
         jTerminalInfo.setHistory((List<String>) terminalInfo.get("history"));
+        jTerminalInfo.setId((String) terminalInfo.get("id"));
         return jTerminalInfo;
     }
 
