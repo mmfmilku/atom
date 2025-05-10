@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
+import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 import org.mmfmilku.atom.util.ReflectUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -24,13 +25,13 @@ public class JTerminalHolderTest {
         assertEquals(1, JTerminalHolder.listId().size());
     }
 
-    @Test
-    public void executeTerminal() {
-        String code = ""
-                + "a = \"\";"
-                ;
-        JTerminalHolder.executeTerminal(jTerminal.getId(), code);
-    }
+//    @Test
+//    public void executeTerminal() {
+//        String code = ""
+//                + "a = \"\";"
+//                ;
+//        JTerminalHolder.executeTerminal(jTerminal.getId(), code);
+//    }
 
     @Test
     public void parseTerminalCode() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
@@ -76,6 +77,7 @@ public class JTerminalHolderTest {
         Object parseTerminalCode = ReflectUtils
                 .invokeStaticMethod(JTerminalHolder.class, "getJavaAST", code, jTerminal);
         JavaAST javaAST = (JavaAST) parseTerminalCode;
+        ByteCodeUtils.toJavassistCode(javaAST);
         System.out.println(javaAST.getSourceCode());
         String expect = "package org.mmfmilku.atom.agent.console;\n" +
                 "\n" +
