@@ -2,9 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class IfStatement implements NestedStatement {
 
@@ -77,5 +75,15 @@ public class IfStatement implements NestedStatement {
         if (falseStatement != null) {
             falseStatement.useImports(importsMap);
         }
+    }
+
+    @Override
+    public List<Statement> getNested() {
+        return Arrays.asList(trueStatement, falseStatement);
+    }
+
+    @Override
+    public List<Expression> getNestedExp() {
+        return Collections.singletonList(condition);
     }
 }

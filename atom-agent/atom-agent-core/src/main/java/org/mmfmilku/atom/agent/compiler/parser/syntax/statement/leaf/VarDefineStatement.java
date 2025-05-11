@@ -60,6 +60,12 @@ public class VarDefineStatement implements LeafStatement {
     }
 
     @Override
+    public List<Expression> getNestedExp() {
+        return assignExpression == null ?
+                Collections.emptyList() : Collections.singletonList(assignExpression);
+    }
+
+    @Override
     public void useImports(Map<String, String> importsMap) {
         setVarType(importsMap.getOrDefault(varType, varType));
         if (assignExpression != null) {

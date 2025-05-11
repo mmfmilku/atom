@@ -170,6 +170,7 @@ public class ParserDispatcher {
             while (iterator.hasNext()) {
                 parseProgram();
             }
+            javaAST.buildLinkedNode();
             return javaAST;
         }
 

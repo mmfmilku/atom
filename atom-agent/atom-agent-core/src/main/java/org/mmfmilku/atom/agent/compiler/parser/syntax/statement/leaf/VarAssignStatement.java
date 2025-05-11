@@ -46,6 +46,11 @@ public class VarAssignStatement implements LeafStatement {
     }
 
     @Override
+    public List<Expression> getNestedExp() {
+        return Collections.singletonList(assignExpression);
+    }
+
+    @Override
     public void useImports(Map<String, String> importsMap) {
         assignExpression.useImports(importsMap);
     }

@@ -33,6 +33,11 @@ public class ExpStatement implements LeafStatement {
     }
 
     @Override
+    public List<Expression> getNestedExp() {
+        return Collections.singletonList(expression);
+    }
+
+    @Override
     public void useImports(Map<String, String> importsMap) {
         expression.useImports(importsMap);
     }

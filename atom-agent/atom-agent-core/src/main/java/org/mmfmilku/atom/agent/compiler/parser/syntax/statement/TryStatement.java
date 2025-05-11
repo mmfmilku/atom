@@ -26,13 +26,25 @@ public class TryStatement implements NestedStatement {
     private CodeBlock tryBody;
 
     /**
-     * catch块映射
+     * catch块映射 TODO 整合为一个 statement
      * k : 捕获的异常
      * v : 对应捕获异常的代码块
      * */
     private Map<ThrowableCatch, CodeBlock> throwableCatches = new LinkedHashMap<>();
 
     private CodeBlock finallyBody;
+
+    @Override
+    public List<Statement> getNested() {
+        List<Statement> nested = new ArrayList<>(autoCloseDefines);
+        nested.add(tryBody);
+        nested.addAll(throwableCatches.keySet());
+        nested.addAll(throwableCatches.values());
+        if (finallyBody != null) {
+            nested.add(finallyBody);
+        }
+        return nested;
+    }
 
     public static class ThrowableCatch implements Statement {
 

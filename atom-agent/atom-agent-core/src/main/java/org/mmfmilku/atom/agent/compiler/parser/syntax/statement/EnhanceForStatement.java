@@ -6,9 +6,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.util.AssertUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 增强for循环
@@ -72,5 +70,15 @@ public class EnhanceForStatement  extends LoopStatement {
         loopItemVarDefine.useImports(importsMap);
         loopIdentifier.useImports(importsMap);
         loopBody.useImports(importsMap);
+    }
+
+    @Override
+    public List<Statement> getNested() {
+        return Arrays.asList(loopItemVarDefine, loopBody);
+    }
+
+    @Override
+    public List<Expression> getNestedExp() {
+        return Collections.singletonList(loopIdentifier);
     }
 }

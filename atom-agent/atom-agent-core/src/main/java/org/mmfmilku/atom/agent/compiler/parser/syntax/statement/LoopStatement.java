@@ -2,9 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class LoopStatement implements NestedStatement {
 
@@ -48,5 +46,15 @@ public abstract class LoopStatement implements NestedStatement {
     public void useImports(Map<String, String> importsMap) {
         loopCondition.useImports(importsMap);
         loopBody.useImports(importsMap);
+    }
+
+    @Override
+    public List<Statement> getNested() {
+        return Collections.singletonList(loopBody);
+    }
+
+    @Override
+    public List<Expression> getNestedExp() {
+        return Collections.singletonList(loopCondition);
     }
 }

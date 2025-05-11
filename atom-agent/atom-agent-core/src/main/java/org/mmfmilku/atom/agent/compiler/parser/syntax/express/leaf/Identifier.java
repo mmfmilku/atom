@@ -1,8 +1,10 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.AbstractLinkedNode;
+
 import java.util.Map;
 
-public class Identifier implements LeafExpression {
+public class Identifier extends AbstractLinkedNode implements LeafExpression {
 
     private String value;
 

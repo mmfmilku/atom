@@ -4,6 +4,7 @@ import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -69,5 +70,10 @@ public class ForStatement extends LoopStatement {
         beforeStatement.useImports(importsMap);
         afterStatement.useImports(importsMap);
         super.useImports(importsMap);
+    }
+
+    @Override
+    public List<Statement> getNested() {
+        return Arrays.asList(beforeStatement, afterStatement, loopBody);
     }
 }

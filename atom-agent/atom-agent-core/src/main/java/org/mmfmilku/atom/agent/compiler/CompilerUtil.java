@@ -84,6 +84,8 @@ public class CompilerUtil {
 
         javaAST.setClassList(Collections.singletonList(aClass));
 
+        javaAST.buildLinkedNode();
+
         return javaAST;
     }
 
