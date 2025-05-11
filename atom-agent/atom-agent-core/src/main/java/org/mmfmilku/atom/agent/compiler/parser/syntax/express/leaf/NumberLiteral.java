@@ -1,4 +1,4 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
+package org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf;
 
 public class NumberLiteral extends BaseLiteral {
 

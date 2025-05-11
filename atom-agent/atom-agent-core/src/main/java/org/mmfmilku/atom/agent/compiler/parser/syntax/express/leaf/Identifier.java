@@ -1,15 +1,12 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
+package org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf;
 
 import java.util.Map;
 
-/**
- * 字面量
- * */
-public class BaseLiteral implements Expression {
+public class Identifier implements LeafExpression {
 
     private String value;
 
-    public BaseLiteral(String value) {
+    public Identifier(String value) {
         this.value = value;
     }
 
@@ -28,6 +25,6 @@ public class BaseLiteral implements Expression {
 
     @Override
     public void useImports(Map<String, String> importsMap) {
-
+        setValue(importsMap.getOrDefault(value, value));
     }
 }

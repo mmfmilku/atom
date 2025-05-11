@@ -6,7 +6,7 @@ import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.BinaryOperate;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.UnaryOperate;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;

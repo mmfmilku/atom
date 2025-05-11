@@ -1,7 +1,8 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
+
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

@@ -1,11 +1,12 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.CodeNode;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.ExpressionOperate;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.ImportUse;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 
-public interface Statement extends Node, ImportUse, ExpressionOperate {
+public interface Statement extends Node, ImportUse, ExpressionOperate, CodeNode {
 
     String getStatementSource();
 
@@ -17,4 +18,5 @@ public interface Statement extends Node, ImportUse, ExpressionOperate {
     default String getSourceCode() {
         return getStatementSource() + ";";
     }
+
 }

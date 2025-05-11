@@ -6,6 +6,9 @@ import java.util.List;
 
 public interface ExpressionOperate {
 
+    /**
+     * 获取所有表达式
+     * */
     List<Expression> getAllExpression();
 
 }

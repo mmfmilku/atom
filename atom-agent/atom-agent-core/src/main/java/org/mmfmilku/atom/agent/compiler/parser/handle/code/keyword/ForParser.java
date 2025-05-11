@@ -7,7 +7,7 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.code.CodeBlockParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementLineParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.util.AssertUtil;

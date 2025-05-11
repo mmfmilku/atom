@@ -6,6 +6,7 @@ import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
@@ -99,6 +100,17 @@ public class JTerminalHolder {
     }
 
     private static Statement enhanceStatement(Statement statement) {
+        List<Expression> allExpression = statement.getAllExpression();
+        for (Expression expression : allExpression) {
+            for (Expression baseExp : expression.getBaseExpression()) {
+                if (baseExp instanceof Identifier) {
+                    // 标识符处理，获取变量从变量上下文中get
+                    // TODO 设置代理
+                    Identifier identifier = (Identifier) baseExp;
+                    identifier.setValue("arg0.get(\"" + identifier.getValue() + "\")");
+                }
+            }
+        }
         // TODO 由于变量上下文map中的value只能存储对象类型，代码中的基础变量需要装箱处理
         if (statement instanceof NestedStatement) {
             // 嵌套语句
