@@ -14,38 +14,30 @@ import java.util.stream.Stream;
  */
 public class CallChain implements NestedExpression {
 
-    private Expression first;
-
-    private Expression next;
+    private Expression[] children = new Expression[2];
 
     public CallChain(Expression first, Expression next) {
-        this.first = first;
-        this.next = next;
+        children[0] = first;
+        children[1] = next;
     }
 
     @Override
     public String getSourceCode() {
-        return first.getSourceCode() + "." + next.getSourceCode();
+        return getFirst().getSourceCode() + "." + getNext().getSourceCode();
     }
 
     public Expression getFirst() {
-        return first;
-    }
-
-    public void setFirst(Expression first) {
-        this.first = first;
+        return children[0];
     }
 
     public Expression getNext() {
-        return next;
-    }
-
-    public void setNext(Expression next) {
-        this.next = next;
+        return children[1];
     }
 
     @Override
     public void useImports(Map<String, String> importsMap) {
+        Expression first = getFirst();
+        Expression next = getNext();
         if (next instanceof MethodCall) {
             // Arrays.toString()    var.method()    get().len()
             // TODO 内部类的情况
@@ -71,8 +63,8 @@ public class CallChain implements NestedExpression {
     private static void importNoneIdentifier(CallChain callChain,
                                              Map<String, String> importsMap) {
         // import所有非标识符的表达式
-        Expression first = callChain.first;
-        Expression next = callChain.next;
+        Expression first = callChain.getFirst();
+        Expression next = callChain.getNext();
         if (!(first instanceof Identifier)) {
             first.useImports(importsMap);
         }
@@ -85,13 +77,20 @@ public class CallChain implements NestedExpression {
 
     @Override
     public List<LeafExpression> getLeafExpression() {
+        Expression first = getFirst();
+        Expression next = getNext();
         return Stream.concat(first.getLeafExpression().stream(),
                 next.getLeafExpression().stream())
                 .collect(Collectors.toList());
     }
 
     @Override
+    public Expression[] orinChildren() {
+        return children;
+    }
+
+    @Override
     public List<Expression> getNested() {
-        return Arrays.asList(first, next);
+        return Arrays.asList(children);
     }
 }

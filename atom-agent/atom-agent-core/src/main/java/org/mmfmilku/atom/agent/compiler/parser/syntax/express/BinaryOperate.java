@@ -11,55 +11,44 @@ import java.util.*;
  * */
 public class BinaryOperate implements NestedExpression {
 
-    private Expression left;
     private String operator;
-    private Expression right;
+
+    private Expression[] children = new Expression[2];
 
     public BinaryOperate(Expression left, String operator, Expression right) {
-        this.left = left;
-        this.right = right;
+        children[0] = left;
+        children[1] = right;
         this.operator = operator;
     }
 
     public Expression getLeft() {
-        return left;
-    }
-
-    public void setLeft(Expression left) {
-        this.left = left;
+        return children[0];
     }
 
     public Expression getRight() {
-        return right;
+        return children[1];
     }
 
-    public void setRight(Expression right) {
-        this.right = right;
-    }
-
-    public String getOperator() {
-        return operator;
-    }
-
-    public void setOperator(String operator) {
-        this.operator = operator;
+    @Override
+    public Expression[] orinChildren() {
+        return children;
     }
 
     @Override
     public String getSourceCode() {
-        return left.getSourceCode() + GrammarUtil.surroundBlank(operator) + right.getSourceCode();
+        return getLeft().getSourceCode() + GrammarUtil.surroundBlank(operator) + getRight().getSourceCode();
     }
 
     @Override
     public void useImports(Map<String, String> importsMap) {
-        left.useImports(importsMap);
-        right.useImports(importsMap);
+        getLeft().useImports(importsMap);
+        getRight().useImports(importsMap);
     }
 
     @Override
     public List<LeafExpression> getLeafExpression() {
-        List<LeafExpression> leftExpression = left.getLeafExpression();
-        List<LeafExpression> rightExpression = right.getLeafExpression();
+        List<LeafExpression> leftExpression = getLeft().getLeafExpression();
+        List<LeafExpression> rightExpression = getRight().getLeafExpression();
         List<LeafExpression> expressions = new ArrayList<>();
         expressions.addAll(leftExpression);
         expressions.addAll(rightExpression);
@@ -68,6 +57,6 @@ public class BinaryOperate implements NestedExpression {
 
     @Override
     public List<Expression> getNested() {
-        return Arrays.asList(left, right);
+        return Arrays.asList(children);
     }
 }

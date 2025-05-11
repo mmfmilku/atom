@@ -12,6 +12,13 @@ public interface NestedExpression extends Expression {
      * */
     List<Expression> getNested();
 
+    /**
+     * 获取原始子表达式数组
+     * */
+    default Expression[] orinChildren() {
+        return null;
+    }
+
     @Override
     default List<LinkedNode> getChildren() {
         return new ArrayList<>(getNested());

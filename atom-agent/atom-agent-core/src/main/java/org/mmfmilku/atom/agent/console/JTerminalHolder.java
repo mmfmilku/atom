@@ -7,6 +7,7 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.LinkedNode;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
@@ -82,6 +83,7 @@ public class JTerminalHolder {
         javaAST.getClassList().get(0)
                 .getMethods().get(0)
                 .getCodeBlock().setStatements(statementList);
+        javaAST.buildLinkedNode();
         return javaAST;
     }
 
@@ -105,9 +107,9 @@ public class JTerminalHolder {
             for (Expression baseExp : expression.getLeafExpression()) {
                 if (baseExp instanceof Identifier) {
                     // 标识符处理，获取变量从变量上下文中get
-                    // TODO 设置代理
+                    // TODO 临时设置为$1处理arg0变量
                     Identifier identifier = (Identifier) baseExp;
-                    identifier.setValue("arg0.get(\"" + identifier.getValue() + "\")");
+                    identifier.setValue("$1.get(\"" + identifier.getValue() + "\")");
                 }
             }
         }
