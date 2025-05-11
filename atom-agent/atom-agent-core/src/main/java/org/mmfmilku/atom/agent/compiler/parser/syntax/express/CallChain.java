@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
 
 import java.util.List;
 import java.util.Map;
@@ -82,9 +83,9 @@ public class CallChain implements Expression {
     }
 
     @Override
-    public List<Expression> getBaseExpression() {
-        return Stream.concat(first.getBaseExpression().stream(),
-                next.getBaseExpression().stream())
+    public List<LeafExpression> getLeafExpression() {
+        return Stream.concat(first.getLeafExpression().stream(),
+                next.getLeafExpression().stream())
                 .collect(Collectors.toList());
     }
 }

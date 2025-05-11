@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
+
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +35,7 @@ public class NotOperate implements Expression {
     }
 
     @Override
-    public List<Expression> getBaseExpression() {
-        return expression.getBaseExpression();
+    public List<LeafExpression> getLeafExpression() {
+        return expression.getLeafExpression();
     }
 }

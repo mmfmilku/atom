@@ -102,7 +102,7 @@ public class JTerminalHolder {
     private static Statement enhanceStatement(Statement statement) {
         List<Expression> allExpression = statement.getAllExpression();
         for (Expression expression : allExpression) {
-            for (Expression baseExp : expression.getBaseExpression()) {
+            for (Expression baseExp : expression.getLeafExpression()) {
                 if (baseExp instanceof Identifier) {
                     // 标识符处理，获取变量从变量上下文中get
                     // TODO 设置代理

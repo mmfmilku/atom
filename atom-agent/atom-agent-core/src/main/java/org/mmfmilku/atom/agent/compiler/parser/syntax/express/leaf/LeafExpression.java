@@ -8,7 +8,7 @@ import java.util.List;
 public interface LeafExpression extends Expression {
 
     @Override
-    default List<Expression> getBaseExpression() {
+    default List<LeafExpression> getLeafExpression() {
         return Collections.singletonList(this);
     }
 

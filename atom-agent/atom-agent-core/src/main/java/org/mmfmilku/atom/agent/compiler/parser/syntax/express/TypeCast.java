@@ -1,5 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ public class TypeCast implements Expression {
     }
 
     @Override
-    public List<Expression> getBaseExpression() {
-        return Collections.singletonList(this);
+    public List<LeafExpression> getLeafExpression() {
+        return expression.getLeafExpression();
     }
 }

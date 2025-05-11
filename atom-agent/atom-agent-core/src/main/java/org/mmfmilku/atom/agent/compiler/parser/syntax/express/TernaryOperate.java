@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,7 @@ public class TernaryOperate implements Expression {
     }
 
     @Override
-    public List<Expression> getBaseExpression() {
+    public List<LeafExpression> getLeafExpression() {
         GrammarUtil.notSupport();
         return null;
     }

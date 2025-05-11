@@ -8,6 +8,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Method;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
 import org.mmfmilku.atom.util.FileUtils;
 
 import java.io.IOException;
@@ -45,8 +46,8 @@ public class ByteCodeUtilsTest {
         List<Expression> allExpression =
                 javaAST.getClassList().get(0).getMethods().get(0).getCodeBlock().getAllExpression();
         for (Expression expression : allExpression) {
-            List<Expression> baseExpression = expression.getBaseExpression();
-            for (Expression baseExp : baseExpression) {
+            List<LeafExpression> baseExpression = expression.getLeafExpression();
+            for (LeafExpression baseExp : baseExpression) {
                 if (baseExp instanceof Identifier) {
                     assertEquals("$1", ((Identifier) baseExp).getValue());
                 }

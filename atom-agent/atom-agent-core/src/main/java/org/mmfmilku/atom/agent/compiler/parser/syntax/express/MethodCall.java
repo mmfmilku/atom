@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,12 +46,12 @@ public class MethodCall implements Expression {
     }
 
     @Override
-    public List<Expression> getBaseExpression() {
+    public List<LeafExpression> getLeafExpression() {
         if (passedParams == null) {
             return Collections.emptyList();
         }
         return passedParams.stream()
-                .map(Expression::getBaseExpression)
+                .map(Expression::getLeafExpression)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }

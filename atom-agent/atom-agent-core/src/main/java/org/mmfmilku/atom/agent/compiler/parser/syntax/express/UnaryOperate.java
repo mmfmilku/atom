@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
 
 import java.util.Collections;
 import java.util.List;
@@ -64,7 +65,7 @@ public class UnaryOperate implements Expression {
     }
 
     @Override
-    public List<Expression> getBaseExpression() {
+    public List<LeafExpression> getLeafExpression() {
         return Collections.singletonList(identifier);
     }
 }

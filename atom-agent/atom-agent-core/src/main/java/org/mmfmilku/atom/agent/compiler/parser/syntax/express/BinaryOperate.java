@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
 
 import java.util.*;
 
@@ -55,10 +56,10 @@ public class BinaryOperate implements Expression {
     }
 
     @Override
-    public List<Expression> getBaseExpression() {
-        List<Expression> leftExpression = left.getBaseExpression();
-        List<Expression> rightExpression = right.getBaseExpression();
-        List<Expression> expressions = new ArrayList<>();
+    public List<LeafExpression> getLeafExpression() {
+        List<LeafExpression> leftExpression = left.getLeafExpression();
+        List<LeafExpression> rightExpression = right.getLeafExpression();
+        List<LeafExpression> expressions = new ArrayList<>();
         expressions.addAll(leftExpression);
         expressions.addAll(rightExpression);
         return expressions;
