@@ -137,8 +137,8 @@ public class ByteCodeUtils {
         for (Statement statement : statements) {
             List<Expression> allExpression = statement.getAllExpression();
             allExpression.stream()
-                    .map(Expression::getBaseExpression)
-                    .flatMap(Collection::stream)
+//                    .map(Expression::getBaseExpression)
+//                    .flatMap(Collection::stream)
                     .forEach(expression -> {
                         if (expression instanceof Identifier) {
                             Identifier identifier = (Identifier) expression;

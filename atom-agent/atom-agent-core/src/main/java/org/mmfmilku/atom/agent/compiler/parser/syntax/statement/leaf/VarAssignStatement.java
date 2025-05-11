@@ -42,7 +42,7 @@ public class VarAssignStatement implements LeafStatement {
 
     @Override
     public List<Expression> getAllExpression() {
-        return Collections.singletonList(assignExpression);
+        return assignExpression.getAllExpression();
     }
 
     @Override

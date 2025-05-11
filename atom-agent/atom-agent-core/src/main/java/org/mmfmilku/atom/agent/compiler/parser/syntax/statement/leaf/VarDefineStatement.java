@@ -56,7 +56,7 @@ public class VarDefineStatement implements LeafStatement {
     @Override
     public List<Expression> getAllExpression() {
         return assignExpression == null ?
-                Collections.emptyList() : Collections.singletonList(assignExpression);
+                Collections.emptyList() : assignExpression.getAllExpression();
     }
 
     @Override

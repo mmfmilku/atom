@@ -29,7 +29,7 @@ public class ExpStatement implements LeafStatement {
 
     @Override
     public List<Expression> getAllExpression() {
-        return Collections.singletonList(expression);
+        return expression.getAllExpression();
     }
 
     @Override

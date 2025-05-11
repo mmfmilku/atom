@@ -39,7 +39,7 @@ public abstract class LoopStatement implements NestedStatement {
     @Override
     public List<Expression> getAllExpression() {
         List<Expression> expressions = new ArrayList<>();
-        expressions.add(loopCondition);
+        expressions.addAll(loopCondition.getAllExpression());
         expressions.addAll(loopBody.getAllExpression());
         return expressions;
     }

@@ -24,7 +24,7 @@ public class SyncCodeBlock extends CodeBlock {
     @Override
     public List<Expression> getAllExpression() {
         List<Expression> allExpression = super.getAllExpression();
-        allExpression.add(syncObject);
+        allExpression.addAll(syncObject.getAllExpression());
         return allExpression;
     }
 

@@ -62,7 +62,7 @@ public class IfStatement implements NestedStatement {
     @Override
     public List<Expression> getAllExpression() {
         List<Expression> all = new ArrayList<>();
-        all.add(condition);
+        all.addAll(condition.getAllExpression());
         all.addAll(trueStatement.getAllExpression());
         if (falseStatement != null) {
             all.addAll(falseStatement.getAllExpression());
