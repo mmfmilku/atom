@@ -2,13 +2,14 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 
 import java.util.*;
 
 /**
  * 双目表达式
  * */
-public class BinaryOperate implements Expression {
+public class BinaryOperate implements NestedExpression {
 
     private Expression left;
     private String operator;
@@ -63,5 +64,10 @@ public class BinaryOperate implements Expression {
         expressions.addAll(leftExpression);
         expressions.addAll(rightExpression);
         return expressions;
+    }
+
+    @Override
+    public List<Expression> getNested() {
+        return Arrays.asList(left, right);
     }
 }

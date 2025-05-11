@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * 括号包裹的 优先执行表达式
  * */
-public class PriorityExpression implements Expression {
+public class PriorityExpression implements NestedExpression {
 
     private Expression expression;
 
@@ -34,5 +34,10 @@ public class PriorityExpression implements Expression {
     @Override
     public List<LeafExpression> getLeafExpression() {
         return expression.getLeafExpression();
+    }
+
+    @Override
+    public List<Expression> getNested() {
+        return Collections.singletonList(expression);
     }
 }

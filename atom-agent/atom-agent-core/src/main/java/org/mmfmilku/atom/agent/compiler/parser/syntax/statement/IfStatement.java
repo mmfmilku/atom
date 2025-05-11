@@ -17,7 +17,7 @@ public class IfStatement implements NestedStatement {
     private Statement trueStatement;
 
     /**
-     * if为 false 时执行的代码块
+     * if为 false 时执行的代码块。注意可能为空！
      * */
     private Statement falseStatement;
 
@@ -79,7 +79,12 @@ public class IfStatement implements NestedStatement {
 
     @Override
     public List<Statement> getNested() {
-        return Arrays.asList(trueStatement, falseStatement);
+        List<Statement> statements = new ArrayList<>();
+        statements.add(trueStatement);
+        if (falseStatement != null) {
+            statements.add(falseStatement);
+        }
+        return statements;
     }
 
     @Override

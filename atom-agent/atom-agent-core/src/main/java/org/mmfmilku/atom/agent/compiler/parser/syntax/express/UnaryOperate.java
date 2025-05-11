@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * 单目表达式
  * */
-public class UnaryOperate implements Expression {
+public class UnaryOperate implements NestedExpression {
 
     private String operator;
     private Identifier identifier;
@@ -66,6 +66,11 @@ public class UnaryOperate implements Expression {
 
     @Override
     public List<LeafExpression> getLeafExpression() {
+        return Collections.singletonList(identifier);
+    }
+
+    @Override
+    public List<Expression> getNested() {
         return Collections.singletonList(identifier);
     }
 }

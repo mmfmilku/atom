@@ -3,6 +3,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,7 +12,7 @@ import java.util.stream.Stream;
 /**
  * 调用链表达式 o1.m1().o2.m2()
  */
-public class CallChain implements Expression {
+public class CallChain implements NestedExpression {
 
     private Expression first;
 
@@ -87,5 +88,10 @@ public class CallChain implements Expression {
         return Stream.concat(first.getLeafExpression().stream(),
                 next.getLeafExpression().stream())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Expression> getNested() {
+        return Arrays.asList(first, next);
     }
 }

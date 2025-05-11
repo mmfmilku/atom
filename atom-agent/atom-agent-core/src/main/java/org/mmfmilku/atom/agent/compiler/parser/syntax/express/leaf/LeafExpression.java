@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.LinkedNode;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,4 +13,8 @@ public interface LeafExpression extends Expression {
         return Collections.singletonList(this);
     }
 
+    @Override
+    default List<LinkedNode> getChildren() {
+        return Collections.emptyList();
+    }
 }
