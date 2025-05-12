@@ -3,6 +3,7 @@ package org.mmfmilku.atom.agent.console;
 import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
+import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 import org.mmfmilku.atom.agent.util.OrdUtils;
 
 import java.util.Map;
@@ -66,6 +67,22 @@ public class JScriptTest {
                         "\n" +
                         "}\n";
         assertEquals(sourceCodeGen, javaAST.getSourceCode());
+    }
+
+    @Test
+    public void testParseJScript4() {
+        String code = " " +
+                "import com.example.bootstudy.service.TestService;" +
+                "System.out.println(\"jjjjjjjjjjjjjj!!!!\");\n" +
+                "        TestService test = new TestService();\n" +
+                "        System.out.println(test.add(5, 8));\n" +
+                "        System.out.println(TestService.class);\n" +
+                "        System.out.println(\"jjjjjjjjjjjjjjjjjj end!!!!\");"
+                ;
+        JavaAST javaAST = JScript.parseJScript(code);
+        System.out.println("脚本映射源码");
+        ByteCodeUtils.toJavassistCode(javaAST);
+        System.out.println(javaAST.getSourceCode());
     }
 
     /**

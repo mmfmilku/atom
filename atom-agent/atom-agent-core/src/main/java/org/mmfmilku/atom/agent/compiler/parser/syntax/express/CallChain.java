@@ -70,7 +70,7 @@ public class CallChain implements NestedExpression {
         }
         if (next instanceof CallChain) {
             importNoneIdentifier((CallChain) next, importsMap);
-        } else if (!(first instanceof Identifier)) {
+        } else if (!(next instanceof Identifier)) {
             next.useImports(importsMap);
         }
     }
