@@ -115,7 +115,7 @@ public class JTerminalHolder {
                     Identifier identifier = (Identifier) baseExp;
                     String value = identifier.getValue();
                     if (jTerminal.getContextVars().containsKey(value)
-                            && jTerminal.getLastVars().contains(value)) {
+                            || jTerminal.getLastVars().contains(value)) {
                         identifier.setValue("$1.get(\"" + value + "\")");
                     }
                 }
