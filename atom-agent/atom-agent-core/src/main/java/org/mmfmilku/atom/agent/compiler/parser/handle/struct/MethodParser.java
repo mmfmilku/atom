@@ -12,7 +12,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineSt
 import java.util.List;
 
 /**
- * 解析方法，不包含解析修饰符
+ * 解析方法，不包含解析修饰符、解析泛形
  * returnType methodName(...) {...}
  * */
 public class MethodParser implements StructParserHandle<Method> {
@@ -25,7 +25,6 @@ public class MethodParser implements StructParserHandle<Method> {
     public Method parse(ParserIterator iterator) {
         Method method = new Method();
 
-        Generics generics = iterator.parseGenericsAndNext();
         // 目前解析 public void getValue(...) {...}
         String returnType = iterator.parseWordsPoint();
         Token methodName = iterator.needNext(TokenType.Words);

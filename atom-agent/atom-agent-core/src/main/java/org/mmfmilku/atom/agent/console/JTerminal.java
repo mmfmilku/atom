@@ -33,7 +33,7 @@ public class JTerminal {
     /**
      * 最近一次执行产生的变量
      * */
-    private Set<String> lastVars = new HashSet<>();
+    private Set<String> currVars = new HashSet<>();
 
     /**
      * 执行历史
@@ -45,12 +45,12 @@ public class JTerminal {
         this.name = name;
     }
 
-    public Set<String> getLastVars() {
-        return lastVars;
+    public Set<String> getCurrVars() {
+        return currVars;
     }
 
-    public void setLastVars(Set<String> lastVars) {
-        this.lastVars = lastVars;
+    public void setCurrVars(Set<String> currVars) {
+        this.currVars = currVars;
     }
 
     public String getId() {

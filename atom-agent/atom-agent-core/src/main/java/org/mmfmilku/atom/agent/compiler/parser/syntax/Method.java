@@ -16,6 +16,7 @@ public class Method implements Node, ImportUse {
     protected List<Annotation> annotations;
     protected String methodName;
     protected Modifier modifier;
+    protected Generics generics;
     protected List<VarDefineStatement> methodParams;
     protected List<String> throwList;
     protected String returnType;
@@ -37,6 +38,14 @@ public class Method implements Node, ImportUse {
                     )
                 + " "
                 + GrammarUtil.getLinesCode(codeBlock);
+    }
+
+    public Generics getGenerics() {
+        return generics;
+    }
+
+    public void setGenerics(Generics generics) {
+        this.generics = generics;
     }
 
     public List<String> getThrowList() {

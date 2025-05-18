@@ -5,6 +5,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 
 /**
@@ -20,9 +21,15 @@ public class VarDefineParser implements CodeParserHandle {
 
     @Override
     public VarDefineStatement parse(ParserIterator iterator) {
+        iterator.checkCurr(TokenType.Words);
         String varType = iterator.parseWordsPoint();
-        Token varName = iterator.needNext(TokenType.Words);
-        return new VarDefineStatement(varType, varName.getValue());
+        iterator.needNext(TokenType.Words);
+        Generics generics = iterator.parseGenericsAndNext();
+        Token varName = iterator.checkCurr(TokenType.Words);
+        VarDefineStatement varDefineStatement =
+                new VarDefineStatement(varType, varName.getValue());
+        varDefineStatement.setGenerics(generics);
+        return varDefineStatement;
     }
 
     @Override

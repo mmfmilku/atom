@@ -242,24 +242,26 @@ public class ParserDispatcher {
             Token className = iterator.needNext(TokenType.Words);
             Class clazz = new Class(className.getValue());
 
-            Generics generics = iterator.parseGenericsAndNext();
+            iterator.needNext();
+            clazz.setGenerics(iterator.parseGenericsAndNext());
 
-            if (iterator.isNext(TokenType.Words)) {
-                Token next = iterator.needNext(TokenType.Words);
-                if ("extends".equals(next.getValue())) {
+            if (iterator.isCurr(TokenType.Words)) {
+                Token curr = iterator.getCurr();
+                if ("extends".equals(curr.getValue())) {
                     iterator.needNext(TokenType.Words);
                     clazz.setSuperClass(parseWordsPoint());
-
-                    if (iterator.isNext(TokenType.Words, "implements")) {
-                        iterator.needNext(TokenType.Words, "implements");
-                        parseImplements(clazz);
+                    iterator.needNext();
+                    // TODO 继承类，泛形保存
+                    Generics generics = iterator.parseGenericsAndNext();
+                    if (iterator.isCurr(TokenType.Words, "implements")) {
+                        parseImplementsAndNext(clazz);
                     }
-                } else if ("implements".equals(next.getValue())) {
-                    parseImplements(clazz);
+                } else if ("implements".equals(curr.getValue())) {
+                    parseImplementsAndNext(clazz);
                 }
             }
-
-            iterator.needNext(TokenType.LBrace);
+            // 花括号，解析类内容
+            iterator.checkCurr(TokenType.LBrace);
             // 成员变量
             List<Member> members = new ArrayList<>();
             clazz.setMembers(members);
@@ -288,11 +290,8 @@ public class ParserDispatcher {
                     staticBlocks.add(codeBlock);
                     continue;
                 }
-                // TODO 方法泛形定义
+                // 泛形定义
                 Generics methodGenerics = iterator.parseGenericsAndNext();
-                if (methodGenerics != null) {
-                    // 必须为方法
-                }
                 iterator.saveIdx();
                 // 判断是成员变量还是方法或构造器
                 // 1.解析 parseWordsPoint 前存档，因为解析构造器和方法时会再次执行parseWordsPoint
@@ -316,6 +315,7 @@ public class ParserDispatcher {
                         methods.add(method);
                     }
 
+                    method.setGenerics(methodGenerics);
                     method.setModifier(modifier);
                     method.setAnnotations(annotations);
                 } else {
@@ -359,15 +359,19 @@ public class ParserDispatcher {
             return accessPrivilege;
         }
 
-        private void parseImplements(Class clazz) {
+        private void parseImplementsAndNext(Class clazz) {
             List<String> implementsList = new ArrayList<>();
             iterator.needNext(TokenType.Words);
             implementsList.add(parseWordsPoint());
+            iterator.needNext();
+            // TODO 实现接口，泛形保存
             Generics generics = iterator.parseGenericsAndNext();
-            while (iterator.isNext(TokenType.Symbol, ParserIterator.COMMA)) {
-                iterator.needNext(TokenType.Symbol, ParserIterator.COMMA);
+            while (iterator.isCurr(TokenType.Symbol, ParserIterator.COMMA)) {
                 iterator.needNext(TokenType.Words);
                 implementsList.add(parseWordsPoint());
+                iterator.needNext();
+                // TODO 实现接口，泛形保存
+                generics = iterator.parseGenericsAndNext();
             }
             clazz.setImplementClasses(implementsList);
         }

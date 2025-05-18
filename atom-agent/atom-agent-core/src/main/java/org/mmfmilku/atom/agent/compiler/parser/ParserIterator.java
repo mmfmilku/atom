@@ -143,7 +143,7 @@ public class ParserIterator {
         return this.curr == this.tokens.size() - 1;
     }
 
-    public void checkCurr(TokenType type) {
+    public Token checkCurr(TokenType type) {
         Token token = getCurr();
         if (token == null) {
             this.throwParserErr(type, type.getFixValue());
@@ -151,6 +151,7 @@ public class ParserIterator {
         if (token.getType() != type) {
             this.throwParserErr(type, token.getType());
         }
+        return token;
     }
 
     public void checkCurr(TokenType type, String value) {
@@ -349,13 +350,14 @@ public class ParserIterator {
      * 解析方法参数定义
      * */
     public List<VarDefineStatement> parameterDefine() {
+        this.checkCurr(TokenType.LParen);
         List<VarDefineStatement> paramDefines = new ArrayList<>();
         if (isNext(TokenType.RParen)) {
             needNext();
             return paramDefines;
         }
         while (true) {
-            needNext();
+            needNext(TokenType.Words);
             VarDefineParser varDefineParser = getParser(VarDefineParser.class);
             VarDefineStatement varDefine = varDefineParser.parse(this);
             paramDefines.add(varDefine);
@@ -439,18 +441,13 @@ public class ParserIterator {
     }
 
     /**
-     * 运行泛形的位置，解析泛形并后移
+     * 允许泛形的位置，解析泛形并后移
      * */
     public Generics parseGenericsAndNext() {
-        // TODO 临时
-        if (!isNext(TokenType.LAngle)) {
-            return null;
-        }
-        needNext();
         GenericsParser genericsParser = getParser(GenericsParser.class);
         if (genericsParser.match(this)) {
             Generics generics = genericsParser.parse(this);
-            // needNext();
+             needNext();
             return generics;
         }
         return null;

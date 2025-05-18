@@ -7,7 +7,6 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.LinkedNode;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
@@ -115,7 +114,7 @@ public class JTerminalHolder {
                     Identifier identifier = (Identifier) baseExp;
                     String value = identifier.getValue();
                     if (jTerminal.getContextVars().containsKey(value)
-                            || jTerminal.getLastVars().contains(value)) {
+                            || jTerminal.getCurrVars().contains(value)) {
                         identifier.setValue("$1.get(\"" + value + "\")");
                     }
                 }
@@ -139,7 +138,7 @@ public class JTerminalHolder {
             // TODO 语句替换为语句块，并插入保存上下文的语句
             String varName = varDefineStatement.getVarName();
             // 插入语句 arg0.put(varName, ${varName});
-            jTerminal.getLastVars().add(varName);
+            jTerminal.getCurrVars().add(varName);
             String addExp = String.format("$1.put(\"%s\", %s);", varName, varName);
             Expression expression = CompilerUtil.parseExpression(addExp);
             CodeBlock codeBlock = new CodeBlock();
@@ -153,7 +152,7 @@ public class JTerminalHolder {
             // TODO 语句替换为语句块，并插入保存上下文的语句
             String varName = varDefineStatement.getVarName();
             // 插入语句 contextVars.put(varName, ${varName});
-            jTerminal.getLastVars().add(varName);
+            jTerminal.getCurrVars().add(varName);
             String addExp = String.format("$1.put(\"%s\", %s);", varName, varName);
             Expression expression = CompilerUtil.parseExpression(addExp);
             CodeBlock codeBlock = new CodeBlock();

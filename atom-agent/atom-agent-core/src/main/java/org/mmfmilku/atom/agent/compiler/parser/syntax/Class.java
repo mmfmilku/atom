@@ -31,6 +31,11 @@ public class Class implements Node {
     private ClassType classType;
 
     /**
+     * 类泛形定义
+     * */
+    private Generics generics;
+
+    /**
      * 修饰符
      * */
     private Modifier modifier;
@@ -56,6 +61,14 @@ public class Class implements Node {
     private List<Method> constructors;
 
     private List<Method> methods;
+
+    public Generics getGenerics() {
+        return generics;
+    }
+
+    public void setGenerics(Generics generics) {
+        this.generics = generics;
+    }
 
     public List<CodeBlock> getStaticBlocks() {
         return staticBlocks;

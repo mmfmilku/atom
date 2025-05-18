@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
 import java.util.Collections;
@@ -14,10 +15,19 @@ public class VarDefineStatement implements LeafStatement {
     private String varType;
     private String varName;
     private Expression assignExpression;
+    private Generics generics;
 
     public VarDefineStatement(String varType, String varName) {
         this.varType = varType;
         this.varName = varName;
+    }
+
+    public Generics getGenerics() {
+        return generics;
+    }
+
+    public void setGenerics(Generics generics) {
+        this.generics = generics;
     }
 
     public String getVarType() {
