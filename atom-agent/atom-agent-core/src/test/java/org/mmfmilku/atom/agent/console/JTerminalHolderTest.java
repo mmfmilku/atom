@@ -19,10 +19,11 @@ public class JTerminalHolderTest {
 
     @Test
     public void testNewTerminal() {
+        int size = JTerminalHolder.listId().size();
         JTerminal test1 = JTerminalHolder.newTerminal("test-1");
-        assertEquals(2, JTerminalHolder.listId().size());
+        assertEquals(size + 1, JTerminalHolder.listId().size());
         JTerminalHolder.deleteTerminal(test1.getId());
-        assertEquals(1, JTerminalHolder.listId().size());
+        assertEquals(size, JTerminalHolder.listId().size());
     }
 
 //    @Test
@@ -41,8 +42,9 @@ public class JTerminalHolderTest {
                 + "int c = 9;"
                 + "int d = b * c;"
                 ;
+        JTerminal jTerminal = JTerminalHolder.newTerminal("parseTerminalCode");
         Object parseTerminalCode = ReflectUtils
-                .invokeStaticMethod(JTerminalHolder.class, "parseTerminalCode", code);
+                .invokeStaticMethod(JTerminalHolder.class, "parseTerminalCode", code, jTerminal);
         List<Statement> statementList = (List<Statement>) parseTerminalCode;
         String enhanceCode = statementList.stream()
                 .map(Statement::getSourceCode)
@@ -82,23 +84,24 @@ public class JTerminalHolderTest {
         String expect = "package org.mmfmilku.atom.agent.console;\n" +
                 "\n" +
                 "class JTerminalExecutor {\n" +
-                "Object execute() {{String a = \"value of a\";\n" +
-                "contextVars.put(\"a\", a);\n" +
+                "Object execute(java.util.Map arg0) {{String a = \"value of a\";\n" +
+                "$1.put(\"a\", a);\n" +
                 "}\n" +
                 "{int b = 4;\n" +
-                "contextVars.put(\"b\", b);\n" +
+                "$1.put(\"b\", b);\n" +
                 "}\n" +
                 "{int c = 6;\n" +
-                "contextVars.put(\"c\", c);\n" +
+                "$1.put(\"c\", c);\n" +
                 "}\n" +
-                "{int d = b * c;\n" +
-                "contextVars.put(\"d\", d);\n" +
+                "{int d = $1.get(\"b\") * $1.get(\"c\");\n" +
+                "$1.put(\"d\", d);\n" +
                 "}\n" +
-                "System.out.println(d);\n" +
-                "System.out.println(a.length());\n" +
+                "System.out.println($1.get(\"d\"));\n" +
+                "System.out.println($1.get(\"a\").length());\n" +
                 "{a = \"new value of a\";\n" +
-                "contextVars.put(\"a\", a);\n" +
+                "$1.put(\"a\", a);\n" +
                 "}\n" +
+                "return \"success\";\n" +
                 "}\n" +
                 "\n" +
                 "}\n";
