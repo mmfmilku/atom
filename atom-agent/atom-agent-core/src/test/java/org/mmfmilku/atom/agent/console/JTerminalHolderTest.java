@@ -51,16 +51,16 @@ public class JTerminalHolderTest {
                 .collect(Collectors.joining("\n"));
         System.out.println(enhanceCode);
         String expect = "{String a = \"ppp\";\n" +
-                "contextVars.put(\"a\", a);\n" +
+                "$1.put(\"a\", a);\n" +
                 "}\n" +
                 "{int b = 2;\n" +
-                "contextVars.put(\"b\", b);\n" +
+                "$1.put(\"b\", b);\n" +
                 "}\n" +
                 "{int c = 9;\n" +
-                "contextVars.put(\"c\", c);\n" +
+                "$1.put(\"c\", c);\n" +
                 "}\n" +
-                "{int d = b * c;\n" +
-                "contextVars.put(\"d\", d);\n" +
+                "{int d = $1.get(\"b\") * $1.get(\"c\");\n" +
+                "$1.put(\"d\", d);\n" +
                 "}";
         assertEquals(expect, enhanceCode);
     }
