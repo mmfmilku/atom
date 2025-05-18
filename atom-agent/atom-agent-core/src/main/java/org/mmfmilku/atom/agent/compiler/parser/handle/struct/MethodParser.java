@@ -4,6 +4,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.StructParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Method;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
@@ -24,6 +25,7 @@ public class MethodParser implements StructParserHandle<Method> {
     public Method parse(ParserIterator iterator) {
         Method method = new Method();
 
+        Generics generics = iterator.parseGenericsAndNext();
         // 目前解析 public void getValue(...) {...}
         String returnType = iterator.parseWordsPoint();
         Token methodName = iterator.needNext(TokenType.Words);

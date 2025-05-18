@@ -7,6 +7,8 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.CodeBlockParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.ExpressionParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.VarDefineParser;
+import org.mmfmilku.atom.agent.compiler.parser.handle.struct.GenericsParser;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
@@ -434,6 +436,24 @@ public class ParserIterator {
             throwList.add(throwE.getValue());
         } while (isNext(TokenType.Symbol, COMMA));
         return throwList;
+    }
+
+    /**
+     * 运行泛形的位置，解析泛形并后移
+     * */
+    public Generics parseGenericsAndNext() {
+        // TODO 临时
+        if (!isNext(TokenType.LAngle)) {
+            return null;
+        }
+        needNext();
+        GenericsParser genericsParser = getParser(GenericsParser.class);
+        if (genericsParser.match(this)) {
+            Generics generics = genericsParser.parse(this);
+            // needNext();
+            return generics;
+        }
+        return null;
     }
 
     public void throwIllegalToken(String value) {

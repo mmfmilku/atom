@@ -242,6 +242,8 @@ public class ParserDispatcher {
             Token className = iterator.needNext(TokenType.Words);
             Class clazz = new Class(className.getValue());
 
+            Generics generics = iterator.parseGenericsAndNext();
+
             if (iterator.isNext(TokenType.Words)) {
                 Token next = iterator.needNext(TokenType.Words);
                 if ("extends".equals(next.getValue())) {
@@ -285,6 +287,11 @@ public class ParserDispatcher {
                     }
                     staticBlocks.add(codeBlock);
                     continue;
+                }
+                // TODO 方法泛形定义
+                Generics methodGenerics = iterator.parseGenericsAndNext();
+                if (methodGenerics != null) {
+                    // 必须为方法
                 }
                 iterator.saveIdx();
                 // 判断是成员变量还是方法或构造器
@@ -356,6 +363,7 @@ public class ParserDispatcher {
             List<String> implementsList = new ArrayList<>();
             iterator.needNext(TokenType.Words);
             implementsList.add(parseWordsPoint());
+            Generics generics = iterator.parseGenericsAndNext();
             while (iterator.isNext(TokenType.Symbol, ParserIterator.COMMA)) {
                 iterator.needNext(TokenType.Symbol, ParserIterator.COMMA);
                 iterator.needNext(TokenType.Words);

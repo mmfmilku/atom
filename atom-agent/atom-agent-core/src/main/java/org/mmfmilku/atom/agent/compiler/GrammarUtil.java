@@ -25,7 +25,8 @@ public class GrammarUtil {
                 "/".equals(value) ||
                 "&".equals(value) ||
                 "|".equals(value) ||
-                "^".equals(value)
+                "^".equals(value) ||
+                "%".equals(value)
                 ;
     }
 

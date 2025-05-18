@@ -31,8 +31,8 @@ public class Lexer {
     // 运算符 加 减 乘 除 与 或 非 异或 取余,[+-*/&|^%]
     private static final Pattern operator = Pattern.compile("[\\+\\-\\*/&\\|\\^%]");
 
-    // 符号,[+-*/&|!^=<>;;,.[]%`~?]
-    private static final Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;:,\\.\\[\\]%`~\\?]");
+    // 符号,[+-*/&|!^=;;,.[]%`~?]
+    private static final Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=;:,\\.\\[\\]%`~\\?]");
 
     // 换行符 通过系统属性获取？ line.separator
     private static final Pattern lineSymbol = Pattern.compile("[\\r\\n]");
@@ -115,6 +115,20 @@ public class Lexer {
                 if (dealChar == '}') {
                     // 大括号
                     tokens.add(new Token(TokenType.RBrace, "}"));
+                    curr++;
+                    continue;
+                }
+
+                if (dealChar == '<') {
+                    // 尖括号
+                    tokens.add(new Token(TokenType.LAngle));
+                    curr++;
+                    continue;
+                }
+
+                if (dealChar == '>') {
+                    // 尖括号
+                    tokens.add(new Token(TokenType.RAngle));
                     curr++;
                     continue;
                 }
