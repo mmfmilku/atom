@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class UseImportsTest {
 
@@ -45,7 +46,7 @@ class Example2 {
         org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST javaAST = CompilerUtil.parseAST("");
         org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST javaAST2 = org.mmfmilku.atom.agent.compiler.CompilerUtil.parseAST("");
         long count = Stream.concat(Stream.of(1, 2), Stream.of(3, 4, 5)).count();
-        assertEquals(count, 5);
+        org.junit.Assert.assertEquals(count, 5);
         return java.util.Collections.EMPTY_MAP;
     }
 }

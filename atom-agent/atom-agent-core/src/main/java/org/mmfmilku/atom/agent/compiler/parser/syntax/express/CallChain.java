@@ -6,6 +6,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpressio
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,7 +53,7 @@ public class CallChain implements NestedExpression {
 //            }
             CallChain callChain = (CallChain) next;
             // 链式调用，标识符中只有第一位需要导入
-            importNoneIdentifier(callChain, importsMap);
+            importAfterChain(callChain, importsMap);
         } else {
             first.useImports(importsMap);
         }
@@ -60,8 +61,8 @@ public class CallChain implements NestedExpression {
         // com.xxx.Class -> com.xxx.com.xxx.Class
     }
 
-    private static void importNoneIdentifier(CallChain callChain,
-                                             Map<String, String> importsMap) {
+    private static void importAfterChain(CallChain callChain,
+                                         Map<String, String> importsMap) {
         // import所有非标识符的表达式
         Expression first = callChain.getFirst();
         Expression next = callChain.getNext();
@@ -69,9 +70,18 @@ public class CallChain implements NestedExpression {
             first.useImports(importsMap);
         }
         if (next instanceof CallChain) {
-            importNoneIdentifier((CallChain) next, importsMap);
+            importAfterChain((CallChain) next, importsMap);
         } else if (!(next instanceof Identifier)) {
-            next.useImports(importsMap);
+            // 不只是标识符不做import替换
+            if (next instanceof MethodCall) {
+                // 方法调用，调用的方法本身不替换
+                MethodCall methodCall = (MethodCall) next;
+                Optional.of(methodCall.getPassedParams())
+                        .ifPresent(expressions -> expressions.forEach(
+                                expression -> expression.useImports(importsMap)));
+            } else {
+                next.useImports(importsMap);
+            }
         }
     }
 
