@@ -3,6 +3,7 @@ package org.mmfmilku.atom.agent.compiler.parser;
 import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler
         .CompilerUtil;
+import org.mmfmilku.atom.agent.compiler.SupportSyntaxSample;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.parser.aa.*;
 import org.mmfmilku.atom.agent.compiler
@@ -116,6 +117,14 @@ public class ParserTest implements Serializable, Closeable {
     @Override
     public void close() throws IOException {
 
+    }
+
+    /**
+     * 综合语法测试
+     * */
+    @Test
+    public void parseSupportSyntax() {
+        TestUtil.compareParsedText(SupportSyntaxSample.class);
     }
 
     /**
