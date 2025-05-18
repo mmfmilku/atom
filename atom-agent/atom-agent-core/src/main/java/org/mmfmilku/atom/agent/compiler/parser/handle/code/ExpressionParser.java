@@ -95,8 +95,10 @@ public class ExpressionParser implements CodeParserHandle {
     }
 
     private Expression parseObjectNew(ParserIterator iterator) {
-        Token className = iterator.needNext(TokenType.Words);
-        ConstructorCall constructorCall = new ConstructorCall(className.getValue());
+        iterator.needNext(TokenType.Words);
+        // 支持 new xx.xx.xx.C()
+        String className = iterator.parseWordsPoint();
+        ConstructorCall constructorCall = new ConstructorCall(className);
         iterator.needNext(TokenType.LParen);
         List<Expression> expressions = iterator.parameterPassing();
         constructorCall.setPassedParams(expressions);
