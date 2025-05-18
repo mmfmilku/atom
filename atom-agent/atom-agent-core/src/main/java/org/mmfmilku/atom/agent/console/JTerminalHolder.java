@@ -69,7 +69,7 @@ public class JTerminalHolder {
     }
 
     private static JavaAST getJavaAST(String code, JTerminal jTerminal) {
-        List<Statement> statementList = parseTerminalCode(code);
+        List<Statement> statementList = parseTerminalCode(code, jTerminal);
         // 处理return语句
         Statement statement = statementList.get(statementList.size() - 1);
         // TODO 代理处理
@@ -87,7 +87,7 @@ public class JTerminalHolder {
         return javaAST;
     }
 
-    private static List<Statement> parseTerminalCode(String code) {
+    private static List<Statement> parseTerminalCode(String code, JTerminal jTerminal) {
         Lexer lexer = new Lexer(code);
         lexer.execute();
         ParserDispatcher dispatcher = new ParserDispatcher(lexer);
@@ -97,19 +97,27 @@ public class JTerminalHolder {
         parserAssembly.parse();
         // TODO 终端语句增强注入
         return statementList.stream()
-                .map(JTerminalHolder::enhanceStatement)
+                .map(statement -> enhanceStatement(statement, jTerminal))
                 .collect(Collectors.toList());
     }
 
-    private static Statement enhanceStatement(Statement statement) {
+    private static Statement enhanceStatement(Statement statement, JTerminal jTerminal) {
         List<Expression> allExpression = statement.getAllExpression();
         for (Expression expression : allExpression) {
             for (Expression baseExp : expression.getLeafExpression()) {
                 if (baseExp instanceof Identifier) {
                     // 标识符处理，获取变量从变量上下文中get
                     // TODO 临时设置为$1处理arg0变量
+                    // TODO 遗漏情况，同import，考虑一起处理
+                    // 1.变量名等于类名的情况，会误替换
+                    // 2.对于调用链，只有首个标识符需要替换
+                    // 变量上下文中存在的变量为历史变量，与本次添加的变量一起判断
                     Identifier identifier = (Identifier) baseExp;
-                    identifier.setValue("$1.get(\"" + identifier.getValue() + "\")");
+                    String value = identifier.getValue();
+                    if (jTerminal.getContextVars().containsKey(value)
+                            && jTerminal.getLastVars().contains(value)) {
+                        identifier.setValue("$1.get(\"" + value + "\")");
+                    }
                 }
             }
         }
@@ -119,7 +127,7 @@ public class JTerminalHolder {
             // TODO 获取其中嵌套的语句,例如语句块
             CodeBlock codeBlock = (CodeBlock) statement;
             for (Statement codeBlockStatement : codeBlock.getStatements()) {
-                enhanceStatement(codeBlockStatement);
+                enhanceStatement(codeBlockStatement, jTerminal);
             }
             // TODO
 //            codeBlock.setStatements();
@@ -131,7 +139,8 @@ public class JTerminalHolder {
             // TODO 语句替换为语句块，并插入保存上下文的语句
             String varName = varDefineStatement.getVarName();
             // 插入语句 arg0.put(varName, ${varName});
-            String addExp = String.format("arg0.put(\"%s\", %s);", varName, varName);
+            jTerminal.getLastVars().add(varName);
+            String addExp = String.format("$1.put(\"%s\", %s);", varName, varName);
             Expression expression = CompilerUtil.parseExpression(addExp);
             CodeBlock codeBlock = new CodeBlock();
             codeBlock.setStatements(Arrays.asList(statement, new ExpStatement(expression)));
@@ -144,7 +153,8 @@ public class JTerminalHolder {
             // TODO 语句替换为语句块，并插入保存上下文的语句
             String varName = varDefineStatement.getVarName();
             // 插入语句 contextVars.put(varName, ${varName});
-            String addExp = String.format("contextVars.put(\"%s\", %s);", varName, varName);
+            jTerminal.getLastVars().add(varName);
+            String addExp = String.format("$1.put(\"%s\", %s);", varName, varName);
             Expression expression = CompilerUtil.parseExpression(addExp);
             CodeBlock codeBlock = new CodeBlock();
             codeBlock.setStatements(Arrays.asList(statement, new ExpStatement(expression)));
