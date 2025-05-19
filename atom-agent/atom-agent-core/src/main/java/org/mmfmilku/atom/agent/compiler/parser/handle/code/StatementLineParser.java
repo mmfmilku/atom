@@ -4,6 +4,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.BinaryOperate;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
@@ -27,6 +28,11 @@ public class StatementLineParser implements CodeParserHandle {
         if (token.getType() == TokenType.Words) {
             iterator.saveIdx();
             String wordsPoint = iterator.parseWordsPoint();
+            if (iterator.isNext(TokenType.LAngle)) {
+                iterator.needNext();
+                // TODO 保存泛形
+                Generics generics = iterator.parseGenericsAndNext();
+            }
             if (iterator.isNext(TokenType.Words)) {
                 iterator.readIdx();
                 // 变量定义
@@ -84,7 +90,7 @@ public class StatementLineParser implements CodeParserHandle {
                 Expression expression = iterator.parseExpression();
                 return new ExpStatement(expression);
             }
-            // TODO 数组、泛形解析
+            // TODO 数组解析
             iterator.throwIllegalToken(token.getValue());
         } else if (token.getType() == TokenType.Symbol
                 || token.getType() == TokenType.Number

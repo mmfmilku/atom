@@ -298,7 +298,8 @@ public class ParserDispatcher {
                 // 2.调用 parseWordsPoint 后再判断是因为 如 com.xx.xxx 会影响判断
                 parseWordsPoint();
                 if (iterator.isNext(TokenType.LParen) ||
-                        iterator.isNext(2, TokenType.LParen, TokenType.LParen.getFixValue())) {
+                        iterator.isNext(2, TokenType.LParen, TokenType.LParen.getFixValue())
+                        || iterator.isNext(TokenType.LAngle)) {
                     iterator.readIdx();
                     // 后一位或后两位是括号，则为方法定义
                     // TODO 抽象方法

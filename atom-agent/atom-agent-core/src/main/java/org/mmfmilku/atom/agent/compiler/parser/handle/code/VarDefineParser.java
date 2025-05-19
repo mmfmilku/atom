@@ -23,7 +23,7 @@ public class VarDefineParser implements CodeParserHandle {
     public VarDefineStatement parse(ParserIterator iterator) {
         iterator.checkCurr(TokenType.Words);
         String varType = iterator.parseWordsPoint();
-        iterator.needNext(TokenType.Words);
+        iterator.needNext();
         Generics generics = iterator.parseGenericsAndNext();
         Token varName = iterator.checkCurr(TokenType.Words);
         VarDefineStatement varDefineStatement =

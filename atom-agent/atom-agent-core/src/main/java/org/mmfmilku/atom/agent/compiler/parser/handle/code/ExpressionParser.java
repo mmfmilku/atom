@@ -4,6 +4,7 @@ import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.NumberLiteral;
@@ -99,7 +100,10 @@ public class ExpressionParser implements CodeParserHandle {
         // 支持 new xx.xx.xx.C()
         String className = iterator.parseWordsPoint();
         ConstructorCall constructorCall = new ConstructorCall(className);
-        iterator.needNext(TokenType.LParen);
+        iterator.needNext();
+        // TODO 泛形
+        Generics generics = iterator.parseGenericsAndNext();
+        iterator.checkCurr(TokenType.LParen);
         List<Expression> expressions = iterator.parameterPassing();
         constructorCall.setPassedParams(expressions);
         return constructorCall;

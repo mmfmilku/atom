@@ -27,7 +27,10 @@ public class MethodParser implements StructParserHandle<Method> {
 
         // 目前解析 public void getValue(...) {...}
         String returnType = iterator.parseWordsPoint();
-        Token methodName = iterator.needNext(TokenType.Words);
+        iterator.needNext();
+        // TODO 返回类型的泛形
+        Generics generics = iterator.parseGenericsAndNext();
+        Token methodName = iterator.checkCurr(TokenType.Words);
         iterator.needNext(TokenType.LParen);
 
         List<VarDefineStatement> varDefineStatements = iterator.parameterDefine();
