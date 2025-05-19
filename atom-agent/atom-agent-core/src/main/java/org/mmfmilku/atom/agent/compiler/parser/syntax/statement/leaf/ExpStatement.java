@@ -29,16 +29,17 @@ public class ExpStatement implements LeafStatement {
 
     @Override
     public List<Expression> getAllExpression() {
-        return expression.getAllExpression();
+        return expression == null ? Collections.emptyList() : expression.getAllExpression();
     }
 
     @Override
     public List<Expression> getNestedExp() {
-        return Collections.singletonList(expression);
+        return expression == null ? Collections.emptyList() : Collections.singletonList(expression);
     }
 
     @Override
     public void useImports(Map<String, String> importsMap) {
-        expression.useImports(importsMap);
+        if (expression != null)
+            expression.useImports(importsMap);
     }
 }

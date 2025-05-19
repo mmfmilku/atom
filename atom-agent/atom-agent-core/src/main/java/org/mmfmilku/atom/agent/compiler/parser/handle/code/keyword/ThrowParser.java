@@ -1,9 +1,11 @@
 package org.mmfmilku.atom.agent.compiler.parser.handle.code.keyword;
 
-import org.mmfmilku.atom.agent.compiler.GrammarUtil;
+import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
 
 /**
  * 解析 主动抛异常语句
@@ -11,14 +13,16 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 public class ThrowParser implements CodeParserHandle {
     @Override
     public boolean match(ParserIterator iterator) {
-        return false;
+        return iterator.isCurr(TokenType.Words, "throw");
     }
 
     @Override
     public Statement parse(ParserIterator iterator) {
-        GrammarUtil.notSupport();
-        // TODO
-        return null;
+        iterator.checkCurr(TokenType.Words, "throw");
+        iterator.needNext();
+        Expression expression = iterator.parseExpression();
+        iterator.needNext(TokenType.Symbol, SEMICOLONS);
+        return new ReturnStatement(expression);
     }
 
 }

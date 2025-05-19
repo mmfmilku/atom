@@ -6,43 +6,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class ReturnStatement implements LeafStatement {
-
-    private Expression expression;
+public class ReturnStatement extends ExpStatement {
 
     public ReturnStatement() {
+        super(null);
     }
 
     public ReturnStatement(Expression expression) {
-        this.expression = expression;
-    }
-
-    public Expression getExpression() {
-        return expression;
-    }
-
-    public void setExpression(Expression expression) {
-        this.expression = expression;
+        super(expression);
     }
 
     @Override
     public String getStatementSource() {
-        return expression == null ? "return" : "return " + expression.getSourceCode();
+        return getExpression() == null ? "return" : "return " + getExpression().getSourceCode();
     }
 
-    @Override
-    public List<Expression> getAllExpression() {
-        return expression == null ? Collections.emptyList() : expression.getAllExpression();
-    }
-
-    @Override
-    public List<Expression> getNestedExp() {
-        return expression == null ? Collections.emptyList() : Collections.singletonList(expression);
-    }
-
-    @Override
-    public void useImports(Map<String, String> importsMap) {
-        if (expression != null)
-            expression.useImports(importsMap);
-    }
 }
