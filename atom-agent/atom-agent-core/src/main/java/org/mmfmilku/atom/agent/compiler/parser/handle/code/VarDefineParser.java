@@ -25,6 +25,11 @@ public class VarDefineParser implements CodeParserHandle {
         String varType = iterator.parseWordsPoint();
         iterator.needNext();
         Generics generics = iterator.parseGenericsAndNext();
+        if (iterator.isCurr(TokenType.Symbol, "[")) {
+            // TODO 数组定义保存
+            iterator.needNext(TokenType.Symbol, "]");
+            iterator.needNext();
+        }
         Token varName = iterator.checkCurr(TokenType.Words);
         VarDefineStatement varDefineStatement =
                 new VarDefineStatement(varType, varName.getValue());

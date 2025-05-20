@@ -32,6 +32,34 @@ public class SupportSyntaxSample<T>
         }
     }
 
+    private static void defineStatement() {
+        int i1 = 234;
+        double d0 = 3423.342;
+
+        long l1 = 123l;
+        long l2 = 100_0000L;
+
+        float f1 = 1.22f;
+        float f2 = 0.34F;
+
+        double d1 = 23432.23432d;
+        double d2 = 0.000000043;
+        double d3 = 999_000_111.342D;
+
+        int[] a;
+        long[] b = new long[4];
+
+        java.lang.String[] strArr1 = new String[3];
+        java.lang.String[] strArr2 = new String[]{"a", "b", "c"};
+
+        Map<String, Object> map1 = new HashMap<>();
+        Map<String, List<Object>> map2 = new HashMap<String, List<java.lang.Object>>();
+
+        Map<String, java.lang.Object>[] mapArr1 = null;
+        Map[] mapArr2 = new java.util.HashMap[6];
+
+    }
+
     public StringBuilder getStr() {
         String a = new String("aaa");
         StringBuilder sb = new java.lang.StringBuilder();

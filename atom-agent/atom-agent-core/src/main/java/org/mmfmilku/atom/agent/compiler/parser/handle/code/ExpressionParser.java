@@ -10,6 +10,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.NumberLiteral;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.StringLiteral;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExpressionParser implements CodeParserHandle {
@@ -96,6 +97,7 @@ public class ExpressionParser implements CodeParserHandle {
     }
 
     private Expression parseObjectNew(ParserIterator iterator) {
+        iterator.checkCurr(TokenType.Words, "new");
         iterator.needNext(TokenType.Words);
         // 支持 new xx.xx.xx.C()
         String className = iterator.parseWordsPoint();
@@ -103,9 +105,30 @@ public class ExpressionParser implements CodeParserHandle {
         iterator.needNext();
         // TODO 泛形
         Generics generics = iterator.parseGenericsAndNext();
-        iterator.checkCurr(TokenType.LParen);
-        List<Expression> expressions = iterator.parameterPassing();
-        constructorCall.setPassedParams(expressions);
+        if (iterator.isCurr(TokenType.Symbol, "[")) {
+            // TODO 数组定义保存
+            if (iterator.isNext(TokenType.Number)) {
+                // 初始化数组大小
+                Token arrSize = iterator.needNext();
+            }
+            iterator.needNext(TokenType.Symbol, "]");
+            if (iterator.isNext(TokenType.LBrace)) {
+                // 数组定义同时赋予初始值
+                // String arr = new String[]{"a", "b", "c"}
+                // TODO 保存
+                iterator.needNext();
+                List<Expression> expressions = iterator.parameterArrInitPassing();
+                constructorCall.setPassedParams(expressions);
+            } else {
+                // TODO 防止NPE
+                constructorCall.setPassedParams(new ArrayList<>());
+            }
+        } else {
+            // 调用构造方法
+            iterator.checkCurr(TokenType.LParen);
+            List<Expression> expressions = iterator.parameterPassing();
+            constructorCall.setPassedParams(expressions);
+        }
         return constructorCall;
     }
 

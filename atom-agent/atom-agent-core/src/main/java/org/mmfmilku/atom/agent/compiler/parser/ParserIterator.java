@@ -347,6 +347,28 @@ public class ParserIterator {
     }
 
     /**
+     * 解析数组初始传参 {e1,e2}
+     * */
+    public List<Expression> parameterArrInitPassing() {
+        List<Expression> expressions = new ArrayList<>();
+        if (isNext(TokenType.RBrace)) {
+            needNext();
+            return expressions;
+        }
+        while (true) {
+            needNext();
+            Expression expression = parseExpression();
+            expressions.add(expression);
+            if (!isNext(TokenType.Symbol, COMMA)) {
+                break;
+            }
+            needNext();
+        }
+        needNext(TokenType.RBrace);
+        return expressions;
+    }
+
+    /**
      * 解析方法参数定义
      * */
     public List<VarDefineStatement> parameterDefine() {

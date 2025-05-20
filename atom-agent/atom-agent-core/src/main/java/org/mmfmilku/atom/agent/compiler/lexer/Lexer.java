@@ -19,8 +19,11 @@ public class Lexer {
     // 字母
     private static final Pattern letter = Pattern.compile("[A-Za-z]");
 
-    // 数字
+    // 数值起始，数字
     private static final Pattern number = Pattern.compile("\\d");
+
+    // 数值体，[数字_.dDfFlL]
+    private static final Pattern numberBody = Pattern.compile("[\\d_.dDfFlL]");
 
     // 标识符首字母,[字母_$@]
     private static final Pattern letterLine = Pattern.compile("[A-Za-z_\\$@]");
@@ -77,7 +80,7 @@ public class Lexer {
 
                 if (match(number, dealChar)) {
                     // 数字
-                    String value = readConsecutive(number);
+                    String value = readConsecutive(numberBody);
                     tokens.add(new Token(TokenType.Number, value));
                     continue;
                 }

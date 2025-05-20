@@ -28,69 +28,28 @@ public class StatementLineParser implements CodeParserHandle {
         if (token.getType() == TokenType.Words) {
             iterator.saveIdx();
             String wordsPoint = iterator.parseWordsPoint();
-            if (iterator.isNext(TokenType.LAngle)) {
-                iterator.needNext();
-                // TODO 保存泛形
-                Generics generics = iterator.parseGenericsAndNext();
-            }
-            if (iterator.isNext(TokenType.Words)) {
+            if (iterator.isNext(TokenType.Symbol, "[") ||
+                    iterator.isNext(TokenType.LAngle) ||
+                    iterator.isNext(TokenType.Words)) {
+                // 数组、泛形、连续字母，必定为变量定义
+                // 读取下标
                 iterator.readIdx();
                 // 变量定义
                 VarDefineAssignParser parser = iterator.getParser(VarDefineAssignParser.class);
                 return parser.parse(iterator);
             }
-            if (iterator.isNext(TokenType.Symbol)) {
+            iterator.needNext();
+            if (iterator.isCurr(TokenType.Symbol)) {
                 String varName = wordsPoint;
-                if (iterator.isNext(TokenType.Symbol, EQUAL)) {
-                    // 变量赋值
-                    // 指向等于号后面的字符
-                    iterator.needNext();
-                    iterator.needNext();
-                    Expression expression = iterator.parseExpression();
-                    return new VarAssignStatement(varName, expression);
-                } else if (iterator.isNext(TokenType.LParen)) {
-                    // 下标回溯
-                    iterator.readIdx();
-                    // 链式调用表达式语句，方法调用
-                    Expression expression = iterator.parseExpression();
-                    return new ExpStatement(expression);
-                } else {
-                    Token next = iterator.needNext();
-                    if (iterator.isOperator(next)) {
-                        String operator = next.getValue();
-                        if (iterator.isNext(TokenType.Symbol, EQUAL)) {
-                            // 变量赋值 a += exp
-                            iterator.needNext();
-                            iterator.needNext();
-                            Expression expression = iterator.parseExpression();
-                            BinaryOperate binaryOperate = new BinaryOperate(new Identifier(varName), operator, expression);
-                            return new VarAssignStatement(varName, binaryOperate);
-                        }
-                        // a++,a--
-                        if (!iterator.isPlusMinus(operator)) {
-                            iterator.throwIllegalToken(operator);
-                        }
-                        iterator.needNext(TokenType.Symbol, operator);
-                        UnaryOperate unaryOperate = new UnaryOperate(
-                                operator + operator,
-                                new Identifier(varName),
-                                false
-                        );
-                        return new ExpStatement(unaryOperate);
-                    } else {
-                        // TODO 其他符号
-                        iterator.throwIllegalToken(token.getValue());
-                    }
-
-                }
+                Statement expression = parseVarOperate(iterator, varName);
+                if (expression != null) return expression;
             }
-            if (iterator.isNext(TokenType.LParen)) {
+            if (iterator.isCurr(TokenType.LParen)) {
                 // 表达式，方法调用开头
                 iterator.readIdx();
                 Expression expression = iterator.parseExpression();
                 return new ExpStatement(expression);
             }
-            // TODO 数组解析
             iterator.throwIllegalToken(token.getValue());
         } else if (token.getType() == TokenType.Symbol
                 || token.getType() == TokenType.Number
@@ -106,5 +65,48 @@ public class StatementLineParser implements CodeParserHandle {
             iterator.throwIllegalToken(token.getValue());
         }
         return ParserIterator.EMPTY;
+    }
+
+    /**
+     * 变量操作
+     * 变量赋值、变量运算
+     * */
+    private Statement parseVarOperate(ParserIterator iterator, String varName) {
+        if (iterator.isCurr(TokenType.Symbol, EQUAL)) {
+            // 变量赋值
+            // 指向等于号后面的字符
+            iterator.needNext();
+            Expression expression = iterator.parseExpression();
+            return new VarAssignStatement(varName, expression);
+        } else {
+            Token next = iterator.getCurr();
+            if (iterator.isOperator(next)) {
+                String operator = next.getValue();
+                if (iterator.isNext(TokenType.Symbol, EQUAL)) {
+                    // 变量赋值 a += exp
+                    iterator.needNext();
+                    iterator.needNext();
+                    Expression expression = iterator.parseExpression();
+                    BinaryOperate binaryOperate = new BinaryOperate(new Identifier(varName), operator, expression);
+                    return new VarAssignStatement(varName, binaryOperate);
+                }
+                // a++,a--
+                if (!iterator.isPlusMinus(operator)) {
+                    iterator.throwIllegalToken(operator);
+                }
+                iterator.needNext(TokenType.Symbol, operator);
+                UnaryOperate unaryOperate = new UnaryOperate(
+                        operator + operator,
+                        new Identifier(varName),
+                        false
+                );
+                return new ExpStatement(unaryOperate);
+            } else {
+                // TODO 其他符号
+                iterator.throwIllegalToken(next.getValue());
+            }
+
+        }
+        return null;
     }
 }
