@@ -6,6 +6,7 @@ import org.mmfmilku.atom.agent.compiler
 import org.mmfmilku.atom.agent.compiler.SupportSyntaxSample;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.parser.aa.*;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler
         .parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.util.TestUtil;
@@ -124,7 +125,12 @@ public class ParserTest implements Serializable, Closeable {
      * */
     @Test
     public void parseSupportSyntax() {
-        TestUtil.compareParsedText(SupportSyntaxSample.class);
+        String javaText = TestUtil.getJavaText(SupportSyntaxSample.class);
+        JavaAST javaAST = CompilerUtil.parseAST(javaText);
+        String sourceCode = javaAST.getSourceCode();
+        System.out.println(sourceCode);
+        javaAST.useImport();
+        assertEquals(javaText, sourceCode);
     }
 
     /**

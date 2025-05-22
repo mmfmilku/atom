@@ -82,6 +82,18 @@ public class SupportSyntaxSample<T>
         }
     }
 
+    protected void lambda() {
+        Map<String, String> map = new HashMap<>();
+        map.put("a", "fsdf");
+        map.put("b", "fffds");
+        map.put("c", "23324444");
+        map.forEach((k, v) -> {
+            System.out.println(k);
+            System.out.println(v);
+        });
+        map.forEach((k, v) -> System.out.println(k));
+    }
+
     protected <K, V extends Object> Map<K, V> getMap(List<V> list,
                                                      BiFunction<String, Boolean, K> biFunction) {
         synchronized (this) {
