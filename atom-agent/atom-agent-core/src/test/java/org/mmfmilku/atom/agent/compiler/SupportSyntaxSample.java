@@ -92,6 +92,7 @@ public class SupportSyntaxSample<T>
             System.out.println(v);
         });
         map.forEach((k, v) -> System.out.println(k));
+        Function<String, Integer> function = str -> str.length();
     }
 
     protected <K, V extends Object> Map<K, V> getMap(List<V> list,

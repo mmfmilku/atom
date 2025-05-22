@@ -23,6 +23,11 @@ public class ExpressionParser implements CodeParserHandle {
     public Expression parse(ParserIterator iterator) {
         Token token = iterator.getCurr();
         if (token.getType() == TokenType.LParen) {
+            LambdaExpressionParser lambdaExpressionParser = iterator.getParser(LambdaExpressionParser.class);
+            if (lambdaExpressionParser.match(iterator)) {
+                // lambda后不再跟表达式
+                return lambdaExpressionParser.parse(iterator);
+            }
             // 左括号
             if (iterator.isNext(2, TokenType.RParen, TokenType.RParen.getFixValue())) {
                 // 1.括号直接仅包裹一个单词，类型强转

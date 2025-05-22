@@ -3,7 +3,6 @@ package org.mmfmilku.atom.agent.compiler.parser.handle.code;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.LambdaExpression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
@@ -15,11 +14,43 @@ import java.util.List;
 public class LambdaExpressionParser implements CodeParserHandle {
     @Override
     public boolean match(ParserIterator iterator) {
-        return false;
+        if (iterator.isCurr(TokenType.LParen)) {
+            return
+                    // () ->
+                    (
+                        iterator.isNext(TokenType.RParen)
+                        && iterator.isNext(2, TokenType.Symbol, "-")
+                        && iterator.isNext(3, TokenType.RAngle)
+                    )
+                        ||
+                    // (p) ->
+                    (
+                        iterator.isNext(TokenType.Words)
+                        && iterator.isNext(2, TokenType.RParen)
+                        && iterator.isNext(3, TokenType.Symbol, "-")
+                        && iterator.isNext(4, TokenType.RAngle)
+                    )
+                        ||
+                    // (p1, p2) ->
+                    (
+                        iterator.isNext(TokenType.Words)
+                        && iterator.isNext(2, TokenType.Symbol, COMMA)
+                    )
+                    ;
+        } else {
+            // p ->
+            return iterator.isCurr(TokenType.Words)
+                    && iterator.isNext(TokenType.Symbol, "-")
+                    && iterator.isNext(2, TokenType.RAngle)
+                    ;
+        }
     }
 
     @Override
     public LambdaExpression parse(ParserIterator iterator) {
+        if (!match(iterator)) {
+            iterator.throwIllegalToken(iterator.getCurr().getValue());
+        }
         List<Identifier> inputs = new ArrayList<>();
         if (iterator.isCurr(TokenType.LParen)) {
             // (p1, p2)
@@ -45,13 +76,15 @@ public class LambdaExpressionParser implements CodeParserHandle {
         // 解析代码体
         CodeBlock codeBlock;
         if (iterator.isNext(TokenType.LBrace)) {
+            iterator.needNext();
             codeBlock = iterator.getParser(CodeBlockParser.class).parse(iterator);
         } else {
+            iterator.needNext();
             StatementLineParser parser = iterator.getParser(StatementLineParser.class);
             Statement parse = parser.parse(iterator);
             codeBlock = new CodeBlock();
             codeBlock.getStatements().add(parse);
         }
-        return null;
+        return new LambdaExpression(inputs, codeBlock);
     }
 }

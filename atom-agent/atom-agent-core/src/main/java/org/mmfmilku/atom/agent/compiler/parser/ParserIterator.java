@@ -185,6 +185,13 @@ public class ParserIterator {
     /**
      * 判断下n个token，不移动指针
      */
+    public boolean isNext(int n, TokenType type) {
+        return isNext(n, type, type.getFixValue());
+    }
+
+    /**
+     * 判断下n个token，不移动指针
+     */
     public boolean isNext(int n, TokenType type, String value) {
         Token next = peekNext(n);
         return next != null && next.getType() == type && value.equals(next.getValue());
