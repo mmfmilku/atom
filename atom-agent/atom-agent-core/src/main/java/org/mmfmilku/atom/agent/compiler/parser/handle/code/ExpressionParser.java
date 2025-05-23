@@ -22,8 +22,8 @@ public class ExpressionParser implements CodeParserHandle {
     @Override
     public Expression parse(ParserIterator iterator) {
         Token token = iterator.getCurr();
+        LambdaExpressionParser lambdaExpressionParser = iterator.getParser(LambdaExpressionParser.class);
         if (token.getType() == TokenType.LParen) {
-            LambdaExpressionParser lambdaExpressionParser = iterator.getParser(LambdaExpressionParser.class);
             if (lambdaExpressionParser.match(iterator)) {
                 // lambda后不再跟表达式
                 return lambdaExpressionParser.parse(iterator);
@@ -44,6 +44,10 @@ public class ExpressionParser implements CodeParserHandle {
             return parseToEnd(new PriorityExpression(expression), iterator);
         }
         if (token.getType() == TokenType.Words) {
+            if (lambdaExpressionParser.match(iterator)) {
+                // lambda后不再跟表达式
+                return lambdaExpressionParser.parse(iterator);
+            }
             if ("new".equals(token.getValue())) {
                 // 创建对象
                 Expression expression = parseObjectNew(iterator);
