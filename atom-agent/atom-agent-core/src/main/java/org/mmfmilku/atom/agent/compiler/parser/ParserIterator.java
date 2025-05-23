@@ -194,7 +194,8 @@ public class ParserIterator {
      */
     public boolean isNext(int n, TokenType type, String value) {
         Token next = peekNext(n);
-        return next != null && next.getType() == type && value.equals(next.getValue());
+        return next != null && next.getType() == type
+                && (value == null || value.equals(next.getValue()));
     }
 
     /**

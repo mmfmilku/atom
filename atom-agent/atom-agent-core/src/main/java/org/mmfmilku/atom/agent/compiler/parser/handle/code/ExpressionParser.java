@@ -48,6 +48,12 @@ public class ExpressionParser implements CodeParserHandle {
                 // lambda后不再跟表达式
                 return lambdaExpressionParser.parse(iterator);
             }
+            MethodReferenceParser methodReferenceParser =
+                    iterator.getParser(MethodReferenceParser.class);
+            if (methodReferenceParser.match(iterator)) {
+                // 方法引用后不再跟表达式
+                return methodReferenceParser.parse(iterator);
+            }
             if ("new".equals(token.getValue())) {
                 // 创建对象
                 Expression expression = parseObjectNew(iterator);

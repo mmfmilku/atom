@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 支持的语法样例
@@ -93,6 +94,12 @@ public class SupportSyntaxSample<T>
         });
         map.forEach((k, v) -> System.out.println(k));
         Function<String, Integer> function = str -> str.length();
+    }
+
+    void methodReference() {
+        List<String> stringList = Arrays.asList("a", "bbb", "fffff");
+        Integer sum = stringList.stream().map(String::length).mapToInt(Integer::intValue).sum();
+        System.out.println(sum);
     }
 
     protected <K, V extends Object> Map<K, V> getMap(List<V> list,
