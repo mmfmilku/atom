@@ -53,6 +53,8 @@ public class SupportSyntaxSample<T>
         java.lang.String[] strArr1 = new String[3];
         java.lang.String[] strArr2 = new String[]{"a", "b", "c"};
 
+        System.out.println(new Object[]{"atom"});
+
         Map<String, Object> map1 = new HashMap<>();
         Map<String, List<Object>> map2 = new HashMap<String, List<java.lang.Object>>();
 
@@ -100,6 +102,22 @@ public class SupportSyntaxSample<T>
         List<String> stringList = Arrays.asList("a", "bbb", "fffff");
         Integer sum = stringList.stream().map(String::length).mapToInt(Integer::intValue).sum();
         System.out.println(sum);
+    }
+
+    void ternaryOperate() {
+        boolean b1 = true;
+        boolean b2 = b1 ? false : true;
+        boolean b3 = b1 == true || b2 == false;
+        int i = 0;
+        int j = i == 0 ? 1 : 3;
+        int k = (j == 0 ? i : j) + 3;
+        int l = b1 ? 1 : 0;
+        int m = b1 && b2 ? i == 1 ? 1 : 2 : l == 0 ? 3 : 4;
+        int len = (k == 0 ? "ff" : "ggg").length();
+
+        Object o = new String();
+        String s = (String) o + "ff";
+        Integer integer = (Integer) o + 333;
     }
 
     protected <K, V extends Object> Map<K, V> getMap(List<V> list,
