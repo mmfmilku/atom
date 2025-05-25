@@ -28,12 +28,13 @@ public class GenericsParser implements StructParserHandle<Generics> {
                 // TODO 嵌套模型
                 stringList.add(generics.getSourceCode());
             } else {
+                // 判断没有<，则包括各种符号一股脑的添加
                 stringList.add(iterator.getCurr().getValue());
             }
         }
         iterator.needNext(TokenType.RAngle);
         Generics generics = new Generics();
-        generics.setContent(stringList.stream().collect(Collectors.joining("")));
+        generics.setContent(stringList.stream().collect(Collectors.joining(" ")));
         return generics;
     }
 }

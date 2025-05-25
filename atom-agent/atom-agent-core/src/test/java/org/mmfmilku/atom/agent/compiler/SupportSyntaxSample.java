@@ -46,26 +46,27 @@ public class SupportSyntaxSample<T>
         double d1 = 23432.23432d;
         double d2 = 0.000000043;
         double d3 = 999_000_111.342D;
+    }
 
+    public String[] arr(String[] strArr, int[] intArr) {
         int[] a;
         long[] b = new long[4];
 
         java.lang.String[] strArr1 = new String[3];
         java.lang.String[] strArr2 = new String[]{"a", "b", "c"};
+        Map<String, java.lang.Object>[] mapArr1 = null;
 
         System.out.println(new Object[]{"atom"});
 
-        Map<String, Object> map1 = new HashMap<>();
-        Map<String, List<Object>> map2 = new HashMap<String, List<java.lang.Object>>();
-
-        Map<String, java.lang.Object>[] mapArr1 = null;
         Map[] mapArr2 = new java.util.HashMap[6];
+
+        return new String[]{"a", "b", "c"};
     }
 
     public void testTypeCast() {
         Object o = 33;
         int o2i1 = (Integer) o + 44;
-        //        int o2i2 = (java.lang.Integer) o + 44;
+                int o2i2 = (java.lang.Integer) o + 44;
 
         String s1 = (String) "ff";
         int i1 = (Integer) 33;
@@ -128,8 +129,14 @@ public class SupportSyntaxSample<T>
         int len = (k == 0 ? "ff" : "ggg").length();
     }
 
-    protected <K, V extends Object> Map<K, V> getMap(List<V> list,
+    static Map<String, List<Object>> MAP = new HashMap<String, List<java.lang.Object>>();
+
+    protected <K, V extends Object> Map<K, V> generics(List<V> list,
                                                      BiFunction<String, Boolean, K> biFunction) {
+        Map<String, Object> map1 = new HashMap<>();
+        Map<String, List<Object>> map2 = new HashMap<String, List<java.lang.Object>>();
+
+        Map<String, java.lang.Object>[] mapArr1 = null;
         synchronized (this) {
             String v1 = "a";
             v1 += list.toString();

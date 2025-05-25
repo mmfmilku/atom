@@ -175,10 +175,10 @@ public class Class implements Node {
         return GrammarUtil.getLinesCode(annotations)
                 + "\n"
                 + GrammarUtil.getSentenceCode(modifier.getSourceCode(), "class", getClassName())
-                + (StringUtils.isEmpty(superClass) ? ""
-                    : " extends " + superClass)
-                + (implementClasses == null || implementClasses.size() == 0 ? ""
-                    : " implements " + String.join(", ", implementClasses))
+                + GrammarUtil.emptyWrap(generics)
+                + GrammarUtil.emptyWrap(StringUtils.isEmpty(superClass), () -> " extends " + superClass)
+                + GrammarUtil.emptyWrap(implementClasses == null || implementClasses.size() == 0,
+                    () -> " implements " + String.join(", ", implementClasses))
                 + " {"
                 + GrammarUtil.emptyWrap(staticBlocks == null || staticBlocks.isEmpty(),
                     () -> GrammarUtil.getLinesCode(staticBlocks))

@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
@@ -249,10 +250,11 @@ public class ParserDispatcher {
                 Token curr = iterator.getCurr();
                 if ("extends".equals(curr.getValue())) {
                     iterator.needNext(TokenType.Words);
-                    clazz.setSuperClass(parseWordsPoint());
+                    String superClass = parseWordsPoint();
                     iterator.needNext();
                     // TODO 继承类，泛形保存
                     Generics generics = iterator.parseGenericsAndNext();
+                    clazz.setSuperClass(superClass + GrammarUtil.emptyWrap(generics));
                     if (iterator.isCurr(TokenType.Words, "implements")) {
                         parseImplementsAndNext(clazz);
                     }
@@ -363,16 +365,18 @@ public class ParserDispatcher {
         private void parseImplementsAndNext(Class clazz) {
             List<String> implementsList = new ArrayList<>();
             iterator.needNext(TokenType.Words);
-            implementsList.add(parseWordsPoint());
+            String implement = parseWordsPoint();
             iterator.needNext();
             // TODO 实现接口，泛形保存
             Generics generics = iterator.parseGenericsAndNext();
+            implementsList.add(implement + GrammarUtil.emptyWrap(generics));
             while (iterator.isCurr(TokenType.Symbol, ParserIterator.COMMA)) {
                 iterator.needNext(TokenType.Words);
-                implementsList.add(parseWordsPoint());
+                String wordsPoint = parseWordsPoint();
                 iterator.needNext();
                 // TODO 实现接口，泛形保存
                 generics = iterator.parseGenericsAndNext();
+                implementsList.add(wordsPoint + GrammarUtil.emptyWrap(generics));
             }
             clazz.setImplementClasses(implementsList);
         }

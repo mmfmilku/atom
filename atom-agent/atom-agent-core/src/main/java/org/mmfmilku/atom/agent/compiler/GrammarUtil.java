@@ -105,4 +105,8 @@ public class GrammarUtil {
         return empty ? "" : supplier.get();
     }
 
+    public static String emptyWrap(Node node) {
+        return node == null ? "" : node.getSourceCode();
+    }
+
 }

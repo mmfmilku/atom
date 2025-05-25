@@ -265,10 +265,11 @@ public class ExpressionParser implements CodeParserHandle {
         iterator.needNext(TokenType.Words);
         // 支持 new xx.xx.xx.C()
         String className = iterator.parseWordsPoint();
-        ConstructorCall constructorCall = new ConstructorCall(className);
         iterator.needNext();
         // TODO 泛形
         Generics generics = iterator.parseGenericsAndNext();
+        className += GrammarUtil.emptyWrap(generics);
+        ConstructorCall constructorCall = new ConstructorCall(className);
         if (iterator.isCurr(TokenType.Symbol, "[")) {
             // TODO 数组定义保存
             if (iterator.isNext(TokenType.Number)) {

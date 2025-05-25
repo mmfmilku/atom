@@ -27,7 +27,8 @@ public class Method implements Node, ImportUse {
     public String getSourceCode() {
         return GrammarUtil.getLinesCode(annotations)
                 + "\n"
-                + GrammarUtil.getSentenceCode(modifier.getSourceCode(), returnType, methodName)
+                + GrammarUtil.getSentenceCode(modifier.getSourceCode(),
+                    GrammarUtil.emptyWrap(generics), returnType, methodName)
                 + "("
                 + methodParams.stream()
                     .map(Statement::getStatementSource)

@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser.handle.code;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
@@ -25,6 +26,7 @@ public class VarDefineParser implements CodeParserHandle {
         String varType = iterator.parseWordsPoint();
         iterator.needNext();
         Generics generics = iterator.parseGenericsAndNext();
+        varType += GrammarUtil.emptyWrap(generics);
         if (iterator.isCurr(TokenType.Symbol, "[")) {
             // TODO 数组定义保存
             iterator.needNext(TokenType.Symbol, "]");

@@ -181,4 +181,13 @@ public class ParserTest implements Serializable, Closeable {
         TestUtil.compareParsedText(TestFile5.class);
     }
 
+    /**
+     * 测试语法
+     * 泛形解析
+     * */
+    @Test
+    public void parseTestFile6() {
+        TestUtil.compareParsedText(TestFile6.class);
+    }
+
 }
