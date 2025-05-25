@@ -60,7 +60,19 @@ public class SupportSyntaxSample<T>
 
         Map<String, java.lang.Object>[] mapArr1 = null;
         Map[] mapArr2 = new java.util.HashMap[6];
+    }
 
+    public void testTypeCast() {
+        Object o = 33;
+        int o2i1 = (Integer) o + 44;
+        //        int o2i2 = (java.lang.Integer) o + 44;
+
+        String s1 = (String) "ff";
+        int i1 = (Integer) 33;
+
+        Object o2 = new String();
+        String s = (String) o + "ff";
+        Integer integer = (Integer) o + 333;
     }
 
     public StringBuilder getStr() {
@@ -114,10 +126,6 @@ public class SupportSyntaxSample<T>
         int l = b1 ? 1 : 0;
         int m = b1 && b2 ? i == 1 ? 1 : 2 : l == 0 ? 3 : 4;
         int len = (k == 0 ? "ff" : "ggg").length();
-
-        Object o = new String();
-        String s = (String) o + "ff";
-        Integer integer = (Integer) o + 333;
     }
 
     protected <K, V extends Object> Map<K, V> getMap(List<V> list,

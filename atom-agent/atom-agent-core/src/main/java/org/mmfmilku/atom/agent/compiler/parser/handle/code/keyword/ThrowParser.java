@@ -6,6 +6,7 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ThrowStatement;
 
 /**
  * 解析 主动抛异常语句
@@ -22,7 +23,7 @@ public class ThrowParser implements CodeParserHandle {
         iterator.needNext();
         Expression expression = iterator.parseExpression();
         iterator.needNext(TokenType.Symbol, SEMICOLONS);
-        return new ReturnStatement(expression);
+        return new ThrowStatement(expression);
     }
 
 }

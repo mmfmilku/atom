@@ -22,6 +22,7 @@
 * 增强for循环，循环变量是一个表达式，现在只能解析标识符
 * 解析continue,break 关键字
 * try语句getAllExpression实现
+* 类型全类名强转 int o2i2 = (java.lang.Integer) o + 44;
 
 ## FServer
 * 请求容错处理

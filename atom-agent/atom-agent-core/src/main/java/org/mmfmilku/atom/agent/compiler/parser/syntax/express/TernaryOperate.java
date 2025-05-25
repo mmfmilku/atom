@@ -55,7 +55,9 @@ public class TernaryOperate implements NestedExpression {
 
     @Override
     public void useImports(Map<String, String> importsMap) {
-        GrammarUtil.notSupport();
+        for (Expression child : children) {
+            child.useImports(importsMap);
+        }
     }
 
     @Override

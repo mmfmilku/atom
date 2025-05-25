@@ -26,6 +26,7 @@ int b = 3;
 a++;
 --b;
 int c = a++ + b;
+int c1 = a++ + ++b + 7;
 int d = new Integer(3) + 4;
 System.out.println(a + b - c);
 if (c > 0){System.out.println("c大于0");
