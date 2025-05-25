@@ -29,9 +29,15 @@ public class MethodParser implements StructParserHandle<Method> {
         // 目前解析 public void getValue(...) {...}
         String returnType = iterator.parseWordsPoint();
         iterator.needNext();
-        // TODO 返回类型的泛形
+        // 返回类型的泛形
         Generics generics = iterator.parseGenericsAndNext();
         returnType += GrammarUtil.emptyWrap(generics);
+        if (iterator.isCurr(TokenType.Symbol, "[")) {
+            // TODO 数组定义保存
+            iterator.needNext(TokenType.Symbol, "]");
+            iterator.needNext();
+            returnType += "[]";
+        }
         Token methodName = iterator.checkCurr(TokenType.Words);
         CodeBlock codeBlock = parseMethodParamAndBody(iterator, method);
 

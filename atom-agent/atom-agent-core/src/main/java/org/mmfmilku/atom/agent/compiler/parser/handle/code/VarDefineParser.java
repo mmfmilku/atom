@@ -31,6 +31,7 @@ public class VarDefineParser implements CodeParserHandle {
             // TODO 数组定义保存
             iterator.needNext(TokenType.Symbol, "]");
             iterator.needNext();
+            varType += "[]";
         }
         Token varName = iterator.checkCurr(TokenType.Words);
         VarDefineStatement varDefineStatement =

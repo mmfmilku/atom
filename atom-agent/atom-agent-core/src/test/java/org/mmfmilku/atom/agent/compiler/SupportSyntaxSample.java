@@ -48,7 +48,7 @@ public class SupportSyntaxSample<T>
         double d3 = 999_000_111.342D;
     }
 
-    public String[] arr(String[] strArr, int[] intArr) {
+    public Map<String, Object>[] arr(String[] strArr, int[] intArr) {
         int[] a;
         long[] b = new long[4];
 
@@ -60,7 +60,7 @@ public class SupportSyntaxSample<T>
 
         Map[] mapArr2 = new java.util.HashMap[6];
 
-        return new String[]{"a", "b", "c"};
+        return new Map[]{new HashMap<String, Object>(3), new HashMap()};
     }
 
     public void testTypeCast() {

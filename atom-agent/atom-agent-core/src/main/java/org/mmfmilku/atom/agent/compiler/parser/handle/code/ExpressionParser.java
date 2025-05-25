@@ -271,10 +271,12 @@ public class ExpressionParser implements CodeParserHandle {
         className += GrammarUtil.emptyWrap(generics);
         ConstructorCall constructorCall = new ConstructorCall(className);
         if (iterator.isCurr(TokenType.Symbol, "[")) {
+            constructorCall.setArr(true);
             // TODO 数组定义保存
             if (iterator.isNext(TokenType.Number)) {
                 // 初始化数组大小
-                Token arrSize = iterator.needNext();
+                Token arrSize = iterator.needNext(TokenType.Number);
+                constructorCall.setArrSize(arrSize.getValue());
             }
             iterator.needNext(TokenType.Symbol, "]");
             if (iterator.isNext(TokenType.LBrace)) {
