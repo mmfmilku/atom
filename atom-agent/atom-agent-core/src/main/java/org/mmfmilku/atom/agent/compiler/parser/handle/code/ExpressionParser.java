@@ -349,7 +349,7 @@ public class ExpressionParser implements CodeParserHandle {
         iterator.needNext();
         String operator = iterator.parseOperator();
         iterator.needNext();
-        Expression right = this.parse(iterator);
+        Expression right = this.parseSingle(iterator);
         return new BinaryOperate(expression, operator, right);
     }
 
