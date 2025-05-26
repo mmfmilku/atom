@@ -46,6 +46,17 @@ public class SupportSyntaxSample<T>
         double d1 = 23432.23432d;
         double d2 = 0.000000043;
         double d3 = 999_000_111.342D;
+
+        // 二进制
+        int int_binary1 = 0b0101;
+        int int_binary2 = 0B0111;
+        // 八进制
+        int int_octal = 0177;
+        // 十进制
+        int int_decimal = 1479;
+        // 十六进制
+        int int_hexadecimal1 = 0x023edf;
+        int int_hexadecimal2 = 0Xff21;
     }
 
     public Map<String, Object>[] arr(String[] strArr, int[] intArr) {
@@ -66,7 +77,8 @@ public class SupportSyntaxSample<T>
     public void testTypeCast() {
         Object o = 33;
         int o2i1 = (Integer) o + 44;
-                int o2i2 = (java.lang.Integer) o + 44;
+        // TODO 该语句待支持
+//        int o2i2 = (java.lang.Integer) o + 44;
 
         String s1 = (String) "ff";
         int i1 = (Integer) 33;

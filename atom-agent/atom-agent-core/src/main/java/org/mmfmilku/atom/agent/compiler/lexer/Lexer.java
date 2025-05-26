@@ -22,8 +22,8 @@ public class Lexer {
     // 数值起始，数字
     private static final Pattern number = Pattern.compile("\\d");
 
-    // 数值体，[数字_.dDfFlL]
-    private static final Pattern numberBody = Pattern.compile("[\\d_.dDfFlL]");
+    // 数值体，[数字_.a-fA-FlLxX] 执行多进制：0b 0B 0x 0X 0xabcdef
+    private static final Pattern numberBody = Pattern.compile("[\\d_.a-fA-FlLxX]");
 
     // 标识符首字母,[字母_$@]
     private static final Pattern letterLine = Pattern.compile("[A-Za-z_\\$@]");
