@@ -12,6 +12,7 @@ import java.util.List;
 public interface Expression extends Node, ImportUse, ExpressionOperate, LinkedNode {
 
     @Override
+    @Deprecated
     default List<Expression> getAllExpression() {
         return new ArrayList<>(getLeafExpression());
     }

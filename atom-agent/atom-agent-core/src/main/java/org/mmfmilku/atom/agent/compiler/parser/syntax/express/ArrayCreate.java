@@ -1,10 +1,10 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
 
-import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ArrayCreate implements NestedExpression {
 
@@ -14,26 +14,29 @@ public class ArrayCreate implements NestedExpression {
 
     private int arrSize;
 
-    private Expression[] initData;
+    private Expression[] initData = new Expression[0];
 
-    @Override
-    public List<Expression> getNested() {
-        return null;
+    public ArrayCreate(String className) {
+        this.className = className;
     }
 
     @Override
-    public List<LeafExpression> getLeafExpression() {
-        return null;
+    public Expression[] orinChildren() {
+        return getInitData();
     }
 
     @Override
     public String getSourceCode() {
-        return null;
-    }
-
-    @Override
-    public void useImports(Map<String, String> importsMap) {
-
+        String showSize = "" + arrSize;
+        String showInitData = "";
+        if (initData != null && initData.length > 0) {
+            showSize = "";
+            showInitData = "{" + Stream.of(initData)
+                    .map(Expression::getSourceCode)
+                    .collect(Collectors.joining(", "))
+                    + "}";
+        }
+        return "new " + className + "[" + showSize + "]" + showInitData;
     }
 
     public String getClassName() {

@@ -266,37 +266,33 @@ public class ExpressionParser implements CodeParserHandle {
         // 支持 new xx.xx.xx.C()
         String className = iterator.parseWordsPoint();
         iterator.needNext();
-        // TODO 泛形
         Generics generics = iterator.parseGenericsAndNext();
-        className += GrammarUtil.emptyWrap(generics);
-        ConstructorCall constructorCall = new ConstructorCall(className);
         if (iterator.isCurr(TokenType.Symbol, "[")) {
-            constructorCall.setArr(true);
-            // TODO 数组定义保存
+            ArrayCreate arrayCreate = new ArrayCreate(className);
+            arrayCreate.setGenerics(generics);
             if (iterator.isNext(TokenType.Number)) {
                 // 初始化数组大小
                 Token arrSize = iterator.needNext(TokenType.Number);
-                constructorCall.setArrSize(arrSize.getValue());
+                arrayCreate.setArrSize(Integer.parseInt(arrSize.getValue()));
             }
             iterator.needNext(TokenType.Symbol, "]");
             if (iterator.isNext(TokenType.LBrace)) {
                 // 数组定义同时赋予初始值
                 // String arr = new String[]{"a", "b", "c"}
-                // TODO 保存
                 iterator.needNext();
                 List<Expression> expressions = iterator.parameterArrInitPassing();
-                constructorCall.setPassedParams(expressions);
-            } else {
-                // TODO 防止NPE
-                constructorCall.setPassedParams(new ArrayList<>());
+                arrayCreate.setInitData(expressions.toArray(new Expression[0]));
             }
+            return arrayCreate;
         } else {
+            className += GrammarUtil.emptyWrap(generics);
+            ConstructorCall constructorCall = new ConstructorCall(className);
             // 调用构造方法
             iterator.checkCurr(TokenType.LParen);
             List<Expression> expressions = iterator.parameterPassing();
             constructorCall.setPassedParams(expressions);
+            return constructorCall;
         }
-        return constructorCall;
     }
 
     private Expression parseCallChain(Expression first, ParserIterator iterator) {

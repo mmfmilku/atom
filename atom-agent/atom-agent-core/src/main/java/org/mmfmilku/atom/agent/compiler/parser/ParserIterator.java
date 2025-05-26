@@ -10,6 +10,7 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.code.VarDefineParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.struct.GenericsParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.TypeDefine;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
@@ -468,6 +469,21 @@ public class ParserIterator {
             throwList.add(throwE.getValue());
         } while (isNext(TokenType.Symbol, COMMA));
         return throwList;
+    }
+
+    public TypeDefine parseTypeDefineAndNext() {
+        this.checkCurr(TokenType.Words);
+        String type = this.parseWordsPoint();
+        TypeDefine typeDefine = new TypeDefine(type);
+        this.needNext();
+        Generics generics = this.parseGenericsAndNext();
+        typeDefine.setGenerics(generics);
+        if (this.isCurr(TokenType.Symbol, "[")) {
+            this.needNext(TokenType.Symbol, "]");
+            this.needNext();
+            typeDefine.setArr(true);
+        }
+        return typeDefine;
     }
 
     /**
