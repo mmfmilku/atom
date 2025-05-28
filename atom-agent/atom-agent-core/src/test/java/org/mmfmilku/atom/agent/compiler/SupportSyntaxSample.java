@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 /**
  * 支持的语法样例
- * */
+ */
 public class SupportSyntaxSample<T>
         extends java.util.HashMap<String, T>
         implements Consumer<String>, java.util.function.Function<String, String> {
@@ -144,7 +144,7 @@ public class SupportSyntaxSample<T>
     static Map<String, List<Object>> MAP = new HashMap<String, List<java.lang.Object>>();
 
     protected <K, V extends Object> Map<K, V> generics(List<V> list,
-                                                     BiFunction<String, Boolean, K> biFunction) {
+                                                       BiFunction<String, Boolean, K> biFunction) {
         Map<String, Object> map1 = new HashMap<>();
         Map<String, List<Object>> map2 = new HashMap<String, List<java.lang.Object>>();
 
@@ -171,5 +171,26 @@ public class SupportSyntaxSample<T>
     @Override
     public String apply(String s) {
         return null;
+    }
+
+    private void varAssignExp() {
+        String a;
+        String b;
+        a = b = "fff";
+        int i1 = 3;
+        int i2 = i1 = a.length();
+        int i3;
+        int i4 = i3 = i2 = i1 = i1 + b.length() + i2;
+        List<String> list;
+        for (String str : Collections.singletonList("f")) {
+            System.out.println(str);
+        }
+        for (String str : list = Arrays.asList("zzzz", "42342", "fds", "fsdfs", "54")) {
+            System.out.println(str);
+        }
+        for (Map<String, Object> map : arr(null, null)) {
+            System.out.println(map);
+        }
+
     }
 }

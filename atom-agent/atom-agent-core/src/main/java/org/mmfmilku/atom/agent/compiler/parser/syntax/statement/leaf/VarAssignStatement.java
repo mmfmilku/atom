@@ -1,7 +1,11 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.NestedExpression;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.extend.LinkedNode;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +13,7 @@ import java.util.Map;
 /**
  * 变量赋值语句
  * */
-public class VarAssignStatement implements LeafStatement {
+public class VarAssignStatement implements LeafStatement, NestedExpression {
 
     private String varName;
     private Expression assignExpression;
@@ -51,7 +55,18 @@ public class VarAssignStatement implements LeafStatement {
     }
 
     @Override
+    public List<Expression> getNested() {
+        return Collections.singletonList(assignExpression);
+    }
+
+    @Override
+    public List<LinkedNode> getChildren() {
+        return new ArrayList<>(getNestedExp());
+    }
+
+    @Override
     public void useImports(Map<String, String> importsMap) {
         assignExpression.useImports(importsMap);
     }
+
 }

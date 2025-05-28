@@ -10,6 +10,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.NumberLiteral;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.StringLiteral;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarAssignStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,94 +25,6 @@ public class ExpressionParser implements CodeParserHandle {
     public Expression parse(ParserIterator iterator) {
         Expression expression = parseSingle(iterator);
         return parseToEnd(expression, iterator);
-//        Token token = iterator.getCurr();
-//        LambdaExpressionParser lambdaExpressionParser = iterator.getParser(LambdaExpressionParser.class);
-//        if (token.getType() == TokenType.LParen) {
-//            if (lambdaExpressionParser.match(iterator)) {
-//                // lambda后不再跟表达式
-//                return lambdaExpressionParser.parse(iterator);
-//            }
-//            // 左括号
-//            if (iterator.isNext(2, TokenType.RParen, TokenType.RParen.getFixValue())) {
-//                // 1.括号直接仅包裹一个单词，类型强转
-//                // TODO 泛形处理
-//                String typeName = iterator.needNext(TokenType.Words).getValue();
-//                iterator.needNext(TokenType.RParen);
-//                iterator.needNext();
-//                return new TypeCast(typeName, this.parse(iterator));
-//            }
-//            // 2.表达式括号包裹
-//            iterator.needNext();
-//            Expression expression = this.parse(iterator);
-//            iterator.needNext(TokenType.RParen);
-//            return parseToEnd(new PriorityExpression(expression), iterator);
-//        }
-//        if (token.getType() == TokenType.Words) {
-//            if (lambdaExpressionParser.match(iterator)) {
-//                // lambda后不再跟表达式
-//                return lambdaExpressionParser.parse(iterator);
-//            }
-//            MethodReferenceParser methodReferenceParser =
-//                    iterator.getParser(MethodReferenceParser.class);
-//            if (methodReferenceParser.match(iterator)) {
-//                // 方法引用后不再跟表达式
-//                return methodReferenceParser.parse(iterator);
-//            }
-//            if ("new".equals(token.getValue())) {
-//                // 创建对象
-//                Expression expression = parseObjectNew(iterator);
-//                return parseToEnd(expression, iterator);
-//            }
-//            if (iterator.isNext(TokenType.LParen)) {
-//                // 方法调用
-//                Expression expression = parseMethodCall(iterator);
-//                return parseToEnd(expression, iterator);
-//            }
-//            Identifier identifier = new Identifier(token.getValue());
-//            if (isExpressionEnd(iterator)) {
-//                // 标识符
-//                return identifier;
-//            }
-//            Token next = iterator.needNext();
-//            String value = next.getValue();
-//            if (iterator.isOperator(next)) {
-//                if (iterator.isNext(TokenType.Symbol, value)) {
-//                    if (iterator.isPlusMinus(value)) {
-//                        // TODO support like: i ++ + ++ j
-//                        // 单目 i++
-//                        iterator.needNext();
-//                        Expression expression = new UnaryOperate(value + value, identifier, false);
-//                        return parseToEnd(expression, iterator);
-//                    }
-//                }
-//                // 双目
-//                iterator.back();
-//                return parseBinaryOperate(identifier, iterator);
-//            }
-//            if (iterator.isCompare(value) || EQUAL.equals(value)) {
-//                String compare = iterator.getCompare();
-//                iterator.needNext();
-//                Expression expression = iterator.parseExpression();
-//                return new BinaryOperate(identifier, compare, expression);
-//            }
-//            // todo 数组、泛形 待支持
-//            iterator.back();
-//            return parseToEnd(identifier, iterator);
-//        }
-//        if (token.getType() == TokenType.Symbol) {
-//            Expression expression = parseUnaryOperate(iterator);
-//            return parseToEnd(expression, iterator);
-//        }
-//        if (token.getType() == TokenType.String) {
-//            Expression expression = new StringLiteral(token.getValue());
-//            return parseToEnd(expression, iterator);
-//        }
-//        if (token.getType() == TokenType.Number) {
-//            Expression expression = new NumberLiteral(token.getValue());
-//            return parseToEnd(expression, iterator);
-//        }
-//        iterator.throwIllegalToken(token.getValue());
-//        return null;
     }
 
     /**
@@ -205,6 +118,7 @@ public class ExpressionParser implements CodeParserHandle {
             return parseToEnd(ternaryOperate, iterator);
         }
         if (expression instanceof Identifier && iterator.isNext(TokenType.Symbol)) {
+            Identifier identifier = (Identifier) expression;
             Token peek = iterator.peekNext();
             String value = peek.getValue();
             if (iterator.isOperator(peek)) {
@@ -217,12 +131,22 @@ public class ExpressionParser implements CodeParserHandle {
                         iterator.needNext();
                         iterator.needNext();
                         Expression unaryOperate = new UnaryOperate(
-                                operate + operate, (Identifier) expression, false);
+                                operate + operate, identifier, false);
                         return parseToEnd(unaryOperate, iterator);
                     }
                 }
-                // 其余情况未return，执行最后的 parseBinaryOperate
-            } else if (iterator.isCompare(value) || EQUAL.equals(value)) {
+            }
+            if (EQUAL.equals(value) && !iterator.isNext(2, TokenType.Symbol, EQUAL)) {
+                // 非连续的等于 == ，判断为赋值表达式
+                iterator.needNext();
+                // 指向等号后一位，解析表达式
+                iterator.needNext();
+                // 贪婪解析 a = (b = (c = exp))
+                Expression assignExp = this.parse(iterator);
+                return new VarAssignStatement(identifier.getValue(), assignExp);
+            }
+            if (iterator.isCompare(value)) {
+                // < > ==
                 Expression left = expression;
                 iterator.needNext();
                 String compare = iterator.getCompare();
@@ -231,6 +155,7 @@ public class ExpressionParser implements CodeParserHandle {
                 BinaryOperate binaryOperate = new BinaryOperate(left, compare, right);
                 return parseToEnd(binaryOperate, iterator);
             }
+            // 其余情况未return，执行最后的 parseBinaryOperate
         }
         // 双目
         Expression binaryOperate = parseBinaryOperate(expression, iterator);
@@ -246,17 +171,6 @@ public class ExpressionParser implements CodeParserHandle {
                 || iterator.isNext(TokenType.Symbol, COMMA)
                 || iterator.isNext(TokenType.Symbol, COLON)
                 || iterator.isLast()
-                ;
-    }
-
-    private boolean isEndValue(String value) {
-        // 表达式结束判断
-        //  )  }  ;  ,  :
-        return TokenType.RParen.getFixValue().equals(value)
-                || TokenType.RBrace.getFixValue().equals(value)
-                || SEMICOLONS.equals(value)
-                || COMMA.equals(value)
-                || COLON.equals(value)
                 ;
     }
 

@@ -199,4 +199,12 @@ public class ParserTest implements Serializable, Closeable {
         TestUtil.compareParsedText(TestFile7.class);
     }
 
+    /**
+     * 变量赋值语句作为表达式
+     * */
+    @Test
+    public void parseTestFile8() {
+        TestUtil.compareParsedText(TestFile8.class);
+    }
+
 }
