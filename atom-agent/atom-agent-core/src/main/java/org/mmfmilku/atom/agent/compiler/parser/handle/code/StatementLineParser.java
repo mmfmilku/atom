@@ -4,14 +4,13 @@ import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.BinaryOperate;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.UnaryOperate;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarAssignStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.VarAssign;
 
 /**
  * 解析一般单行语句，不包含结束符 ;
@@ -77,7 +76,7 @@ public class StatementLineParser implements CodeParserHandle {
             // 指向等于号后面的字符
             iterator.needNext();
             Expression expression = iterator.parseExpression();
-            return new VarAssignStatement(varName, expression);
+            return new ExpStatement(new VarAssign(varName, expression));
         } else {
             Token next = iterator.getCurr();
             if (iterator.isOperator(next)) {
@@ -88,7 +87,7 @@ public class StatementLineParser implements CodeParserHandle {
                     iterator.needNext();
                     Expression expression = iterator.parseExpression();
                     BinaryOperate binaryOperate = new BinaryOperate(new Identifier(varName), operator, expression);
-                    return new VarAssignStatement(varName, binaryOperate);
+                    return new ExpStatement(new VarAssign(varName, binaryOperate));
                 }
                 // a++,a--
                 if (!iterator.isPlusMinus(operator)) {

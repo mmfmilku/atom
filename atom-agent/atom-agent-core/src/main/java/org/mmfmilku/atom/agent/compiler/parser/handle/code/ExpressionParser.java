@@ -10,9 +10,8 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.NumberLiteral;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.StringLiteral;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarAssignStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.VarAssign;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ExpressionParser implements CodeParserHandle {
@@ -143,7 +142,7 @@ public class ExpressionParser implements CodeParserHandle {
                 iterator.needNext();
                 // 贪婪解析 a = (b = (c = exp))
                 Expression assignExp = this.parse(iterator);
-                return new VarAssignStatement(identifier.getValue(), assignExp);
+                return new VarAssign(identifier.getValue(), assignExp);
             }
             if (iterator.isCompare(value)) {
                 // < > ==

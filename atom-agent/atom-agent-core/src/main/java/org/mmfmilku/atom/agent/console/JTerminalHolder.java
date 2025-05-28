@@ -10,7 +10,7 @@ import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarAssignStatement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.VarAssign;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.agent.util.OrdUtils;
 import org.mmfmilku.atom.exception.BizException;
@@ -147,8 +147,8 @@ public class JTerminalHolder {
             return codeBlock;
             // TODO 变量获取的情况，需要从上下文获取
         }
-        if (statement instanceof VarAssignStatement) {
-            VarAssignStatement varDefineStatement = (VarAssignStatement) statement;
+        if (statement instanceof VarAssign) {
+            VarAssign varDefineStatement = (VarAssign) statement;
             // TODO 语句替换为语句块，并插入保存上下文的语句
             String varName = varDefineStatement.getVarName();
             // 插入语句 contextVars.put(varName, ${varName});

@@ -1,6 +1,5 @@
 package org.mmfmilku.atom.agent.console;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
