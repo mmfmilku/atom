@@ -103,6 +103,7 @@ public class JTerminalHolder {
     private static Statement enhanceStatement(Statement statement, JTerminal jTerminal) {
         List<Expression> allExpression = statement.getAllExpression();
         for (Expression expression : allExpression) {
+            // 变量赋值语句的处理
             for (Expression baseExp : expression.getLeafExpression()) {
                 if (baseExp instanceof Identifier) {
                     // 标识符处理，获取变量从变量上下文中get
@@ -147,18 +148,28 @@ public class JTerminalHolder {
             return codeBlock;
             // TODO 变量获取的情况，需要从上下文获取
         }
-        if (statement instanceof VarAssign) {
-            VarAssign varDefineStatement = (VarAssign) statement;
-            // TODO 语句替换为语句块，并插入保存上下文的语句
-            String varName = varDefineStatement.getVarName();
-            // 插入语句 contextVars.put(varName, ${varName});
-            jTerminal.getCurrVars().add(varName);
-            String addExp = String.format("$1.put(\"%s\", %s);", varName, varName);
-            Expression expression = CompilerUtil.parseExpression(addExp);
-            CodeBlock codeBlock = new CodeBlock();
-            codeBlock.setStatements(Arrays.asList(statement, new ExpStatement(expression)));
-            // 原statement替换为codeBlock
-            return codeBlock;
+        if (statement instanceof ExpStatement) {
+            ExpStatement expStatement = (ExpStatement) statement;
+            Expression exp = expStatement.getExpression();
+            if (exp instanceof VarAssign) {
+                List<Statement> statements = new ArrayList<>();
+                statements.add(statement);
+                CodeBlock codeBlock = new CodeBlock();
+                codeBlock.setStatements(statements);
+                do {
+                    VarAssign varAssign = (VarAssign) exp;
+                    String varName = varAssign.getVarName();
+                    // TODO 语句替换为语句块，并插入保存上下文的语句
+                    // 插入语句 contextVars.put(varName, ${varName});
+                    jTerminal.getCurrVars().add(varName);
+                    String addExp = String.format("$1.put(\"%s\", %s);", varName, varName);
+                    Expression expression = CompilerUtil.parseExpression(addExp);
+                    statements.add(new ExpStatement(expression));
+                    exp = varAssign.getAssignExpression();
+                } while (exp instanceof VarAssign);
+                // 原statement替换为codeBlock
+                return codeBlock;
+            }
             // TODO 变量获取的情况，需要从上下文获取
         }
         // TODO 其他语句

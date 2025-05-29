@@ -74,6 +74,7 @@ public class JTerminalHolderTest {
                 + "System.out.println(d);"
                 + "System.out.println(a.length());"
                 + "a = \"new value of a\";"
+                + "d = c = b = a.length();"
                 ;
         Object parseTerminalCode = ReflectUtils
                 .invokeStaticMethod(JTerminalHolder.class, "getJavaAST", code, jTerminal);
@@ -99,6 +100,11 @@ public class JTerminalHolderTest {
                 "System.out.println($1.get(\"a\").length());\n" +
                 "{a = \"new value of a\";\n" +
                 "$1.put(\"a\", a);\n" +
+                "}\n" +
+                "{d = c = b = $1.get(\"a\").length();\n" +
+                "$1.put(\"d\", d);\n" +
+                "$1.put(\"c\", c);\n" +
+                "$1.put(\"b\", b);\n" +
                 "}\n" +
                 "return \"success\";\n" +
                 "}\n" +
