@@ -1,12 +1,15 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 取反表达式
  * */
-public class NotOperate implements Expression {
+public class NotOperate implements NestedExpression {
 
     private Expression expression;
 
@@ -33,7 +36,12 @@ public class NotOperate implements Expression {
     }
 
     @Override
-    public List<Expression> getBaseExpression() {
-        return expression.getBaseExpression();
+    public List<LeafExpression> getLeafExpression() {
+        return expression.getLeafExpression();
+    }
+
+    @Override
+    public List<Expression> getNested() {
+        return Collections.singletonList(expression);
     }
 }

@@ -21,6 +21,9 @@ h3 {
 .hide {
     display: none!important;
 }
+.text-err {
+    color: red;
+}
 .vm-list-block {
     border: 2px solid #2196F3;
     background-color: #eff6fe;

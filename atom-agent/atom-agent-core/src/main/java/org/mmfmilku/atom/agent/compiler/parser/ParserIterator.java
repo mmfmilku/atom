@@ -7,7 +7,10 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.ParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.CodeBlockParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.ExpressionParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.VarDefineParser;
+import org.mmfmilku.atom.agent.compiler.parser.handle.struct.GenericsParser;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Node;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.TypeDefine;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
@@ -141,7 +144,7 @@ public class ParserIterator {
         return this.curr == this.tokens.size() - 1;
     }
 
-    public void checkCurr(TokenType type) {
+    public Token checkCurr(TokenType type) {
         Token token = getCurr();
         if (token == null) {
             this.throwParserErr(type, type.getFixValue());
@@ -149,6 +152,7 @@ public class ParserIterator {
         if (token.getType() != type) {
             this.throwParserErr(type, token.getType());
         }
+        return token;
     }
 
     public void checkCurr(TokenType type, String value) {
@@ -182,9 +186,17 @@ public class ParserIterator {
     /**
      * 判断下n个token，不移动指针
      */
+    public boolean isNext(int n, TokenType type) {
+        return isNext(n, type, type.getFixValue());
+    }
+
+    /**
+     * 判断下n个token，不移动指针
+     */
     public boolean isNext(int n, TokenType type, String value) {
         Token next = peekNext(n);
-        return next != null && next.getType() == type && value.equals(next.getValue());
+        return next != null && next.getType() == type
+                && (value == null || value.equals(next.getValue()));
     }
 
     /**
@@ -344,16 +356,39 @@ public class ParserIterator {
     }
 
     /**
+     * 解析数组初始传参 {e1,e2}
+     * */
+    public List<Expression> parameterArrInitPassing() {
+        List<Expression> expressions = new ArrayList<>();
+        if (isNext(TokenType.RBrace)) {
+            needNext();
+            return expressions;
+        }
+        while (true) {
+            needNext();
+            Expression expression = parseExpression();
+            expressions.add(expression);
+            if (!isNext(TokenType.Symbol, COMMA)) {
+                break;
+            }
+            needNext();
+        }
+        needNext(TokenType.RBrace);
+        return expressions;
+    }
+
+    /**
      * 解析方法参数定义
      * */
     public List<VarDefineStatement> parameterDefine() {
+        this.checkCurr(TokenType.LParen);
         List<VarDefineStatement> paramDefines = new ArrayList<>();
         if (isNext(TokenType.RParen)) {
             needNext();
             return paramDefines;
         }
         while (true) {
-            needNext();
+            needNext(TokenType.Words);
             VarDefineParser varDefineParser = getParser(VarDefineParser.class);
             VarDefineStatement varDefine = varDefineParser.parse(this);
             paramDefines.add(varDefine);
@@ -434,6 +469,34 @@ public class ParserIterator {
             throwList.add(throwE.getValue());
         } while (isNext(TokenType.Symbol, COMMA));
         return throwList;
+    }
+
+    public TypeDefine parseTypeDefineAndNext() {
+        this.checkCurr(TokenType.Words);
+        String type = this.parseWordsPoint();
+        TypeDefine typeDefine = new TypeDefine(type);
+        this.needNext();
+        Generics generics = this.parseGenericsAndNext();
+        typeDefine.setGenerics(generics);
+        if (this.isCurr(TokenType.Symbol, "[")) {
+            this.needNext(TokenType.Symbol, "]");
+            this.needNext();
+            typeDefine.setArr(true);
+        }
+        return typeDefine;
+    }
+
+    /**
+     * 允许泛形的位置，解析泛形并后移
+     * */
+    public Generics parseGenericsAndNext() {
+        GenericsParser genericsParser = getParser(GenericsParser.class);
+        if (genericsParser.match(this)) {
+            Generics generics = genericsParser.parse(this);
+             needNext();
+            return generics;
+        }
+        return null;
     }
 
     public void throwIllegalToken(String value) {

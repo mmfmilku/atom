@@ -18,7 +18,7 @@ import javassist.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Method;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
@@ -137,8 +137,8 @@ public class ByteCodeUtils {
         for (Statement statement : statements) {
             List<Expression> allExpression = statement.getAllExpression();
             allExpression.stream()
-                    .map(Expression::getBaseExpression)
-                    .flatMap(Collection::stream)
+//                    .map(Expression::getBaseExpression)
+//                    .flatMap(Collection::stream)
                     .forEach(expression -> {
                         if (expression instanceof Identifier) {
                             Identifier identifier = (Identifier) expression;

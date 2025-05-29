@@ -51,4 +51,9 @@ public class CodeBlock implements NestedStatement {
     public void useImports(Map<String, String> importsMap) {
         statements.forEach(statement -> statement.useImports(importsMap));
     }
+
+    @Override
+    public List<Statement> getNested() {
+        return new ArrayList<>(statements);
+    }
 }

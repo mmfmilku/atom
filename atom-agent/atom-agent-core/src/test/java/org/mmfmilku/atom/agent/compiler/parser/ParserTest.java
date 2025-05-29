@@ -3,8 +3,10 @@ package org.mmfmilku.atom.agent.compiler.parser;
 import org.junit.Test;
 import org.mmfmilku.atom.agent.compiler
         .CompilerUtil;
+import org.mmfmilku.atom.agent.compiler.SupportSyntaxSample;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.parser.aa.*;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.compiler
         .parser.syntax.express.Expression;
 import org.mmfmilku.atom.agent.util.TestUtil;
@@ -119,6 +121,19 @@ public class ParserTest implements Serializable, Closeable {
     }
 
     /**
+     * 综合语法测试
+     * */
+    @Test
+    public void parseSupportSyntax() {
+        String javaText = TestUtil.getJavaText(SupportSyntaxSample.class);
+        JavaAST javaAST = CompilerUtil.parseAST(javaText);
+        String sourceCode = javaAST.getSourceCode();
+        System.out.println(sourceCode);
+        javaAST.useImport();
+//        assertEquals(javaText, sourceCode);
+    }
+
+    /**
      * 测试语法
      * 1.构造器
      * 2.类型强转
@@ -164,6 +179,32 @@ public class ParserTest implements Serializable, Closeable {
     @Test
     public void parseTestFile5() {
         TestUtil.compareParsedText(TestFile5.class);
+    }
+
+    /**
+     * 测试语法
+     * 泛形解析
+     * */
+    @Test
+    public void parseTestFile6() {
+        TestUtil.compareParsedText(TestFile6.class);
+    }
+
+    /**
+     * 测试语法
+     * 数组解析
+     * */
+    @Test
+    public void parseTestFile7() {
+        TestUtil.compareParsedText(TestFile7.class);
+    }
+
+    /**
+     * 变量赋值语句作为表达式
+     * */
+    @Test
+    public void parseTestFile8() {
+        TestUtil.compareParsedText(TestFile8.class);
     }
 
 }

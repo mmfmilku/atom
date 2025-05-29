@@ -1,11 +1,11 @@
-package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
+package org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf;
 
 import java.util.Map;
 
 /**
  * 字面量
  * */
-public class BaseLiteral implements Expression {
+public class BaseLiteral implements LeafExpression {
 
     private String value;
 

@@ -2,9 +2,7 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class IfStatement implements NestedStatement {
 
@@ -19,7 +17,7 @@ public class IfStatement implements NestedStatement {
     private Statement trueStatement;
 
     /**
-     * if为 false 时执行的代码块
+     * if为 false 时执行的代码块。注意可能为空！
      * */
     private Statement falseStatement;
 
@@ -62,7 +60,7 @@ public class IfStatement implements NestedStatement {
     @Override
     public List<Expression> getAllExpression() {
         List<Expression> all = new ArrayList<>();
-        all.add(condition);
+        all.addAll(condition.getAllExpression());
         all.addAll(trueStatement.getAllExpression());
         if (falseStatement != null) {
             all.addAll(falseStatement.getAllExpression());
@@ -77,5 +75,20 @@ public class IfStatement implements NestedStatement {
         if (falseStatement != null) {
             falseStatement.useImports(importsMap);
         }
+    }
+
+    @Override
+    public List<Statement> getNested() {
+        List<Statement> statements = new ArrayList<>();
+        statements.add(trueStatement);
+        if (falseStatement != null) {
+            statements.add(falseStatement);
+        }
+        return statements;
+    }
+
+    @Override
+    public List<Expression> getNestedExp() {
+        return Collections.singletonList(condition);
     }
 }

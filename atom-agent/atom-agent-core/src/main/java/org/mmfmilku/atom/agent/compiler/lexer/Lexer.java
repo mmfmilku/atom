@@ -19,8 +19,11 @@ public class Lexer {
     // 字母
     private static final Pattern letter = Pattern.compile("[A-Za-z]");
 
-    // 数字
+    // 数值起始，数字
     private static final Pattern number = Pattern.compile("\\d");
+
+    // 数值体，[数字_.a-fA-FlLxX] 执行多进制：0b 0B 0x 0X 0xabcdef
+    private static final Pattern numberBody = Pattern.compile("[\\d_.a-fA-FlLxX]");
 
     // 标识符首字母,[字母_$@]
     private static final Pattern letterLine = Pattern.compile("[A-Za-z_\\$@]");
@@ -31,8 +34,8 @@ public class Lexer {
     // 运算符 加 减 乘 除 与 或 非 异或 取余,[+-*/&|^%]
     private static final Pattern operator = Pattern.compile("[\\+\\-\\*/&\\|\\^%]");
 
-    // 符号,[+-*/&|!^=<>;;,.[]%`~?]
-    private static final Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=<>;:,\\.\\[\\]%`~\\?]");
+    // 符号,[+-*/&|!^=;;,.[]%`~?]
+    private static final Pattern symbol = Pattern.compile("[\\+\\-\\*/&\\|!\\^=;:,\\.\\[\\]%`~\\?]");
 
     // 换行符 通过系统属性获取？ line.separator
     private static final Pattern lineSymbol = Pattern.compile("[\\r\\n]");
@@ -77,7 +80,7 @@ public class Lexer {
 
                 if (match(number, dealChar)) {
                     // 数字
-                    String value = readConsecutive(number);
+                    String value = readConsecutive(numberBody);
                     tokens.add(new Token(TokenType.Number, value));
                     continue;
                 }
@@ -115,6 +118,20 @@ public class Lexer {
                 if (dealChar == '}') {
                     // 大括号
                     tokens.add(new Token(TokenType.RBrace, "}"));
+                    curr++;
+                    continue;
+                }
+
+                if (dealChar == '<') {
+                    // 尖括号
+                    tokens.add(new Token(TokenType.LAngle));
+                    curr++;
+                    continue;
+                }
+
+                if (dealChar == '>') {
+                    // 尖括号
+                    tokens.add(new Token(TokenType.RAngle));
                     curr++;
                     continue;
                 }

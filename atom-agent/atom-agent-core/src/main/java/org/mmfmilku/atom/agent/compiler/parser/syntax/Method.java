@@ -16,6 +16,7 @@ public class Method implements Node, ImportUse {
     protected List<Annotation> annotations;
     protected String methodName;
     protected Modifier modifier;
+    protected Generics generics;
     protected List<VarDefineStatement> methodParams;
     protected List<String> throwList;
     protected String returnType;
@@ -26,7 +27,8 @@ public class Method implements Node, ImportUse {
     public String getSourceCode() {
         return GrammarUtil.getLinesCode(annotations)
                 + "\n"
-                + GrammarUtil.getSentenceCode(modifier.getSourceCode(), returnType, methodName)
+                + GrammarUtil.getSentenceCode(modifier.getSourceCode(),
+                    GrammarUtil.emptyWrap(generics), returnType, methodName)
                 + "("
                 + methodParams.stream()
                     .map(Statement::getStatementSource)
@@ -37,6 +39,14 @@ public class Method implements Node, ImportUse {
                     )
                 + " "
                 + GrammarUtil.getLinesCode(codeBlock);
+    }
+
+    public Generics getGenerics() {
+        return generics;
+    }
+
+    public void setGenerics(Generics generics) {
+        this.generics = generics;
     }
 
     public List<String> getThrowList() {

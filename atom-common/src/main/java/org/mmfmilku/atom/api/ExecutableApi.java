@@ -2,6 +2,9 @@ package org.mmfmilku.atom.api;
 
 import org.mmfmilku.atom.api.dto.ExecuteResult;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 可执行接口，用于即时执行代码块
  * */
@@ -28,5 +31,13 @@ public interface ExecutableApi {
      * @param args 执行参数
      * */
     ExecuteResult executeTerminal(String terminalId, String code, Object... args);
+
+    List<String> listTerminalId();
+
+    Map<String, Object> terminalInfo(String terminalId);
+
+    String newTerminal(String terminalName);
+
+    void deleteTerminal(String terminalId);
 
 }

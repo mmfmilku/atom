@@ -7,7 +7,7 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.code.CodeBlockParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementLineParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.util.AssertUtil;
@@ -42,12 +42,12 @@ public class ForParser implements CodeParserHandle {
             }
             loopStatement = new ForStatement(beforeStatement, afterStatement, loopCondition);
         } else {
-            iterator.needNext(TokenType.Symbol, COLON);
-            Token token = iterator.needNext(TokenType.Words);
             AssertUtil.isTrue(beforeStatement instanceof VarDefineStatement,
                     "is not var define:" + beforeStatement.getStatementSource());
-            loopStatement = new EnhanceForStatement((VarDefineStatement) beforeStatement,
-                    new Identifier(token.getValue()));
+            iterator.needNext(TokenType.Symbol, COLON);
+            iterator.needNext();
+            Expression loopExp = iterator.parseExpression();
+            loopStatement = new EnhanceForStatement((VarDefineStatement) beforeStatement, loopExp);
         }
         iterator.needNext(TokenType.RParen);
         iterator.needNext(TokenType.LBrace);

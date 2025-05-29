@@ -76,9 +76,15 @@ let executeConsole = clickDom => {
         .then(res => {
             let fileListDom = pageEdit.querySelector('.executeConsole')
             fileListDom.innerHTML = res.map(e =>
-                // TODO 先写死为 EXECUTE_ORD 类型，后面需要改为从后端获取
+                e.ordEnum == 'EXECUTE_ORD'
+                ? `
+                    <div onclick="getTerminal('${e.ordName}', this)" 
+                    rightClickEvent="consoleRightMenu"
+                    class="edit-file text-wrap">${e.ordName}</div>
+                    `
+                :
                 `
-                    <div onclick="readText('${e.ordName}', this, 'EXECUTE_ORD')" 
+                    <div onclick="readText('${e.ordName}', this, '${e.ordEnum}')" 
                     rightClickEvent="consoleRightMenu"
                     class="edit-file text-wrap">${e.ordName}</div>
                     `
@@ -135,7 +141,12 @@ let typeArr = {
     // 控制台执行文件
     "EXECUTE_ORD": {
         type: 'executeConsole',
-        '0': '<button onclick="saveText(\'EXECUTE_ORD\')">保存</button>' +
+        '0': '<button onclick="submitJTerminal()">提交</button>'
+    },
+    // 脚本化执行文件
+    "SCRIPT_ORD": {
+        type: 'jScript',
+        '0': '<button onclick="saveText(\'SCRIPT_ORD\')">保存</button>' +
             '<button onclick="executeGoal()">运行</button>'
     }
 }
@@ -171,12 +182,9 @@ let readText = (ordFileName, clickDom, ordEnum = 'BASE_ORD') => {
             oldSelect && oldSelect.classList.remove('edit-file-select')
             clickDom && clickDom.classList.add('edit-file-select')
 
-            // 文件标题反显
-            pageEdit.querySelector('.edit-code-title').innerText = ordFileName
             setType(ordEnum, res.running)
-
-            // 文件内容反显
-            pageEdit.querySelector('#ordFileText').value = res.text
+            // 文件标题反显,文件内容反显
+            showOrdText(ordFileName, res.text)
         })
 }
 
@@ -248,11 +256,102 @@ let executeGoal = () => {
         UI.showMessage('请先选择文件')
         return
     }
-    post(`executeConsole/execute?appName=${vmInfo.displayName}&executeFile=${ordFileName}`)
+    post(`executeConsole/executeJScript?appName=${vmInfo.displayName}&jScriptFile=${ordFileName}`)
         .then(res => {
-            UI.showMessage(res.success)
+            UI.showMessage(res.executeReturn)
         })
 }
+
+// 主文本展示区域
+let showOrdText = (title, text) => {
+    // 标题
+    pageEdit.querySelector('.edit-code-title').innerText = title
+    // 内容
+    let textDom = pageEdit.querySelector('#ordFileText')
+    textDom.value = text
+    textDom.style.height = ''
+    // terminal部分移除
+    pageEdit.querySelector('.terminal-box').style.height = ''
+    pageEdit.querySelector('.terminal-box').innerHTML = ''
+}
+
+let showTerminalText = (title, history) => {
+    // 标题
+    pageEdit.querySelector('.edit-code-title').innerText = title
+    // 内容
+    let textDom = pageEdit.querySelector('#ordFileText')
+    textDom.value = ''
+    // 流程高度展示历史命令
+    textDom.style.height = '24%'
+    // 监听回车
+    textDom.addEventListener('keydown', (event) => {
+        // 检查是否为回车键（Enter 的 keyCode 是 13，或直接判断 event.key）
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            if (event.ctrlKey) {
+                // ctrl加回车，换行行为
+                textDom.value += '\n'
+            } else {
+                // 只有回车，执行发送
+                event.preventDefault(); // 阻止默认行为（如表单提交或换行）
+                console.log('回车键被按下，输入内容：', textDom.value)
+                // 提交终端命令
+                submitJTerminal()
+            }
+        }
+    });
+    // terminal历史命令部分
+    pageEdit.querySelector('.terminal-box').style.height = '70%'
+    pageEdit.querySelector('.terminal-box').innerHTML =
+        history.map(item => `<div class="terminal-his-line">${item}</div>`).join('')
+}
+
+// ---------------terminal相关-------------- beg
+let curJTerminal;
+let getTerminal = (ordFileName, clickDom) => {
+    curJTerminal = null
+    post(`executeConsole/getTerminal?appName=${vmInfo.displayName}&terminalFile=${ordFileName}`)
+        .then(res => {
+            curJTerminal = res
+            // 文件选中
+            let oldSelect = pageEdit.querySelector('.edit-file-select')
+            oldSelect && oldSelect.classList.remove('edit-file-select')
+            clickDom && clickDom.classList.add('edit-file-select')
+
+            // 文件标题反显
+            setType('EXECUTE_ORD')
+            showTerminalText(ordFileName, res.history)
+        })
+}
+
+let submitJTerminal = () => {
+    let input = pageEdit.querySelector('#ordFileText').value
+    if (!input) {
+        return
+    }
+    post(`executeConsole/executeJTerminal?appName=${vmInfo.displayName}`,
+        {
+            id: curJTerminal.id,
+            code: input
+        })
+        .then(res => {
+            // TODO 输入输出添加
+            // TODO 执行异常处理
+            pageEdit.querySelector('.terminal-box').innerHTML +=
+                `<div class="terminal-his-line">${input}</div>`
+            if (res.success) {
+                pageEdit.querySelector('.terminal-box').innerHTML +=
+                    `<div class="terminal-his-line">${res.executeReturn}</div>`
+            } else {
+                // 异常展示
+                pageEdit.querySelector('.terminal-box').innerHTML +=
+                    `<div class="terminal-his-line text-err">${res.throwable.message}</div>`
+            }
+            pageEdit.querySelector('.terminal-box').scrollTop = pageEdit.querySelector('.terminal-box').scrollHeight
+            // 上次内容清空
+            pageEdit.querySelector('#ordFileText').value = ''
+        })
+}
+// ---------------terminal相关-------------- end
 
 let loadAgent = () => {
     post(`agent/loadAgent?appName=${vmInfo.displayName}&vmId=${vmInfo.vmId}`)
@@ -332,10 +431,9 @@ let genCode = (javaName, clickDom) => {
     clickDom.classList.add('edit-file-select')
     post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${javaName}`)
         .then(res => {
-            // 文件标题反显
             setType(0)
-            pageEdit.querySelector('.edit-code-title').innerText = javaName
-            pageEdit.querySelector('#ordFileText').value = res
+            // 文件标题反显,文件内容反显
+            showOrdText(javaName, res)
         })
 }
 

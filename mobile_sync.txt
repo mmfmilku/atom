@@ -1,0 +1,128 @@
+打包工程中
+
+语法解析待支持
+
+
+
+
+
+
+
+/**
+ * 三目表达式
+ * boolExp ? trueExp : falseExp
+ * i == 1 ? i1.toString() : i2.toString()
+ * */
+public class TernaryOperate implements NestedExpression {
+
+    private Expression[] children = new Expression[3];
+
+    public TernaryOperate(Expression boolExp, Expression trueExp, Expression falseExp) {
+        this.children[0] = boolExp;
+        this.children[1] = trueExp;
+        this.children[2] = falseExp;
+    }
+
+    public Expression getBoolExp() {
+        return children[0];
+    }
+
+    public void setBoolExp(Expression boolExp) {
+        this.children[0] = boolExp;
+    }
+
+    public Expression getTrueExp() {
+        return children[1];
+    }
+
+    public void setTrueExp(Expression trueExp) {
+        this.children[1] = trueExp;
+    }
+
+    public Expression getFalseExp() {
+        return children[2];
+    }
+
+    public void setFalseExp(Expression falseExp) {
+        this.children[2] = falseExp;
+    }
+
+    @Override
+    public String getSourceCode() {
+        return GrammarUtil.getSentenceCode(
+                getBoolExp().getSourceCode(), "?",
+                getTrueExp().getSourceCode(), ":", getFalseExp().getSourceCode());
+    }
+
+    @Override
+    public void useImports(Map<String, String> importsMap) {
+        GrammarUtil.notSupport();
+    }
+
+    @Override
+    public List<LeafExpression> getLeafExpression() {
+        return Stream.of(children)
+                .map(Expression::getLeafExpression)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Expression> getNested() {
+        return Arrays.asList(children);
+    }
+}
+
+
+
+
+
+
+
+    void ternaryOperate() {
+        boolean b1 = true;
+        boolean b2 = b1 ? false : true;
+        boolean b3 = b1 == true || b2 == false;
+        int i = 0;
+        int j = i == 0 ? 1 : 3;
+        int k = (j == 0 ? i : j) + 3;
+        int l = b1 ? 1 : 0;
+        int m = b1 && b2 ? i == 1 ? 1 : 2 : l == 0 ? 3 : 4;
+        int len = (k == 0 ? "ff" : "ggg").length();
+
+        Object o = new String();
+        String s = (String) o + "ff";
+        Integer integer = (Integer) o + 333;
+    }
+
+
+
+
+
+//    static {
+//        System.out.println("init JScriptExecutor");
+//        String startClassName = JavaUtil.getStartClass();
+//        System.out.println("init JScriptExecutor from startClass " + startClassName);
+//        Class<?> startClass = InstrumentationContext.searchClass(startClassName);
+//        JScriptExecutor instance = null;
+//        if (startClass != null) {
+//            ClassLoader classLoader = startClass.getClassLoader();
+//            // TODO 使用自定义类加载器，将父类加载器设置为 classLoader
+//            if (classLoader != null) {
+//                try {
+//                    Class<?> clazz = classLoader.loadClass(JScriptExecutor.class.getName());
+//                    Object o = clazz.newInstance();
+//                    instance = (JScriptExecutor) o;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        System.out.println("init JScriptExecutor instance = " + instance);
+//        if (instance != null) {
+//            executor = instance;
+//        } else {
+//            // TODO 临时这么写
+//            executor = new JScriptExecutor();
+//        }
+//    }

@@ -1,14 +1,16 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
+
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 单目表达式
  * */
-public class UnaryOperate implements Expression {
+public class UnaryOperate implements NestedExpression {
 
     private String operator;
     private Identifier identifier;
@@ -63,7 +65,12 @@ public class UnaryOperate implements Expression {
     }
 
     @Override
-    public List<Expression> getBaseExpression() {
+    public List<LeafExpression> getLeafExpression() {
+        return Collections.singletonList(identifier);
+    }
+
+    @Override
+    public List<Expression> getNested() {
         return Collections.singletonList(identifier);
     }
 }

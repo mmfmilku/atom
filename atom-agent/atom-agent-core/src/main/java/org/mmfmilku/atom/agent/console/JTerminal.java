@@ -2,10 +2,7 @@ package org.mmfmilku.atom.agent.console;
 
 import org.mmfmilku.atom.agent.compiler.parser.syntax.Import;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 描述一个终端的对象
@@ -34,6 +31,11 @@ public class JTerminal {
     private Map<String, Object> contextVars = new HashMap<>();
 
     /**
+     * 最近一次执行产生的变量
+     * */
+    private Set<String> currVars = new HashSet<>();
+
+    /**
      * 执行历史
      * */
     private List<String> history = new ArrayList<>();
@@ -41,6 +43,14 @@ public class JTerminal {
     public JTerminal(String id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public Set<String> getCurrVars() {
+        return currVars;
+    }
+
+    public void setCurrVars(Set<String> currVars) {
+        this.currVars = currVars;
     }
 
     public String getId() {

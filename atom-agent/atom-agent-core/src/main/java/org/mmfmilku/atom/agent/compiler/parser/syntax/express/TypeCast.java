@@ -1,11 +1,15 @@
 package org.mmfmilku.atom.agent.compiler.parser.syntax.express;
 
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.LeafExpression;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
  * 强制转换类型表达式，(Type) exp;
  * */
-public class TypeCast implements Expression {
+public class TypeCast implements NestedExpression {
 
     private String type;
 
@@ -24,5 +28,15 @@ public class TypeCast implements Expression {
     @Override
     public String getSourceCode() {
         return "(" + type + ") " + expression.getSourceCode();
+    }
+
+    @Override
+    public List<LeafExpression> getLeafExpression() {
+        return expression.getLeafExpression();
+    }
+
+    @Override
+    public List<Expression> getNested() {
+        return Collections.singletonList(expression);
     }
 }

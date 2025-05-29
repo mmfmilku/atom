@@ -7,6 +7,7 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.struct.ImportParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
 import org.mmfmilku.atom.agent.util.OrdUtils;
 
 import java.util.ArrayList;
@@ -36,6 +37,8 @@ public class JScript {
     }
 
     public synchronized static JScriptResult execute(JavaAST javaAST, Object... args) {
+        System.out.println("execute jScript ast:");
+        System.out.println(javaAST.getSourceCode());
         // 将待执行程序写入执行目标
         OrdUtils.loadOrd(javaAST);
         JScriptResult jScriptResult = new JScriptResult();
@@ -65,10 +68,16 @@ public class JScript {
         parserAssembly.registryList(StatementParser.class, statementList::addAll);
         parserAssembly.parse();
 
-        return JScript.parseJScript(importList, statementList);
+        return parseJScript(importList, statementList);
     }
 
     public static JavaAST parseJScript(List<Import> importList, List<Statement> statementList) {
+        // 处理return语句
+        Statement statement = statementList.get(statementList.size() - 1);
+        // TODO 代理处理
+        if (!(statement instanceof ReturnStatement)) {
+            statementList.add(new ReturnStatement(CompilerUtil.parseExpression("\"success\"")));
+        }
         JavaAST javaAST = CompilerUtil.newEmptyJavaAST(JScriptExecutor.class);
         javaAST.setImports(importList);
         javaAST.getClassList().get(0)

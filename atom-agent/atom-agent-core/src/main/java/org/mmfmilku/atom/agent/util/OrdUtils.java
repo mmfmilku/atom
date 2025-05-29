@@ -19,12 +19,13 @@ import java.util.stream.Collectors;
 public class OrdUtils {
 
     public static void loadOrd(Map<String, ClassORDDefine> defineMap) {
+        System.out.println("loadOrd for defineMap:\n" + defineMap.toString());
         LoadOrdTransformer ordTransformer = new LoadOrdTransformer(defineMap);
         InstrumentationContext.addTransformer(ordTransformer);
         try {
             Class[] classes = defineMap.keySet().stream().map(InstrumentationContext::searchClass).toArray(Class[]::new);
             System.out.println("retransformClasses：" + Arrays.toString(classes));
-            if (classes == null || classes.length == 0) {
+            if (classes == null || classes.length == 0 || classes[0] == null) {
                 throw new BizException("no loadOrd class found");
             }
             InstrumentationContext.retransformClasses(classes);
@@ -43,6 +44,7 @@ public class OrdUtils {
     }
 
     public static void loadOrd(JavaAST javaAST) {
+        System.out.println("loadOrd for javaAST:\n" + javaAST.getSourceCode());
         Map<String, ClassORDDefine> defineMap = astToOrd(javaAST);
         loadOrd(defineMap);
     }

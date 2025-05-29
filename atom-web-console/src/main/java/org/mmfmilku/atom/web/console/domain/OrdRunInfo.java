@@ -6,6 +6,16 @@ public class OrdRunInfo {
 
     private String running;
 
+    private OrdEnum ordEnum;
+
+    public OrdEnum getOrdEnum() {
+        return ordEnum;
+    }
+
+    public void setOrdEnum(OrdEnum ordEnum) {
+        this.ordEnum = ordEnum;
+    }
+
     public String getOrdName() {
         return ordName;
     }

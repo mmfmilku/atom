@@ -1,10 +1,12 @@
 package org.mmfmilku.atom.agent.compiler.parser.handle.code;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
 import org.mmfmilku.atom.agent.compiler.parser.ParserIterator;
 import org.mmfmilku.atom.agent.compiler.parser.handle.CodeParserHandle;
 import org.mmfmilku.atom.agent.compiler.parser.handle.HandleScope;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.Generics;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 
 /**
@@ -20,9 +22,22 @@ public class VarDefineParser implements CodeParserHandle {
 
     @Override
     public VarDefineStatement parse(ParserIterator iterator) {
+        iterator.checkCurr(TokenType.Words);
         String varType = iterator.parseWordsPoint();
-        Token varName = iterator.needNext(TokenType.Words);
-        return new VarDefineStatement(varType, varName.getValue());
+        iterator.needNext();
+        Generics generics = iterator.parseGenericsAndNext();
+        varType += GrammarUtil.emptyWrap(generics);
+        if (iterator.isCurr(TokenType.Symbol, "[")) {
+            // TODO 数组定义保存
+            iterator.needNext(TokenType.Symbol, "]");
+            iterator.needNext();
+            varType += "[]";
+        }
+        Token varName = iterator.checkCurr(TokenType.Words);
+        VarDefineStatement varDefineStatement =
+                new VarDefineStatement(varType, varName.getValue());
+        varDefineStatement.setGenerics(generics);
+        return varDefineStatement;
     }
 
     @Override

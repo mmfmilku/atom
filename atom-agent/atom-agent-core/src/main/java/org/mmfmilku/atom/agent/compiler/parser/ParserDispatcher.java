@@ -1,5 +1,6 @@
 package org.mmfmilku.atom.agent.compiler.parser;
 
+import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.lexer.Lexer;
 import org.mmfmilku.atom.agent.compiler.lexer.Token;
 import org.mmfmilku.atom.agent.compiler.lexer.TokenType;
@@ -170,6 +171,7 @@ public class ParserDispatcher {
             while (iterator.hasNext()) {
                 parseProgram();
             }
+            javaAST.buildLinkedNode();
             return javaAST;
         }
 
@@ -241,22 +243,27 @@ public class ParserDispatcher {
             Token className = iterator.needNext(TokenType.Words);
             Class clazz = new Class(className.getValue());
 
-            if (iterator.isNext(TokenType.Words)) {
-                Token next = iterator.needNext(TokenType.Words);
-                if ("extends".equals(next.getValue())) {
-                    iterator.needNext(TokenType.Words);
-                    clazz.setSuperClass(parseWordsPoint());
+            iterator.needNext();
+            clazz.setGenerics(iterator.parseGenericsAndNext());
 
-                    if (iterator.isNext(TokenType.Words, "implements")) {
-                        iterator.needNext(TokenType.Words, "implements");
-                        parseImplements(clazz);
+            if (iterator.isCurr(TokenType.Words)) {
+                Token curr = iterator.getCurr();
+                if ("extends".equals(curr.getValue())) {
+                    iterator.needNext(TokenType.Words);
+                    String superClass = parseWordsPoint();
+                    iterator.needNext();
+                    // TODO 继承类，泛形保存
+                    Generics generics = iterator.parseGenericsAndNext();
+                    clazz.setSuperClass(superClass + GrammarUtil.emptyWrap(generics));
+                    if (iterator.isCurr(TokenType.Words, "implements")) {
+                        parseImplementsAndNext(clazz);
                     }
-                } else if ("implements".equals(next.getValue())) {
-                    parseImplements(clazz);
+                } else if ("implements".equals(curr.getValue())) {
+                    parseImplementsAndNext(clazz);
                 }
             }
-
-            iterator.needNext(TokenType.LBrace);
+            // 花括号，解析类内容
+            iterator.checkCurr(TokenType.LBrace);
             // 成员变量
             List<Member> members = new ArrayList<>();
             clazz.setMembers(members);
@@ -285,13 +292,16 @@ public class ParserDispatcher {
                     staticBlocks.add(codeBlock);
                     continue;
                 }
+                // 泛形定义
+                Generics methodGenerics = iterator.parseGenericsAndNext();
                 iterator.saveIdx();
                 // 判断是成员变量还是方法或构造器
                 // 1.解析 parseWordsPoint 前存档，因为解析构造器和方法时会再次执行parseWordsPoint
                 // 2.调用 parseWordsPoint 后再判断是因为 如 com.xx.xxx 会影响判断
-                parseWordsPoint();
-                if (iterator.isNext(TokenType.LParen) ||
-                        iterator.isNext(2, TokenType.LParen, TokenType.LParen.getFixValue())) {
+                iterator.parseTypeDefineAndNext();
+                if (iterator.isCurr(TokenType.LParen)
+                        || iterator.isNext(TokenType.LParen)
+                        || iterator.isCurr(TokenType.LAngle)) {
                     iterator.readIdx();
                     // 后一位或后两位是括号，则为方法定义
                     // TODO 抽象方法
@@ -308,6 +318,7 @@ public class ParserDispatcher {
                         methods.add(method);
                     }
 
+                    method.setGenerics(methodGenerics);
                     method.setModifier(modifier);
                     method.setAnnotations(annotations);
                 } else {
@@ -351,14 +362,21 @@ public class ParserDispatcher {
             return accessPrivilege;
         }
 
-        private void parseImplements(Class clazz) {
+        private void parseImplementsAndNext(Class clazz) {
             List<String> implementsList = new ArrayList<>();
             iterator.needNext(TokenType.Words);
-            implementsList.add(parseWordsPoint());
-            while (iterator.isNext(TokenType.Symbol, ParserIterator.COMMA)) {
-                iterator.needNext(TokenType.Symbol, ParserIterator.COMMA);
+            String implement = parseWordsPoint();
+            iterator.needNext();
+            // TODO 实现接口，泛形保存
+            Generics generics = iterator.parseGenericsAndNext();
+            implementsList.add(implement + GrammarUtil.emptyWrap(generics));
+            while (iterator.isCurr(TokenType.Symbol, ParserIterator.COMMA)) {
                 iterator.needNext(TokenType.Words);
-                implementsList.add(parseWordsPoint());
+                String wordsPoint = parseWordsPoint();
+                iterator.needNext();
+                // TODO 实现接口，泛形保存
+                generics = iterator.parseGenericsAndNext();
+                implementsList.add(wordsPoint + GrammarUtil.emptyWrap(generics));
             }
             clazz.setImplementClasses(implementsList);
         }

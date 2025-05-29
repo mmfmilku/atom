@@ -25,7 +25,8 @@ public class GrammarUtil {
                 "/".equals(value) ||
                 "&".equals(value) ||
                 "|".equals(value) ||
-                "^".equals(value)
+                "^".equals(value) ||
+                "%".equals(value)
                 ;
     }
 
@@ -102,6 +103,10 @@ public class GrammarUtil {
 
     public static String emptyWrap(boolean empty, Supplier<String> supplier) {
         return empty ? "" : supplier.get();
+    }
+
+    public static String emptyWrap(Node node) {
+        return node == null ? "" : node.getSourceCode();
     }
 
 }

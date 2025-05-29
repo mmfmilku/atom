@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.web.console.interfaces;
 
 import org.mmfmilku.atom.api.dto.ExecuteResult;
+import org.mmfmilku.atom.web.console.domain.JTerminalInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,27 @@ public interface IInstrumentService {
      * 执行程序相对于执行文件夹的路径名称
      * */
     ExecuteResult execute(String appName, String executeFile, Object... args);
+
+    /**
+     * 执行脚本化java代码
+     * */
+    ExecuteResult executeJScript(String appName, String jScriptFile);
+
+    /**
+     * 获取终端
+     * */
+    JTerminalInfo getTerminal(String appName, String terminalFile);
+
+    /**
+     * 执行JTerminal
+     * */
+    ExecuteResult executeJTerminal(String appName, String terminalId, String code);
+
+    List<String> listTerminalId(String appName);
+
+    String newTerminal(String appName, String terminalName);
+
+    void deleteTerminal(String appName, String terminalId);
 
     /**
      * 获取被重写的类

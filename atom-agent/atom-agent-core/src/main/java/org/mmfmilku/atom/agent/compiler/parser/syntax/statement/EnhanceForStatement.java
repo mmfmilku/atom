@@ -2,13 +2,11 @@ package org.mmfmilku.atom.agent.compiler.parser.syntax.statement;
 
 import org.mmfmilku.atom.agent.compiler.GrammarUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
-import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Identifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.leaf.Identifier;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
 import org.mmfmilku.atom.util.AssertUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 增强for循环
@@ -21,7 +19,7 @@ public class EnhanceForStatement  extends LoopStatement {
 
     private VarDefineStatement loopItemVarDefine;
 
-    private Identifier loopIdentifier;
+    private Expression loopExp;
 
     public VarDefineStatement getLoopItemVarDefine() {
         return loopItemVarDefine;
@@ -31,20 +29,20 @@ public class EnhanceForStatement  extends LoopStatement {
         this.loopItemVarDefine = loopItemVarDefine;
     }
 
-    public Identifier getLoopIdentifier() {
-        return loopIdentifier;
+    public Expression getLoopExp() {
+        return loopExp;
     }
 
-    public void setLoopIdentifier(Identifier loopIdentifier) {
-        this.loopIdentifier = loopIdentifier;
+    public void setLoopExp(Expression loopExp) {
+        this.loopExp = loopExp;
     }
 
-    public EnhanceForStatement(VarDefineStatement loopItemVarDefine, Identifier loopIdentifier) {
+    public EnhanceForStatement(VarDefineStatement loopItemVarDefine, Expression loopExp) {
         // 仅定义变量，不能赋值
         AssertUtil.isTrue(loopItemVarDefine.getAssignExpression() == null,
                 "this expression should not assign value " + loopItemVarDefine.getSourceCode());
         this.loopItemVarDefine = loopItemVarDefine;
-        this.loopIdentifier = loopIdentifier;
+        this.loopExp = loopExp;
     }
 
     @Override
@@ -53,7 +51,7 @@ public class EnhanceForStatement  extends LoopStatement {
                 "(",
                 loopItemVarDefine.getStatementSource(),
                 ":",
-                loopIdentifier.getSourceCode(),
+                loopExp.getSourceCode(),
                 ")",
                 loopBody.getSourceCode()
         );
@@ -62,7 +60,7 @@ public class EnhanceForStatement  extends LoopStatement {
     @Override
     public List<Expression> getAllExpression() {
         List<Expression> expressions = new ArrayList<>();
-        expressions.addAll(loopIdentifier.getAllExpression());
+        expressions.addAll(loopExp.getLeafExpression());
         expressions.addAll(loopBody.getAllExpression());
         return expressions;
     }
@@ -70,7 +68,17 @@ public class EnhanceForStatement  extends LoopStatement {
     @Override
     public void useImports(Map<String, String> importsMap) {
         loopItemVarDefine.useImports(importsMap);
-        loopIdentifier.useImports(importsMap);
+        loopExp.useImports(importsMap);
         loopBody.useImports(importsMap);
+    }
+
+    @Override
+    public List<Statement> getNested() {
+        return Arrays.asList(loopItemVarDefine, loopBody);
+    }
+
+    @Override
+    public List<Expression> getNestedExp() {
+        return Collections.singletonList(loopExp);
     }
 }

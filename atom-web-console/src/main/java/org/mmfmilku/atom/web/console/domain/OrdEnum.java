@@ -1,22 +1,34 @@
 package org.mmfmilku.atom.web.console.domain;
 
+import org.mmfmilku.atom.util.StringUtils;
+
 import java.util.function.Function;
 
 public enum OrdEnum {
 
-    BASE_ORD("1", "重写文件", "java", AgentConfig::getOrdDir),
-    STRATEGY_ORD("2", "重写策略", "jords", AgentConfig::getOrdDir),
-    EXECUTE_ORD("3", "执行终端", "jconsole", AgentConfig::getExecuteDir),
+    BASE_ORD("1", "重写文件", ".java", AgentConfig::getOrdDir),
+    STRATEGY_ORD("2", "重写策略", ".jords", AgentConfig::getOrdDir),
+    EXECUTE_ORD("3", "执行终端", ".jconsole", AgentConfig::getExecuteDir),
     FOLDER_ORD("4", "文件夹", "", AgentConfig::getExecuteDir),
-    SCRIPT_ORD("5", "脚本化文件", "jscript", AgentConfig::getExecuteDir),
+    SCRIPT_ORD("5", "脚本化文件", ".jscript", AgentConfig::getExecuteDir),
     RESOURCE_ORD("6", "资源文件", "", AgentConfig::getExecuteDir),
     ;
 
-    private OrdEnum(String type, String desc, String suffix, Function<AgentConfig, String> dirGetter) {
+    OrdEnum(String type, String desc, String suffix, Function<AgentConfig, String> dirGetter) {
         this.type = type;
         this.desc = desc;
         this.suffix = suffix;
         this.dirGetter = dirGetter;
+    }
+
+    public static OrdEnum gussEnum(String ordName) {
+        for (OrdEnum ordEnum : values()) {
+            String suffix = ordEnum.getSuffix();
+            if (!StringUtils.isEmpty(suffix) && ordName.endsWith(suffix)) {
+                return ordEnum;
+            }
+        }
+        return RESOURCE_ORD;
     }
 
     private String type;
