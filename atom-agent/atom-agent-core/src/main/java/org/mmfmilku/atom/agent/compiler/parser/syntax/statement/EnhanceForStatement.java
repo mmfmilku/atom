@@ -19,7 +19,7 @@ public class EnhanceForStatement  extends LoopStatement {
 
     private VarDefineStatement loopItemVarDefine;
 
-    private Identifier loopIdentifier;
+    private Expression loopExp;
 
     public VarDefineStatement getLoopItemVarDefine() {
         return loopItemVarDefine;
@@ -29,20 +29,20 @@ public class EnhanceForStatement  extends LoopStatement {
         this.loopItemVarDefine = loopItemVarDefine;
     }
 
-    public Identifier getLoopIdentifier() {
-        return loopIdentifier;
+    public Expression getLoopExp() {
+        return loopExp;
     }
 
-    public void setLoopIdentifier(Identifier loopIdentifier) {
-        this.loopIdentifier = loopIdentifier;
+    public void setLoopExp(Expression loopExp) {
+        this.loopExp = loopExp;
     }
 
-    public EnhanceForStatement(VarDefineStatement loopItemVarDefine, Identifier loopIdentifier) {
+    public EnhanceForStatement(VarDefineStatement loopItemVarDefine, Expression loopExp) {
         // 仅定义变量，不能赋值
         AssertUtil.isTrue(loopItemVarDefine.getAssignExpression() == null,
                 "this expression should not assign value " + loopItemVarDefine.getSourceCode());
         this.loopItemVarDefine = loopItemVarDefine;
-        this.loopIdentifier = loopIdentifier;
+        this.loopExp = loopExp;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class EnhanceForStatement  extends LoopStatement {
                 "(",
                 loopItemVarDefine.getStatementSource(),
                 ":",
-                loopIdentifier.getSourceCode(),
+                loopExp.getSourceCode(),
                 ")",
                 loopBody.getSourceCode()
         );
@@ -60,7 +60,7 @@ public class EnhanceForStatement  extends LoopStatement {
     @Override
     public List<Expression> getAllExpression() {
         List<Expression> expressions = new ArrayList<>();
-        expressions.addAll(loopIdentifier.getAllExpression());
+        expressions.addAll(loopExp.getLeafExpression());
         expressions.addAll(loopBody.getAllExpression());
         return expressions;
     }
@@ -68,7 +68,7 @@ public class EnhanceForStatement  extends LoopStatement {
     @Override
     public void useImports(Map<String, String> importsMap) {
         loopItemVarDefine.useImports(importsMap);
-        loopIdentifier.useImports(importsMap);
+        loopExp.useImports(importsMap);
         loopBody.useImports(importsMap);
     }
 
@@ -79,6 +79,6 @@ public class EnhanceForStatement  extends LoopStatement {
 
     @Override
     public List<Expression> getNestedExp() {
-        return Collections.singletonList(loopIdentifier);
+        return Collections.singletonList(loopExp);
     }
 }
