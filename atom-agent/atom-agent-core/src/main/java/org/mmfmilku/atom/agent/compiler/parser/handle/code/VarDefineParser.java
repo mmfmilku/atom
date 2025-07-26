@@ -29,6 +29,7 @@ public class VarDefineParser implements CodeParserHandle {
         varType += GrammarUtil.emptyWrap(generics);
         if (iterator.isCurr(TokenType.Symbol, "[")) {
             // TODO 数组定义保存
+            // TODO muti dimension support
             iterator.needNext(TokenType.Symbol, "]");
             iterator.needNext();
             varType += "[]";

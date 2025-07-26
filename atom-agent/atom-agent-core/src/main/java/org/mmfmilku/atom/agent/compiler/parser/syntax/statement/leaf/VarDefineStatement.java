@@ -14,6 +14,8 @@ public class VarDefineStatement implements LeafStatement {
 
     private String varType;
     private String varName;
+    private boolean arr;
+    private int arrDimension;
     private Expression assignExpression;
     private Generics generics;
 

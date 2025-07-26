@@ -23,6 +23,10 @@
 * 解析continue,break 关键字
 * try语句getAllExpression实现
 * 类型全类名强转 int o2i2 = (java.lang.Integer) o + 44;
+* var define parse not support muti dimension array like String[][] or more []
+* array type import use error
+* parse expression like  a + ((b)) error,b is not type cast
+* javassist not support generics
 
 ## FServer
 * 请求容错处理

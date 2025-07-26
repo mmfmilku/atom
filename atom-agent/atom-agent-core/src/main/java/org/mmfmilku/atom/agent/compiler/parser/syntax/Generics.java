@@ -24,7 +24,9 @@ public class Generics implements Node {
 
     @Override
     public String getSourceCode() {
-        return TokenType.LAngle.getFixValue() + content + TokenType.RAngle.getFixValue();
+        // javassist not support generics,return empty
+        // return TokenType.LAngle.getFixValue() + content + TokenType.RAngle.getFixValue();
+        return "";
     }
 
 }
