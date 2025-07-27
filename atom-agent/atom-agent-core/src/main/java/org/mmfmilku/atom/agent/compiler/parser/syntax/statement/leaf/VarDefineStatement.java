@@ -19,6 +19,12 @@ public class VarDefineStatement implements LeafStatement {
     private Expression assignExpression;
     private Generics generics;
 
+    public VarDefineStatement(String varType,int arrDimension, String varName) {
+        this.varType = varType;
+        this.arrDimension = aarrDimension;
+        this.varName = varName;
+    }
+    
     public VarDefineStatement(String varType, String varName) {
         this.varType = varType;
         this.varName = varName;
@@ -62,7 +68,11 @@ public class VarDefineStatement implements LeafStatement {
         if (assignExpression != null) {
             assignValueStr = " = " + assignExpression.getSourceCode();
         }
-        return varType + " " + varName + assignValueStr;
+        String arrFlag = "";
+        for (int i = 0; i < arrDimension; i++) {
+          arrFlag += "[]";
+        }
+        return varType + arrFlag + " " + varName + assignValueStr;
     }
 
     @Override
