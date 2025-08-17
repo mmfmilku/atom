@@ -12,17 +12,17 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
-public class JTerminalHolderTest {
+public class JTerminalTest {
 
-    private static JTerminal jTerminal = JTerminalHolder.newTerminal("test-terminal");
+    private static JTerminalDomain jTerminalDomain = JTerminal.newTerminal("test-terminal");
 
     @Test
     public void testNewTerminal() {
-        int size = JTerminalHolder.listId().size();
-        JTerminal test1 = JTerminalHolder.newTerminal("test-1");
-        assertEquals(size + 1, JTerminalHolder.listId().size());
-        JTerminalHolder.deleteTerminal(test1.getId());
-        assertEquals(size, JTerminalHolder.listId().size());
+        int size = JTerminal.listId().size();
+        JTerminalDomain test1 = JTerminal.newTerminal("test-1");
+        assertEquals(size + 1, JTerminal.listId().size());
+        JTerminal.deleteTerminal(test1.getId());
+        assertEquals(size, JTerminal.listId().size());
     }
 
 //    @Test
@@ -41,9 +41,9 @@ public class JTerminalHolderTest {
                 + "int c = 9;"
                 + "int d = b * c;"
                 ;
-        JTerminal jTerminal = JTerminalHolder.newTerminal("parseTerminalCode");
+        JTerminalDomain jTerminalDomain = JTerminal.newTerminal("parseTerminalCode");
         Object parseTerminalCode = ReflectUtils
-                .invokeStaticMethod(JTerminalHolder.class, "parseTerminalCode", code, jTerminal);
+                .invokeStaticMethod(JTerminal.class, "parseTerminalCode", code, jTerminalDomain);
         List<Statement> statementList = (List<Statement>) parseTerminalCode;
         String enhanceCode = statementList.stream()
                 .map(Statement::getSourceCode)
@@ -77,7 +77,7 @@ public class JTerminalHolderTest {
                 + "d = c = b = a.length();"
                 ;
         Object parseTerminalCode = ReflectUtils
-                .invokeStaticMethod(JTerminalHolder.class, "getJavaAST", code, jTerminal);
+                .invokeStaticMethod(JTerminal.class, "getJavaAST", code, jTerminalDomain);
         JavaAST javaAST = (JavaAST) parseTerminalCode;
         ByteCodeUtils.toJavassistCode(javaAST);
         System.out.println(javaAST.getSourceCode());

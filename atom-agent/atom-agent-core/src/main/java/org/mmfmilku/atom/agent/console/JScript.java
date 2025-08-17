@@ -83,7 +83,7 @@ public class JScript {
         // 执行程序
         try {
             // 保存执行结果
-            Object executeReturn = ReflectUtils.invokeMethod(executor, "execute", new Object[]{args});
+            Object executeReturn = ReflectUtils.invokeMethod(executor, EXECUTE_METHOD_NAME, new Object[]{args});
 //            Object executeReturn = executor.execute(args);
             jScriptResult.setSuccess(true);
             jScriptResult.setExecuteReturn(executeReturn);
