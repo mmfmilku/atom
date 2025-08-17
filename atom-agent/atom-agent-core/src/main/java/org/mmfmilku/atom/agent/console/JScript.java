@@ -8,15 +8,53 @@ import org.mmfmilku.atom.agent.compiler.parser.handle.struct.ImportParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
+import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
+import org.mmfmilku.atom.agent.loader.AppAccessibleClassLoader;
 import org.mmfmilku.atom.agent.util.OrdUtils;
+import org.mmfmilku.atom.util.JavaUtil;
+import org.mmfmilku.atom.util.ReflectUtils;
 
+import java.lang.Class;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class JScript {
 
-    private static final JScriptExecutor executor = new JScriptExecutor();
+    // 使用Object引用，否则不同类加载器的实例会出现类型转换异常
+    private static Object executor;
+
+    static {
+        System.out.println(Thread.currentThread().getContextClassLoader());
+        // 必须设置自定义类加载器加载JScriptExecutor，
+        // 如果通过spring的LaunchedURLClassLoader加载，最终还是使用应用类加载器加载JScriptExecutor
+        // 因为LaunchedURLClassLoader自身加载不到JScriptExecutor，结果还是通过父类加载器加载
+        String startClass = JavaUtil.getStartClass();
+        Class<?> aClass = InstrumentationContext.searchClass(startClass);
+        System.out.println(aClass);
+        Object o = null;
+        try {
+            o = aClass.newInstance();
+            System.out.println(o);
+            System.out.println(o.getClass().getClassLoader());
+
+            URL location = JScript.class.getProtectionDomain().getCodeSource().getLocation();
+
+            ClassLoader classLoader = new AppAccessibleClassLoader(
+                    new URL[]{location}, o.getClass().getClassLoader());
+
+            Class<?> executorClass = Class.forName(
+                    "org.mmfmilku.atom.agent.console.JScriptExecutor", true, classLoader);
+            executor = executorClass.newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("JScriptExecutor init fail!!!!!!!!!!!!!!!");
+            // 无法调用目标应用中的类
+            executor = new JScriptExecutor();
+        }
+
+    }
 
     // 执行方法名约定为execute
     public static final String EXECUTE_METHOD_NAME = "execute";
@@ -45,7 +83,8 @@ public class JScript {
         // 执行程序
         try {
             // 保存执行结果
-            Object executeReturn = executor.execute(args);
+            Object executeReturn = ReflectUtils.invokeMethod(executor, "execute", new Object[]{args});
+//            Object executeReturn = executor.execute(args);
             jScriptResult.setSuccess(true);
             jScriptResult.setExecuteReturn(executeReturn);
         } catch (Exception e) {
