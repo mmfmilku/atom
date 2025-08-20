@@ -275,6 +275,24 @@ let showOrdText = (title, text) => {
     pageEdit.querySelector('.terminal-box').innerHTML = ''
 }
 
+let keydownHandle = (event) => {
+    // 内容
+    let textDom = pageEdit.querySelector('#ordFileText')
+    // 检查是否为回车键（Enter 的 keyCode 是 13，或直接判断 event.key）
+    if (event.key === 'Enter' || event.keyCode === 13) {
+        if (event.ctrlKey) {
+            // ctrl加回车，换行行为
+            textDom.value += '\n'
+        } else {
+            // 只有回车，执行发送
+            event.preventDefault(); // 阻止默认行为（如表单提交或换行）
+            console.log('回车键被按下，输入内容：', textDom.value)
+            // 提交终端命令
+            submitJTerminal()
+        }
+    }
+}
+
 let showTerminalText = (title, history) => {
     // 标题
     pageEdit.querySelector('.edit-code-title').innerText = title
@@ -284,21 +302,7 @@ let showTerminalText = (title, history) => {
     // 流程高度展示历史命令
     textDom.style.height = '24%'
     // 监听回车
-    textDom.addEventListener('keydown', (event) => {
-        // 检查是否为回车键（Enter 的 keyCode 是 13，或直接判断 event.key）
-        if (event.key === 'Enter' || event.keyCode === 13) {
-            if (event.ctrlKey) {
-                // ctrl加回车，换行行为
-                textDom.value += '\n'
-            } else {
-                // 只有回车，执行发送
-                event.preventDefault(); // 阻止默认行为（如表单提交或换行）
-                console.log('回车键被按下，输入内容：', textDom.value)
-                // 提交终端命令
-                submitJTerminal()
-            }
-        }
-    });
+    textDom.addEventListener('keydown', keydownHandle);
     // terminal历史命令部分
     pageEdit.querySelector('.terminal-box').style.height = '70%'
     pageEdit.querySelector('.terminal-box').innerHTML =
