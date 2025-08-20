@@ -158,7 +158,11 @@ const atom = {
         let allInput = pageDom.querySelectorAll('input')
         let formData = {}
         allInput.forEach(item => {
-            formData[item.name] = item.value
+            if (item.type === 'checkbox') {
+                formData[item.name] = item.checked
+            } else {
+                formData[item.name] = item.value
+            }
         })
         return formData
     },

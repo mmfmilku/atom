@@ -6,5 +6,9 @@
         <div>
             <label>时间</label><input type="text" name="time" value="${param.time || ''}"/>
         </div>
+        <div>
+            <label>编译加速</label><input type="checkbox" name="compileUp"
+                                      ${param.compileUp=='true'?'checked':''}/>
+        </div>
     </div>
 </div>
