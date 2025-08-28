@@ -119,6 +119,8 @@ public class SupportSyntaxSample<T>
             System.out.println(k);
             System.out.println(v);
         });
+        System.out.println((map));
+        System.out.println(((HashMap)map).getClass());
         map.forEach((k, v) -> System.out.println(k));
         Function<String, Integer> function = str -> str.length();
     }
