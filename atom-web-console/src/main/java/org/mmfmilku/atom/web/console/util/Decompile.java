@@ -21,6 +21,8 @@ public class Decompile {
         // target dir
         HashMap<String, String> outputMap = new HashMap<>();
         outputMap.put("outputdir", targetPath);
+        // 中文不展示unicode
+        outputMap.put("hideutf", "false");
 
         OptionsImpl options = new OptionsImpl(outputMap);
         CfrDriver cfrDriver = new CfrDriver.Builder().withBuiltOptions(options).build();
