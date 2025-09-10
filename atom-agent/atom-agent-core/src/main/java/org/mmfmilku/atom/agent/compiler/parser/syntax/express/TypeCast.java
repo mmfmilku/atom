@@ -22,6 +22,7 @@ public class TypeCast implements NestedExpression {
 
     @Override
     public void useImports(Map<String, String> importsMap) {
+        this.type = importsMap.getOrDefault(type, type);
         expression.useImports(importsMap);
     }
 
