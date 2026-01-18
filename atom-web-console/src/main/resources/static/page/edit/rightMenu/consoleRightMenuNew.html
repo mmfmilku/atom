@@ -3,9 +3,9 @@
          onmouseover="atom.SPA.loadHtml('/page/edit/rightMenu/consoleRightChildMenu.html')
         .then(html => {
             // 移除上一次的子菜单
-            clearRightChildMenu()
+            atomPage.clearRightChildMenu()
             // 打开子菜单
-            openChildBlock(event, html, contextmenu)
+            atomPage.openChildBlock(event, html)
         })"
     >新增
     </div>

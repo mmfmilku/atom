@@ -1,0 +1,70 @@
+<div>
+    <div class="from-table-middle">
+        <div class="from-section-title">基础信息</div>
+        <div class="from-field">
+            <label class="from-field-label">启动类</label>
+            <input readonly type="text" value="${param.startClass}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">核心jar路径</label>
+            <input readonly type="text" value="${param.bootConfigDTO.coreJarPath}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">应用类加载器</label>
+            <input readonly type="text" value="${param.bootConfigDTO.appClassloader}"/>
+        </div>
+
+        <div class="from-section-title">运行时配置</div>
+        <div class="from-field">
+            <label class="from-field-label">应用基础包路径</label>
+            <input readonly type="text" value="${param.runningConfigDTO.appBasePackage}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">
+                编译加速
+                <i class="icon-warn" title="开启后，会在每次调用方法时，编译字节码，提高调用速度">!</i>
+            </label>
+            <input disabled type="checkbox" ${param.runningConfigDTO.byteCodeCompile?'checked':''}/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">全局toString方法</label>
+            <input readonly type="text" value="${param.runningConfigDTO.toStringMethod || ''}"/>
+        </div>
+
+        <div class="from-section-title">fServer信息</div>
+        <div class="from-field">
+            <label class="from-field-label">fServer路径</label>
+            <input readonly type="text" value="${param.fServerInfoDTO.listenPath}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">当前连接数</label>
+            <input readonly type="text" value="${param.fServerInfoDTO.connectCount}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">活跃线程数</label>
+            <input readonly type="text" value="${param.fServerInfoDTO.activeCount}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">线程池大小</label>
+            <input readonly type="text" value="${param.fServerInfoDTO.poolSize}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">核心线程数</label>
+            <input readonly type="text" value="${param.fServerInfoDTO.corePoolSize}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">最大线程数</label>
+            <input readonly type="text" value="${param.fServerInfoDTO.maximumPoolSize}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">队列大小</label>
+            <input readonly type="text" value="${param.fServerInfoDTO.queueSize}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">队列容量</label>
+            <input readonly type="text" value="${param.fServerInfoDTO.queueCapacity}"/>
+        </div>
+
+
+    </div>
+</div>

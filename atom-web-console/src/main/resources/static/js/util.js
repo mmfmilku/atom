@@ -1,7 +1,7 @@
 
 const UI = {
 
-    // 弹窗打开新页面
+    // 弹窗打开新页面，返回点击确定时触发的promise
     openPageWin: (pagePath, title, param) => {
         return new Promise((resolve, reject) => {
             atom.SPA.loadHtml(pagePath + '.html', null, param)
@@ -75,6 +75,74 @@ const UI = {
         return UI.openDialog('', title)
     },
 
+    // 打开浮动窗口
+    openFloatWindow: (pagePath, title = '', parentDom = document.body, param = {}) => {
+        return new Promise((resolve, reject) => {
+            atom.SPA.loadHtml(pagePath + '.html', null, param)
+                .then(showHtml => {
+                    let windowHtml = `
+                        <div >
+                            <div class="atom-float-window-header">
+                                <div >${title}</div>
+                            </div>
+                            <div >
+                                ${showHtml}
+                            </div>
+                        </div>
+                    `
+
+                    let windowDom = document.createElement("div")
+                    windowDom.classList.add('atom-float-window')
+                    windowDom.innerHTML = windowHtml
+                    parentDom.appendChild(windowDom)
+
+                    // 绑定关闭事件
+//                    windowDom.querySelector('.close-btn').addEventListener('click', function(event) {
+//                        document.body.removeChild(windowDom)
+//                    });
+
+                    let winHeader = windowDom.querySelector('.atom-float-window-header')
+
+                    let isDragging = false
+                    let dragOffsetX, dragOffsetY
+                    // 拖拽功能
+                    winHeader.addEventListener('mousedown', function(e) {
+                        isDragging = true
+                        dragOffsetX = e.clientX - windowDom.getBoundingClientRect().left
+                        dragOffsetY = e.clientY - windowDom.getBoundingClientRect().top
+                        windowDom.style.transition = 'none';
+                    });
+                    // 鼠标移动事件,需要监听整个页面的鼠标移动
+                    document.addEventListener('mousemove', function(e) {
+                        if (isDragging) {
+                            // 鼠标拖动的目标位置，为了不超过左侧与上侧不能小于0
+                            let dragToX = e.clientX - dragOffsetX
+                            let dragToY = e.clientY - dragOffsetY
+                            // 为了不超过左侧与上侧，不能小于0
+                            dragToX = Math.max(dragToX, 0)
+                            dragToY = Math.max(dragToY, 0)
+                            // 为了不超过右侧与下侧，不能大于body元素的边界
+                            dragToX = Math.min(dragToX, document.body.getBoundingClientRect().right - windowDom.offsetWidth)
+                            dragToY = Math.min(dragToY, document.body.getBoundingClientRect().bottom - winHeader.offsetHeight)
+
+                            // 元素定位需要加上自身尺寸的一半
+                            windowDom.style.left = (dragToX + windowDom.offsetWidth / 2) + 'px'
+                            windowDom.style.top = (dragToY + windowDom.offsetHeight / 2) + 'px'
+                        }
+                    });
+                    // 鼠标释放事件
+                    document.addEventListener('mouseup', function() {
+                        if (isDragging) {
+                            isDragging = false
+                            windowDom.style.transition = 'all 0.3s ease'
+                        }
+                    })
+
+                    resolve(windowDom)
+                })
+        })
+    },
+
     showMessage: (message) => {
         let popup = document.createElement("div")
         popup.classList.add('atom-tip')
@@ -87,12 +155,22 @@ const UI = {
 
     showError: (message) => {
         let popup = document.createElement("div")
+        popup.classList.add('atom-window')
         popup.classList.add('atom-error')
         popup.innerText = message
+        popup.innerHTML =
+            `<div>
+                <div class="atom-window-header vm-button-container">
+                    <div class="close-btn">x</div>
+                </div>
+                <div class="atom-window-body">${message}</div>
+            </div>`
         document.body.appendChild(popup)
-        setTimeout(function () {
+
+        // 添加事件监听器
+        popup.querySelector('.close-btn').addEventListener('click', () => {
             document.body.removeChild(popup)
-        }, 5000);
+        })
     },
 
     // 右键菜单
@@ -185,6 +263,10 @@ const atom = {
             return atom.SPA.router.route(pagePath, param)
         },
 
+        reload: () => {
+            atom.SPA.router.reload()
+        },
+
         definePage: define => {
             atom.SPA.routers.push(define)
         },
@@ -195,55 +277,12 @@ const atom = {
     }
 }
 
-
-//注册到window全局
-// window.spaRouters = new spaRouters();
-
-//
-//
-// 案例如下:
-//
-//     1、创建静态.html/.htm文件；
-//
-// 2、在html中创建文档元素
-// <a href="#/login">测试1</a>，
-//     <a href="#/register">测试2</a>
-//     <a href="#/main">测试3</a>
-// “#”后代表的是相对应的内容；
-//
-// 3、分别创建3个
-// login.js
-// index.js
-// main.js脚本文件；
-// 4、注册路由 :
-//     spaRouters.map('/index',function(transition){
-//         //异步加载js
-//         spaRouters.asyncFun('index.js',transition)
-//         //或者同步执行回调
-//         //spaRouters.syncFun(function(transition){},transition)
-//     })
-//
-// 5、login.js脚本代码如下:
-// SPA_RESOLVE_INIT = function(transition) {
-//     alert("请登录");
-// }
-// 5、index.js脚本代码如下:
-// SPA_RESOLVE_INIT = function(transition) {
-//     alert("测试1");
-// }
-//
-// 5、main.js脚本代码如下:
-// SPA_RESOLVE_INIT = function(transition) {
-//     alert("测试2");
-// }
-//
-// 6、初始化：spaRouters.init()；
-
-
-
 function spaRouters() {
     // 保存注册的所有路由
     this.routers = {
+        'list': {
+            htmlPath: '/page/main/list.html'
+        },
         'edit': {
             htmlPath: '/page/edit/edit.html'
         },
@@ -281,6 +320,10 @@ spaRouters.prototype = {
         let currentHash = atom.getParamsUrl();
         this.loadPage(currentHash)
     },
+    reload: function () {
+        let currentHash = atom.getParamsUrl();
+        this.loadPage(currentHash)
+    },
     route: function (pagePath, param) {
         location.hash = pagePath
     },
@@ -303,9 +346,14 @@ spaRouters.prototype = {
             let jsPath = pageData.jsPath || htmlPath.replace('.html', '.js')
             // 加载html
             this.loadHtml(htmlPath, document.getElementById('app'))
-                .then(data => {
+                .then(showHtml => {
                     // 最后加载js
-                    let jsDom = this.loadJS(jsPath, document.getElementById('app'))
+                    let jsDom = this.loadJS(jsPath, document.getElementById('app'), () => {
+//                        load && load(document.getElementById('app'), showHtml)
+                        window.atomPage && window.atomPage.beforeDestroy && window.atomPage.beforeDestroy()
+                        window.atomPage = {}
+                        load && load.apply(window.atomPage)
+                    })
                 })
         }
     },
@@ -323,15 +371,13 @@ spaRouters.prototype = {
                 })
         }))
     },
-    loadJS: (path, dom) => {
+    loadJS: (path, dom, onload) => {
         let _body = document.getElementsByTagName('body')[0];
         let scriptEle = document.createElement('script');
         scriptEle.type = 'text/javascript';
         scriptEle.src = path;
         scriptEle.async = true;
-        scriptEle.onload = function () {
-
-        }
+        scriptEle.onload = onload
         dom.appendChild(scriptEle);
         return scriptEle;
     },
@@ -341,3 +387,7 @@ spaRouters.prototype = {
 atom.SPA.router = new spaRouters()
 
 atom.SPA.router.init()
+
+const post = (path, data) => {
+    return atom.post(path, data)
+}

@@ -89,6 +89,15 @@
         width: 70vh;
         height: 450px;
     }
+
+    .terminal-his-line {
+        border-bottom-style: solid;
+        border-width: thin;
+        margin-top: 5px;
+        padding: 5px;
+        border-color: black;
+        white-space: pre-wrap;
+    }
 </style>
 <div id="page-edit">
     <div>
@@ -96,18 +105,21 @@
         <div class="edit-frame">
             <div class="edit-operate-bar hide">
                 <div class="vm-button-container">
-                    <button onclick="configView()">设置</button>
-                    <button id="loadAgentBtn" onclick="loadAgent()">载入</button>
+                    <button action-click="configView">设置</button>
+                    <button class="agent-run hide" action-click="showLog">日志</button>
+                    <button class="agent-stop hide" id="loadAgentBtn" action-click="loadAgent">载入</button>
+                    <button class="agent-run hide" id="stopAgentBtn" action-click="stopAgent">终止</button>
+                    <button class="agent-run hide" action-click="agentInfo">状态</button>
                 </div>
             </div>
             <div class="flex-row edit-area">
                 <div class="flex-column edit-left-bar">
-                    <div class="edit-left-bar-operate hide">
+                    <div class="edit-left-bar-operate agent-run hide">
                         <div class="button-container-center">
-                            <div class="button-container-btn button-container-select listClassBtn" onclick="listClass(this)">类列表</div>
-                            <div class="button-container-btn listFileBtn" onclick="listFile(this)">重写列表</div>
-                            <div class="button-container-btn listStrategyBtn" onclick="listStrategy(this)">重写策略</div>
-                            <div class="button-container-btn executeConsoleBtn" onclick="executeConsole(this)">控制台</div>
+                            <div class="button-container-btn button-container-select listClassBtn" action-click="listClass">类列表</div>
+                            <div class="button-container-btn listFileBtn" action-click="listFile">重写列表</div>
+                            <div class="button-container-btn listStrategyBtn" action-click="listStrategy">重写策略</div>
+                            <div class="button-container-btn executeConsoleBtn" action-click="executeConsole">控制台</div>
                         </div>
                     </div>
                     <div class="edit-left-bar-content scrollable-y">

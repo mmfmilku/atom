@@ -12,38 +12,13 @@
 </style>
 <script src=./js/util.js></script>
 <script>
-    let post = (path, data) => {
-        return atom.post(path, data)
+    console.log('welcome to atom web console')
+    if (!location.hash) {
+        atom.SPA.route('list')
     }
-
-    post('agent/listVm', {})
-        .then(res => {
-            let listHtml = res.map(e =>
-                `
-                <div class="vm-list-block" onclick="atom.SPA.route('edit?vmId=${e.vmId}')">
-                    <div class="vm-field">
-                        <label class="vm-field-label">应用名称:</label>
-                        <div class="vm-field-value">${e.displayName}</div>
-                    </div>
-                    <div class="vm-field">
-                        <label class="vm-field-label">id:</label>
-                        <div class="vm-field-value">${e.vmId}</div>
-                    </div>
-                </div>
-                `
-            ).join('')
-            document.querySelector('.vm-list').innerHTML  = listHtml
-        })
-
 </script>
 <div id="app">
-    <div id="pageMain">
 
-        <h1>JVM列表</h1>
-        <div class="vm-list flex-column">
-
-        </div>
-    </div>
 </div>
 </body>
 </html>

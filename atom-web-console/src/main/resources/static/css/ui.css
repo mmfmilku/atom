@@ -24,6 +24,28 @@ h3 {
 .text-err {
     color: red;
 }
+.icon-warn {
+    color: #d47f00;
+    font-size: 16px;
+    font-weight: bold;
+    font-style: normal;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 5px;
+    cursor: help;
+    transition: all 0.2s ease-in-out;
+}
+.icon-warn:hover {
+    transform: scale(1.1);
+    background-color: #ffeeba;
+    box-shadow: 0 0 5px rgba(212, 127, 0, 0.5);
+}
 .vm-list-block {
     border: 2px solid #2196F3;
     background-color: #eff6fe;
@@ -69,6 +91,56 @@ h3 {
 }
 .button-container-btn2:hover {
     background-color: #7e7e7e;
+}
+
+/* 表单字段容器，垂直排列 */
+.from-table {
+    display: flex;
+    flex-direction: column;
+}
+.from-table-middle {
+    display: flex;
+    flex-direction: column;
+    width: 508px;
+    max-height: 500px;
+    overflow-y: scroll;
+}
+.from-table-middle .from-field input {
+    width: 308px;
+}
+
+.from-section-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 15px 0 10px 0;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+.from-field {
+    display: flex;
+    justify-content: flex-start;
+    margin: 4px;
+}
+.from-field-label {
+    width: 150px;
+}
+
+/* 为只读input设置友好样式 */
+input:read-only {
+    background-color: #f5f5f5; /* 浅灰色背景，区分可编辑字段 */
+    border: 1px solid #ddd;     /* 柔和的边框 */
+    color: #666;                /* 稍暗的文字颜色，保持可读性 */
+    cursor: default;            /* 默认鼠标指针，提示不可编辑 */
+    user-select: text;          /* 允许文本选择（便于复制内容） */
+}
+
+/* 可选：为禁用状态添加类似样式 */
+input:disabled {
+    background-color: #f9f9f9; /* 更浅的背景色区分禁用和只读 */
+    border: 1px solid #e0e0e0;
+    color: #999;
+    cursor: not-allowed;        /* 禁止鼠标指针 */
 }
 
 /* 鼠标悬停时添加阴影 */
@@ -156,23 +228,53 @@ h3 {
 }
 
 .atom-error {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    /*width: 100px;*/
-    /*height: 50px;*/
-    display: flex;
-    justify-content: center; /* 水平居中,flex模式 */
-    align-items: center; /* 垂直居中,flex模式 */
-    transform: translate(-50%, -50%);
     background-color: #803327;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    animation: fadeOut 5s ease-in-out forwards;
 }
 
 @keyframes fadeOut {
     0% { opacity: 1; }
     100% { opacity: 0; }
+}
+
+/* 弹窗 */
+.atom-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.atom-window-header {
+    display: flex;
+    padding: 0px 5px;
+    cursor: default;
+}
+
+.atom-window-body {
+    display: flex;
+    justify-content: center; /* 水平居中,flex模式 */
+    align-items: center; /* 垂直居中,flex模式 */
+    padding: 0px 20px 20px 20px;
+    border-radius: 5px;
+}
+
+/* 浮动窗口 */
+.atom-float-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    justify-content: center; /* 水平居中,flex模式 */
+    align-items: center; /* 垂直居中,flex模式 */
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.atom-float-window-header {
+    display: flex;
+    border: 2px solid #2196F3;
+    cursor: move;
 }

@@ -1,14 +1,25 @@
 <div id="configView">
-    <div class="flex-column">
-        <div>
-            <label>路径</label><input type="text" name="basePackage" value="${param.basePackage || ''}"/>
+    <div class="from-table">
+        <div class="from-section-title">启动时配置</div>
+        <div class="from-field">
+            <label class="from-field-label">应用类加载器</label>
+            <input type="text" name="appClassloader" value="${param.appClassloader || ''}"/>
         </div>
-        <div>
-            <label>时间</label><input type="text" name="time" value="${param.time || ''}"/>
+        <div class="from-section-title">启动时配置</div>
+        <div class="from-field">
+            <label class="from-field-label">应用基础类路径</label>
+            <input type="text" name="appBasePackage" value="${param.appBasePackage || ''}"/>
         </div>
-        <div>
-            <label>编译加速</label><input type="checkbox" name="compileUp"
-                                      ${param.compileUp=='true'?'checked':''}/>
+        <div class="from-field">
+            <label class="from-field-label">
+                编译加速
+                <i class="icon-warn" title="开启后，会在每次调用方法时，编译字节码，提高调用速度">!</i>
+            </label>
+            <input type="checkbox" name="byteCodeCompile" ${param.byteCodeCompile=='true'?'checked':''}/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">对象转String方法</label>
+            <input type="text" name="toStringMethod" value="${param.toStringMethod || ''}"/>
         </div>
     </div>
 </div>

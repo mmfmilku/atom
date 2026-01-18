@@ -1,0 +1,16 @@
+<div>
+    <div class="from-table-middle">
+        <div class="from-field">
+            <label class="from-field-label">进程号</label>
+            <input readonly type="text" value="${param.pid}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">执行程序</label>
+            <input readonly type="text" value="${param.displayName}"/>
+        </div>
+        <div class="from-field">
+            <label class="from-field-label">执行目录</label>
+            <input readonly type="text" value="${param.workingDir.replaceAll('\"', '&quot;')}"/>
+        </div>
+    </div>
+</div>
