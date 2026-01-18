@@ -24,7 +24,7 @@ public class StringHandle implements ServerHandle<TypeFrame, String> {
     @Override
     public String code(TypeFrame typeFrame) {
         byte[] data = typeFrame.getData();
-        return new String(data);
+        return new String(data, charset);
     }
 
     @Override

@@ -225,8 +225,12 @@ public class FServer {
         workerExecutor.shutdown();
         ctxMap.forEach((name, ctx) -> ctx.close());
         IOUtils.closeStream(listenStream);
-        listenStream = null;
         new File(listenPath, LISTEN_FILE).delete();
+
+        listenStream = null;
+        bossExecutor = null;
+        workerExecutor = null;
+        handleManager = null;
     }
 
     private void accept(File requestFile) {
@@ -268,6 +272,38 @@ public class FServer {
             IOUtils.closeStream(inputStream);
             IOUtils.closeStream(outputStream);
         }
+    }
+
+    public static class FServerInfo {
+        public String listenPath;
+        public int connectCount;
+        public int activeCount;
+        public int poolSize;
+        public int corePoolSize;
+        public int maximumPoolSize;
+        public int queueSize;
+        public int queueCapacity;
+    }
+
+    public FServerInfo getFServerInfo() {
+        FServerInfo info = new FServerInfo();
+        info.listenPath = listenPath;
+        info.connectCount = ctxMap.size();
+
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) workerExecutor;
+        // 活跃线程数：当前正在执行任务的线程数量
+        info.activeCount = executor.getActiveCount();
+        // 当前线程池大小：线程池中实际存在的线程数量（包括空闲线程）
+        info.poolSize = executor.getPoolSize();
+        // 核心线程池大小：线程池配置的核心线程数量
+        info.corePoolSize = executor.getCorePoolSize();
+        // 最大线程池大小：线程池允许的最大线程数量
+        info.maximumPoolSize = executor.getMaximumPoolSize();
+        // 队列大小：当前等待执行的任务队列中的任务数量
+        info.queueSize = executor.getQueue().size();
+        // 队列总容量：任务队列的总容量（当前队列大小 + 剩余容量）
+        info.queueCapacity = executor.getQueue().size() + executor.getQueue().remainingCapacity();
+        return info;
     }
 
 }

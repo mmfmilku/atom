@@ -4,11 +4,23 @@ import java.io.Serializable;
 
 public class ExecuteResult implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private boolean success;
 
     private Object executeReturn;
 
     private Throwable throwable;
+
+    private String errMsg;
+
+    public String getErrMsg() {
+        return errMsg;
+    }
+
+    public void setErrMsg(String errMsg) {
+        this.errMsg = errMsg;
+    }
 
     public boolean isSuccess() {
         return success;

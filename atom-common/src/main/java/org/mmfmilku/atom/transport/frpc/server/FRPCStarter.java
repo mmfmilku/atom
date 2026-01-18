@@ -1,21 +1,15 @@
 package org.mmfmilku.atom.transport.frpc.server;
 
-import org.mmfmilku.atom.consts.CodeConst;
 import org.mmfmilku.atom.transport.protocol.base.FServer;
 import org.mmfmilku.atom.transport.protocol.handle.assembly.TypeAssemblyHandler;
 import org.mmfmilku.atom.transport.protocol.handle.type.TypeHandler;
 import org.mmfmilku.atom.util.AssertUtil;
-import org.mmfmilku.atom.util.CodeUtils;
 import org.mmfmilku.atom.util.ReflectUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.JarURLConnection;
-import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
-import java.util.jar.JarEntry;
 
 public class FRPCStarter {
 
@@ -43,7 +37,13 @@ public class FRPCStarter {
     public void stopServer() {
         if (fServer != null) {
             fServer.stop();
+            fServer = null;
         }
+        scanPackage = null;
+        fDir = null;
+        classes = null;
+        mappings = null;
+        listener = null;
     }
 
     public void setListener(Listener listener) {
@@ -154,4 +154,7 @@ public class FRPCStarter {
         }
     }
 
+    public FServer getfServer() {
+        return fServer;
+    }
 }

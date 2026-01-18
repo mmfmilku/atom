@@ -58,7 +58,10 @@ public class FRPCClient {
                     return frpcSession.call(frpcParam);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    sessionList.remove(i);
+                    // 关闭连接，移除连接列表
+                    frpcSession.close();
+                    // 并发情况下，实际移除时的下标可能非预期的对象，需要通过对象移除
+                    sessionList.remove(frpcSession);
                     throw e;
                 }
             }
@@ -67,9 +70,19 @@ public class FRPCClient {
             // double check 同步，保证不超上限
             synchronized (sessionList) {
                 if (sessionList.size() < maxConnect) {
-                    FRPCSession frpcSession = new FRPCSession(FClients.openAssemblySession(fClient));
-                    // 局部变量，无需上锁
-                    FRPCReturn result = frpcSession.call(frpcParam);
+                    FRPCSession frpcSession = null;
+                    FRPCReturn result;
+                    try {
+                        frpcSession = new FRPCSession(FClients.openAssemblySession(fClient));
+                        // 局部变量，无需上锁
+                        result = frpcSession.call(frpcParam);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        if (frpcSession != null) {
+                            frpcSession.close();
+                        }
+                        throw e;
+                    }
                     // 调用完后再添加至连接列表，避免被其他线程抢夺
                     sessionList.add(frpcSession);
                     return result;
@@ -100,6 +113,7 @@ public class FRPCClient {
 
     public void close() {
         sessionList.forEach(FRPCSession::close);
+        sessionList.clear();
     }
 
     static class FRPCSession implements ClientSession<FRPCParam> {

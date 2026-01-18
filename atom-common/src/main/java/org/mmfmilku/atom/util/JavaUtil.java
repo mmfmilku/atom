@@ -43,7 +43,8 @@ public class JavaUtil {
             }
 
         }
-        return command;
+        String[] s = command.split(" ");
+        return s[0];
     }
 
 }

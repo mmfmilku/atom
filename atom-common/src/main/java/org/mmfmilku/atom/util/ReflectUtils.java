@@ -65,8 +65,8 @@ public class ReflectUtils {
     }
 
     public static List<String> scanClass(String scanPackage) {
-        // TODO，仅扫描了当前线程所在class路径
-        URL resource = Thread.currentThread().getContextClassLoader()
+        // TODO，处理当前类对应类加载器的资源
+        URL resource = ReflectUtils.class.getClassLoader()
                 .getResource(scanPackage.replace(".", "/"));
         if (resource == null) {
             throw new RuntimeException("错误的扫描路径：" + scanPackage);

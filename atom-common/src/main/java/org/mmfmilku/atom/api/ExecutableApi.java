@@ -1,6 +1,7 @@
 package org.mmfmilku.atom.api;
 
 import org.mmfmilku.atom.api.dto.ExecuteResult;
+import org.mmfmilku.atom.api.dto.JTerminalDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ public interface ExecutableApi {
 
     List<String> listTerminalId();
 
-    Map<String, Object> terminalInfo(String terminalId);
+    JTerminalDTO terminalInfo(String terminalId);
 
     String newTerminal(String terminalName);
 

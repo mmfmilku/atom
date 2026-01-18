@@ -142,13 +142,12 @@ public class Connector implements Closeable {
 
     @Override
     public void close() {
-        System.out.println("关闭连接");
-        write(MessageUtils.packFFrame());
-        release();
-        close = true;
-        if (closeCallback != null) {
-            closeCallback.accept(this);
+        System.out.println("关闭连接" + inputStream.toString());
+        try {
+            write(MessageUtils.packFFrame());
+        } catch (Throwable e) {
         }
+        release();
     }
 
     private void release() {
