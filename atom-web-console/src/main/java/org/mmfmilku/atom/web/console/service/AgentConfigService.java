@@ -1,5 +1,10 @@
 package org.mmfmilku.atom.web.console.service;
 
+import org.mmfmilku.atom.api.AgentPropertiesKey;
+import org.mmfmilku.atom.api.AppInfoApi;
+import org.mmfmilku.atom.api.InstrumentApi;
+import org.mmfmilku.atom.api.dto.RunningConfigDTO;
+import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.util.CodeUtils;
 import org.mmfmilku.atom.util.StringUtils;
 import org.mmfmilku.atom.web.console.domain.AgentConfig;
@@ -10,6 +15,7 @@ import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -43,6 +49,12 @@ public class AgentConfigService implements IAgentConfigService {
     public static final String ORD_SUFFIX = ".ord";
 
     private static MessageDigest sha1;
+
+    @Value("${console.agentDefault.appBasePackage}")
+    private String defaultAppBasePackage;
+
+    @Value("${console.agentDefault.toStringMethod}")
+    private String defaultToStringMethod;
 
     @Autowired
     IInstrumentService instrumentService;
@@ -83,6 +95,14 @@ public class AgentConfigService implements IAgentConfigService {
             e.printStackTrace();
             throw new RuntimeException("保存配置失败");
         }
+
+        RunningConfigDTO runningConfigDTO = new RunningConfigDTO();
+        runningConfigDTO.setAppBasePackage(saveData.get(AgentPropertiesKey.APP_BASE_PACKAGE));
+        runningConfigDTO.setByteCodeCompile(Boolean.parseBoolean(
+                saveData.getOrDefault(AgentPropertiesKey.BYTE_CODE_COMPILE, "false")));
+        runningConfigDTO.setToStringMethod(saveData.get(AgentPropertiesKey.TO_STRING_METHOD));
+        AppInfoApi appInfoApi = FRPCFactory.getService(AppInfoApi.class, configByName.getFDir());
+        appInfoApi.setRunningConfig(runningConfigDTO);
     }
 
     @Override
@@ -109,6 +129,11 @@ public class AgentConfigService implements IAgentConfigService {
         agentConfig.setTmpDir(agentConfig.getAppBaseDir() + File.separator + "tmp");
         agentConfig.setExecuteDir(agentConfig.getAppBaseDir() + File.separator + "execute");
         agentConfig.setConfFile(agentConfig.getAppBaseDir() + File.separator + ".conf");
+
+        // 设置应用基础包路径默认值
+        agentConfig.getConfigData().put(AgentPropertiesKey.APP_BASE_PACKAGE, defaultAppBasePackage);
+        // 设置应用toString方法默认值
+        agentConfig.getConfigData().put(AgentPropertiesKey.TO_STRING_METHOD, defaultToStringMethod);
 
         try {
             Files.createDirectories(Paths.get(agentConfig.getAppBaseDir()));

@@ -5,6 +5,7 @@ import org.mmfmilku.atom.api.AppInfoApi;
 import org.mmfmilku.atom.api.ExecutableApi;
 import org.mmfmilku.atom.api.InstrumentApi;
 import org.mmfmilku.atom.api.dto.ExecuteResult;
+import org.mmfmilku.atom.api.dto.JTerminalDTO;
 import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.CodeUtils;
@@ -92,6 +93,7 @@ public class InstrumentService implements IInstrumentService {
         }
     }
 
+    @Deprecated
     @Override
     public void retransformClass(String appName, String fullClassName) {
         getApi(appName).retransformClass(fullClassName);
@@ -127,7 +129,7 @@ public class InstrumentService implements IInstrumentService {
         String text = ordFile.getText();
         JTerminalConfData confData = JSON.parseObject(text, JTerminalConfData.class);
         ExecutableApi api = getApi(appName, ExecutableApi.class);
-        Map<String, Object> terminalInfo;
+        JTerminalDTO terminalInfo;
         if (confData == null
                 || StringUtils.isEmpty(confData.getTerminalId())
                 || (terminalInfo = api.terminalInfo(confData.getTerminalId())) == null) {
@@ -147,8 +149,30 @@ public class InstrumentService implements IInstrumentService {
         }
 
         JTerminalInfo jTerminalInfo = new JTerminalInfo();
-        jTerminalInfo.setHistory((List<String>) terminalInfo.get("history"));
-        jTerminalInfo.setId((String) terminalInfo.get("id"));
+        jTerminalInfo.setHistory(terminalInfo.getHistory());
+        jTerminalInfo.setResultHistory(terminalInfo.getResultHistory());
+        jTerminalInfo.setId(terminalInfo.getId());
+        jTerminalInfo.setContextVars(terminalInfo.getContextVars());
+        jTerminalInfo.setContextVarsType(terminalInfo.getContextVarsType());
+        jTerminalInfo.setImportList(terminalInfo.getImportList());
+        return jTerminalInfo;
+    }
+
+    @Override
+    public JTerminalInfo getTerminalContext(String appName, String terminalId) {
+        ExecutableApi api = getApi(appName, ExecutableApi.class);
+        JTerminalDTO terminalInfo = api.terminalInfo(terminalId);
+        if (terminalInfo == null) {
+            throw new RuntimeException("终端不存在" + terminalId);
+        }
+
+        JTerminalInfo jTerminalInfo = new JTerminalInfo();
+        jTerminalInfo.setHistory(terminalInfo.getHistory());
+        jTerminalInfo.setResultHistory(terminalInfo.getResultHistory());
+        jTerminalInfo.setId(terminalInfo.getId());
+        jTerminalInfo.setContextVars(terminalInfo.getContextVars());
+        jTerminalInfo.setContextVarsType(terminalInfo.getContextVarsType());
+        jTerminalInfo.setImportList(terminalInfo.getImportList());
         return jTerminalInfo;
     }
 
@@ -175,6 +199,11 @@ public class InstrumentService implements IInstrumentService {
     @Override
     public Map<String, Object> getRunningOrdClass(String appName) {
         return getApi(appName, AppInfoApi.class).getRunningOrd();
+    }
+
+    @Override
+    public List<String> allScreenLogs(String appName) {
+        return getApi(appName, AppInfoApi.class).getAllScreenLogs();
     }
 
 }

@@ -1,8 +1,10 @@
 package org.mmfmilku.atom.web.console.service;
 
 import org.mmfmilku.atom.agent.client.AgentClient;
+import org.mmfmilku.atom.api.AgentPropertiesKey;
 import org.mmfmilku.atom.api.AppInfoApi;
 import org.mmfmilku.atom.api.dto.RunInfo;
+import org.mmfmilku.atom.transport.frpc.client.FRPCClient;
 import org.mmfmilku.atom.transport.frpc.client.FRPCFactory;
 import org.mmfmilku.atom.util.AssertUtil;
 import org.mmfmilku.atom.util.StringUtils;
@@ -29,21 +31,19 @@ public class AgentService implements IAgentService {
     @Override
     public boolean loadAgent(String vmId, String appName) {
         AgentConfig config = agentConfigService.getConfigByName(appName);
-        String dir = config.getOrdDir();
-        // TODO 配置 classloader
-        String customClassloader = "org.springframework.boot.loader.LaunchedURLClassLoader";
+//        String dir = config.getOrdDir();
+        StringBuilder runningConfigStr = new StringBuilder();
+        config.getConfigData().forEach((k,v) -> {
+            runningConfigStr.append(";").append(k).append("=").append(v);
+        });
+
         try {
-            AgentClient.loadAgent(vmId, getAgentJar()
-                    // 基础路径，ord文件、配置文件所在目录
-                    , "base-path=" + dir
-                            // 需要拓展的类加载器
-                            + ";app-classloader=" + customClassloader
-                            // 可重写class的包路径
-                            + ";app-base-package=" +
-                                config.getConfigData()
-                                .getOrDefault("basePackage", "com")
+            AgentClient.loadAgent(vmId, getAgentLoaderJar(),
+                    // agent核心jar路径
+                     AgentPropertiesKey.CORE_JAR_PATH + "=" + getAgentCoreJar()
                             // ferver监听路径
-                            + ";app-fserver-dir=" + config.getFDir()
+                            + ";" + AgentPropertiesKey.FSERVER_DIR + "=" + config.getFDir()
+                            + runningConfigStr
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -63,6 +63,16 @@ public class AgentService implements IAgentService {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean stopAgent(String appName) {
+        AgentConfig config = agentConfigService.getConfigByName(appName);
+        AppInfoApi infoApi = FRPCFactory.getService(AppInfoApi.class, config.getFDir());
+        Boolean stopped = infoApi.stopAgent();
+        // 释放客户端连接
+        FRPCClient.getInstance(config.getFDir()).close();
+        return stopped;
     }
 
     @Override
@@ -88,20 +98,28 @@ public class AgentService implements IAgentService {
         return vmInfo;
     }
 
-    // TODO jar版本如何配置
-    private static final String AGENT_JAR_NAME = "atom-agent-core-0.0.1-SNAPSHOT-jar-with-dependencies.jar";
-    private static final String AGENT_JAR_RESOURCE_PATH = "jar/" + AGENT_JAR_NAME;
+    @Override
+    public RunInfo agentInfo(String appName) {
+        AgentConfig config = agentConfigService.getConfigByName(appName);
+        return FRPCFactory.getService(AppInfoApi.class, config.getFDir()).runInfo();
+    }
 
-    private String getAgentJar() {
+    // TODO jar版本如何配置
+    private static final String CORE_JAR_NAME = "atom-agent-core-0.0.1-SNAPSHOT-jar-with-dependencies.jar";
+    private static final String LOADER_JAR_NAME = "atom-agent-loader-0.0.1-SNAPSHOT-jar-with-dependencies.jar";
+    private static final String CORE_JAR_RESOURCE_PATH = "jar/" + CORE_JAR_NAME;
+    private static final String LOADER_JAR_RESOURCE_PATH = "jar/" + LOADER_JAR_NAME;
+
+    private String getJarAbsolutePath(String resourcePath) {
         File baseDir = new File(AgentConfigService.CONSOLE_BASE_DIR, "jar");
         if (!baseDir.exists()) {
             baseDir.mkdirs();
         }
-        File agentFile = new File(AgentConfigService.CONSOLE_BASE_DIR, AGENT_JAR_RESOURCE_PATH);
+        File agentFile = new File(AgentConfigService.CONSOLE_BASE_DIR, resourcePath);
         if (!agentFile.exists()) {
             InputStream jarInputStream = Thread.currentThread()
                     .getContextClassLoader()
-                    .getResourceAsStream(AGENT_JAR_RESOURCE_PATH);
+                    .getResourceAsStream(resourcePath);
             AssertUtil.notnull(jarInputStream, "can not find agentJar!");
             try {
                 agentFile.createNewFile();
@@ -112,5 +130,13 @@ public class AgentService implements IAgentService {
             }
         }
         return agentFile.getAbsolutePath();
+    }
+
+    private String getAgentLoaderJar() {
+        return getJarAbsolutePath(LOADER_JAR_RESOURCE_PATH);
+    }
+
+    private String getAgentCoreJar() {
+        return getJarAbsolutePath(CORE_JAR_RESOURCE_PATH);
     }
 }

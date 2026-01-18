@@ -44,6 +44,12 @@ public class ExecuteConsoleController {
         return instrumentService.getTerminal(appName, terminalFile);
     }
 
+    @RequestMapping("getTerminalContext")
+    public JTerminalInfo getTerminalContext(@RequestParam String appName,
+                                     @RequestParam String terminalId) {
+        return instrumentService.getTerminalContext(appName, terminalId);
+    }
+
     @RequestMapping("executeJTerminal")
     public ExecuteResult executeJTerminal(@RequestParam String appName,
                                           @RequestBody CodeVO codeVO) {

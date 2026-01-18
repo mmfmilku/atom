@@ -1,4 +1,7 @@
 server:
-  port: 8081
-test:
-  app-base-package: com
+  port: 12345
+console:
+  # 未设置目标应用配置时的默认值
+  agentDefault:
+    appBasePackage: org.mmfmilku
+    #toStringMethod:

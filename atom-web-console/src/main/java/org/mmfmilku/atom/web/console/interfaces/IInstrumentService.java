@@ -42,6 +42,11 @@ public interface IInstrumentService {
     JTerminalInfo getTerminal(String appName, String terminalFile);
 
     /**
+     * 获取终端上下文
+     * */
+    JTerminalInfo getTerminalContext(String appName, String terminalId);
+
+    /**
      * 执行JTerminal
      * */
     ExecuteResult executeJTerminal(String appName, String terminalId, String code);
@@ -56,5 +61,7 @@ public interface IInstrumentService {
      * 获取被重写的类
      * */
     Map<String, Object> getRunningOrdClass(String appName);
+
+    List<String> allScreenLogs(String appName);
 
 }
