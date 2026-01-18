@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
  * @author mmfmilku
  * @date 2024/6/19:13:35
  */
+@Deprecated
 public class ORDParser {
 
     public static final String importReg = "\\s*import\\s+[\\w.]+;";

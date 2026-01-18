@@ -22,13 +22,19 @@ public class JTerminalDomain {
     /**
      * 全局import
      * */
-    private List<Import> importList = new ArrayList<>();
+    private Set<Import> importList = new HashSet<>();
 
     /**
      * 变量上下文，每次执行定义的变量保存于此
      * k:变量名    v:变量值
      * */
     private Map<String, Object> contextVars = new HashMap<>();
+
+    /**
+     * 变量类型上下文，每次执行定义的变量保存于此
+     * k:变量名    v:变量类型
+     * */
+    private Map<String, String> contextVarsType = new HashMap<>();
 
     /**
      * 最近一次执行产生的变量
@@ -40,9 +46,30 @@ public class JTerminalDomain {
      * */
     private List<String> history = new ArrayList<>();
 
+    /**
+     * 结果历史
+     * */
+    private List<JTerminalResult> resultHistory = new ArrayList<>();
+
     public JTerminalDomain(String id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public List<JTerminalResult> getResultHistory() {
+        return resultHistory;
+    }
+
+    public void setResultHistory(List<JTerminalResult> resultHistory) {
+        this.resultHistory = resultHistory;
+    }
+
+    public Map<String, String> getContextVarsType() {
+        return contextVarsType;
+    }
+
+    public void setContextVarsType(Map<String, String> contextVarsType) {
+        this.contextVarsType = contextVarsType;
     }
 
     public Set<String> getCurrVars() {
@@ -69,11 +96,11 @@ public class JTerminalDomain {
         this.name = name;
     }
 
-    public List<Import> getImportList() {
+    public Set<Import> getImportList() {
         return importList;
     }
 
-    public void setImportList(List<Import> importList) {
+    public void setImportList(Set<Import> importList) {
         this.importList = importList;
     }
 

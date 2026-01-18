@@ -22,6 +22,7 @@ import java.lang.instrument.Instrumentation;
  * @author chenxp
  * @date 2024/5/29:16:12
  */
+@Deprecated
 public class AtomAgent {
 
     public static void premain(String agentArgs, Instrumentation inst) {

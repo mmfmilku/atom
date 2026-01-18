@@ -3,18 +3,19 @@ package org.mmfmilku.atom.agent.api.impl;
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
 import org.mmfmilku.atom.agent.config.AgentProperties;
+import org.mmfmilku.atom.api.AgentPropertiesKey;
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
 import org.mmfmilku.atom.agent.config.OverrideBodyHolder;
 import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
-import org.mmfmilku.atom.agent.instrument.transformer.LoadOrdTransformer;
-import org.mmfmilku.atom.agent.instrument.transformer.StopOrdTransformer;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
 import org.mmfmilku.atom.agent.util.OrdUtils;
 import org.mmfmilku.atom.api.InstrumentApi;
-import org.mmfmilku.atom.exception.BizException;
 import org.mmfmilku.atom.transport.frpc.server.FRPCService;
 import org.mmfmilku.atom.util.AssertUtil;
+import org.mmfmilku.atom.util.CodeUtils;
+import org.mmfmilku.atom.util.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.*;
@@ -33,7 +34,7 @@ public class InstrumentApiImpl implements InstrumentApi {
         if (offset < 1 || size < 1) {
             return Collections.emptyList();
         }
-        String appPackage = AgentProperties.getProperty(AgentProperties.PROP_APP_BASE_PACKAGE);
+        String appPackage = AgentProperties.getProperty(AgentPropertiesKey.APP_BASE_PACKAGE);
         List<String> loadedClasses = InstrumentationContext.getLoadedClasses(appPackage);
         return pageList(offset, size, loadedClasses);
     }
@@ -43,7 +44,7 @@ public class InstrumentApiImpl implements InstrumentApi {
         if (offset < 1 || size < 1) {
             return Collections.emptyList();
         }
-        String appPackage = AgentProperties.getProperty(AgentProperties.PROP_APP_BASE_PACKAGE);
+        String appPackage = AgentProperties.getProperty(AgentPropertiesKey.APP_BASE_PACKAGE);
         List<String> loadedClasses = InstrumentationContext.getLoadedClasses(appPackage, classShortNameLike);
         return pageList(offset, size, loadedClasses);
     }
@@ -93,7 +94,7 @@ public class InstrumentApiImpl implements InstrumentApi {
     public void retransformClass(String className) {
         checkClass(className);
         // TODO 如何清理
-        OverrideBodyHolder.load(AgentProperties.getProperty(AgentProperties.PROP_BASE_PATH));
+        OverrideBodyHolder.load(AgentProperties.getProperty(AgentPropertiesKey.APP_BASE_PACKAGE));
         Class<?> clazz = InstrumentationContext.searchClass(className);
         if (clazz == null) {
             throw new RuntimeException(className + " not exist");
@@ -107,8 +108,20 @@ public class InstrumentApiImpl implements InstrumentApi {
 
     @Override
     public void loadOrdFile(String file) {
-        Map<String, ClassORDDefine> defineMap = OverrideBodyHolder.parseOverrideFile(file);
-        OrdUtils.loadOrd(defineMap);
+        System.out.println("loadOrdFile byteCodeCompile:" + AgentProperties.byteCodeCompile());
+        if (AgentProperties.byteCodeCompile()) {
+            Map<String, ClassORDDefine> defineMap = OverrideBodyHolder.parseOverrideFile(file);
+            OrdUtils.loadOrd(defineMap);
+        } else {
+            File fileObj = new File(file);
+            try {
+                String sourceCode = FileUtils.readText(fileObj);
+                String className = CodeUtils.toClassName(fileObj.getName());
+                OrdUtils.loadOrd(className, sourceCode);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Override

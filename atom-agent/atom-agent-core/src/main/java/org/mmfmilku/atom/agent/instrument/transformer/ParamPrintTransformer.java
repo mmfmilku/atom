@@ -20,6 +20,7 @@ import javassist.expr.MethodCall;
 import org.mmfmilku.atom.agent.config.*;
 import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
 import org.mmfmilku.atom.agent.util.ByteCodeUtils;
+import org.mmfmilku.atom.api.AgentPropertiesKey;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -201,7 +202,7 @@ public class ParamPrintTransformer implements ClassFileTransformer {
     }
 
     private static String toString(Object o) {
-        String toStringLongName = AgentProperties.getProperty(AgentProperties.PROP_TO_STRING_METHOD);
+        String toStringLongName = AgentProperties.getProperty(AgentPropertiesKey.TO_STRING_METHOD);
         if (toStringLongName == null) {
             return o.toString();
         }

@@ -1,7 +1,12 @@
 package org.mmfmilku.atom.agent.compiler;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -115,6 +120,8 @@ public class SupportSyntaxSample<T>
         map.put("a", "fsdf");
         map.put("b", "fffds");
         map.put("c", "23324444");
+        System.out.println((map));
+        System.out.println(((HashMap)map).getClass());
         map.forEach((k, v) -> {
             System.out.println(k);
             System.out.println(v);
@@ -193,6 +200,10 @@ public class SupportSyntaxSample<T>
         for (Map<String, Object> map : arr(null, null)) {
             System.out.println(map);
         }
+
+    }
+
+    public void thisMethodForTestJavassist(Map<String, Object> args) {
 
     }
 }

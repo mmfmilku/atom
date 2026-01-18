@@ -6,55 +6,26 @@ import org.mmfmilku.atom.agent.compiler.parser.ParserDispatcher;
 import org.mmfmilku.atom.agent.compiler.parser.handle.code.StatementParser;
 import org.mmfmilku.atom.agent.compiler.parser.handle.struct.ImportParser;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.*;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.AccessPrivilege;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.deco.Modifier;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.express.Expression;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.CodeBlock;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.Statement;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ExpStatement;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.ReturnStatement;
-import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
-import org.mmfmilku.atom.agent.loader.AppAccessibleClassLoader;
+import org.mmfmilku.atom.agent.compiler.parser.syntax.statement.leaf.VarDefineStatement;
+import org.mmfmilku.atom.agent.config.AgentProperties;
 import org.mmfmilku.atom.agent.util.OrdUtils;
-import org.mmfmilku.atom.util.JavaUtil;
 import org.mmfmilku.atom.util.ReflectUtils;
 
-import java.lang.Class;
-import java.net.URL;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class JScript {
 
-    // 使用Object引用，否则不同类加载器的实例会出现类型转换异常
-    private static Object executor;
-
-    static {
-        System.out.println(Thread.currentThread().getContextClassLoader());
-        // 必须设置自定义类加载器加载JScriptExecutor，
-        // 如果通过spring的LaunchedURLClassLoader加载，最终还是使用应用类加载器加载JScriptExecutor
-        // 因为LaunchedURLClassLoader自身加载不到JScriptExecutor，结果还是通过父类加载器加载
-        String startClass = JavaUtil.getStartClass();
-        Class<?> aClass = InstrumentationContext.searchClass(startClass);
-        System.out.println(aClass);
-        Object o = null;
-        try {
-            o = aClass.newInstance();
-            System.out.println(o);
-            System.out.println(o.getClass().getClassLoader());
-
-            URL location = JScript.class.getProtectionDomain().getCodeSource().getLocation();
-
-            ClassLoader classLoader = new AppAccessibleClassLoader(
-                    new URL[]{location}, o.getClass().getClassLoader());
-
-            Class<?> executorClass = Class.forName(
-                    "org.mmfmilku.atom.agent.console.JScriptExecutor", true, classLoader);
-            executor = executorClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            e.printStackTrace();
-            System.out.println("JScriptExecutor init fail!!!!!!!!!!!!!!!");
-            // 无法调用目标应用中的类
-            executor = new JScriptExecutor();
-        }
-
-    }
+    private static final JScriptExecutor executor = new JScriptExecutor();
 
     // 执行方法名约定为execute
     public static final String EXECUTE_METHOD_NAME = "execute";
@@ -78,7 +49,13 @@ public class JScript {
         System.out.println("execute jScript ast:");
         System.out.println(javaAST.getSourceCode());
         // 将待执行程序写入执行目标
-        OrdUtils.loadOrd(javaAST);
+        if (AgentProperties.byteCodeCompile()) {
+            OrdUtils.loadOrd(javaAST);
+        } else {
+            String sourceCode = javaAST.getSourceCode();
+            String className = javaAST.getClassList().get(0).getClassFullName();
+            OrdUtils.loadOrd(className, sourceCode);
+        }
         JScriptResult jScriptResult = new JScriptResult();
         // 执行程序
         try {
@@ -87,6 +64,11 @@ public class JScript {
 //            Object executeReturn = executor.execute(args);
             jScriptResult.setSuccess(true);
             jScriptResult.setExecuteReturn(executeReturn);
+        } catch (InvocationTargetException e) {
+            // 保存执行异常
+            jScriptResult.setThrowable(e.getTargetException());
+            jScriptResult.setSuccess(false);
+            e.printStackTrace();
         } catch (Exception e) {
             // 保存执行异常
             jScriptResult.setThrowable(e);
@@ -122,6 +104,24 @@ public class JScript {
         javaAST.getClassList().get(0)
                 .getMethods().get(0)
                 .getCodeBlock().setStatements(statementList);
+
+        // 构造echo方法
+        Method echoMethod = new Method();
+        Modifier modifier = new Modifier();
+        modifier.setAccessPrivilege(AccessPrivilege.PRIVATE);
+        echoMethod.setModifier(modifier);
+        echoMethod.setMethodName("echo");
+        VarDefineStatement varDefine = new VarDefineStatement("Object", "arg0");
+        echoMethod.setMethodParams(Collections.singletonList(varDefine));
+        echoMethod.setReturnType("void");
+        echoMethod.setAnnotations(Collections.emptyList());
+        CodeBlock codeBlock = new CodeBlock();
+        Expression expression = CompilerUtil.parseExpression(
+                "org.mmfmilku.atom.agent.log.ScreenLogger.print(org.mmfmilku.atom.agent.util.AgentExeUtils.toString(arg0))");
+        codeBlock.setStatements(Collections.singletonList(new ExpStatement(expression)));
+        echoMethod.setCodeBlock(codeBlock);
+
+        javaAST.getClassList().get(0).getMethods().add(echoMethod);
 
         return javaAST;
     }

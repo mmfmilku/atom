@@ -1,10 +1,12 @@
 package org.mmfmilku.atom.agent.util;
 
+import org.mmfmilku.atom.agent.compiler.CompilerUtil;
 import org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST;
 import org.mmfmilku.atom.agent.config.ClassORDDefine;
 import org.mmfmilku.atom.agent.config.Keywords;
 import org.mmfmilku.atom.agent.config.MethodORDDefine;
 import org.mmfmilku.atom.agent.instrument.InstrumentationContext;
+import org.mmfmilku.atom.agent.instrument.transformer.LoadByteCodeOrdTransformer;
 import org.mmfmilku.atom.agent.instrument.transformer.LoadOrdTransformer;
 import org.mmfmilku.atom.agent.instrument.transformer.StopOrdTransformer;
 import org.mmfmilku.atom.exception.BizException;
@@ -24,6 +26,28 @@ public class OrdUtils {
         InstrumentationContext.addTransformer(ordTransformer);
         try {
             Class[] classes = defineMap.keySet().stream().map(InstrumentationContext::searchClass).toArray(Class[]::new);
+            System.out.println("retransformClasses：" + Arrays.toString(classes));
+            if (classes == null || classes.length == 0 || classes[0] == null) {
+                throw new BizException("no loadOrd class found");
+            }
+            InstrumentationContext.retransformClasses(classes);
+        } catch (UnmodifiableClassException e) {
+            e.printStackTrace();
+            throw new BizException(e.getMessage());
+        } finally {
+            InstrumentationContext.removeTransformer(ordTransformer);
+        }
+    }
+
+    public static void loadOrd(String fullClassName, String sourceCode) {
+        System.out.println("loadOrd with byteCode " + fullClassName + ":\n" + sourceCode);
+        byte[] byteCode = CompilerUtil.compile(fullClassName, sourceCode);
+        Map<String, byte[]> byteCodeMap = new HashMap<>();
+        byteCodeMap.put(fullClassName, byteCode);
+        LoadByteCodeOrdTransformer ordTransformer = new LoadByteCodeOrdTransformer(byteCodeMap);
+        InstrumentationContext.addTransformer(ordTransformer);
+        try {
+            Class[] classes = byteCodeMap.keySet().stream().map(InstrumentationContext::searchClass).toArray(Class[]::new);
             System.out.println("retransformClasses：" + Arrays.toString(classes));
             if (classes == null || classes.length == 0 || classes[0] == null) {
                 throw new BizException("no loadOrd class found");

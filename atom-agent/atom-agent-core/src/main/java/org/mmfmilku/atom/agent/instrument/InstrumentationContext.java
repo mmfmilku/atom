@@ -47,6 +47,8 @@ public class InstrumentationContext {
         System.out.println("---------------------clear InstrumentationContext-------------------------");
         if (instance != null) {
             clearTransformer();
+            instance.ordClassMap.clear();
+            instance.inst = null;
             instance = null;
         }
     }
