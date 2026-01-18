@@ -41,7 +41,7 @@ public class PreMainTest {
     }
 
     /**
-     * 启动参数添加 -javaagent:F:\dev\project\atom\atom-web-console\src\main\resources\jar\atom-agent-core-0.0.1-SNAPSHOT-jar-with-dependencies.jar=base-path=F:\dev\project\atom\atom-agent\src\main\resources\test\ord;k2=v2;app-fserver-dir=F:\dev\project\atom\atom-agent\src\main\resources\test\fserver;app-base-package=org.mmfmilku.atom.agent
+     * 启动参数添加 -javaagent:F:\dev\project\atom\atom-web-console\src\main\resources\jar\atom-agent-core-0.0.1-SNAPSHOT-jar-with-dependencies.jar=base-path=F:\dev\project\atom\atom-agent\src\main\resources\test\ord;k2=v2;appFserverDir=F:\dev\project\atom\atom-agent\src\main\resources\test\fserver;app-base-package=org.mmfmilku.atom.agent
      * */
     @Test
     public void testCase1() {
