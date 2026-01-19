@@ -3,6 +3,8 @@ function load() {
     let editorDom = document.getElementById('monacoEditor')
 
     let atomEditor = {}
+    // 需要同步设置的函数
+    atomEditor.setSubmitEvent = (event) => atomEditor.submitEvent = event
 
     atom.SPA.router.loadJS('https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.min.js', editorDom, () => {
 
@@ -239,6 +241,12 @@ function load() {
 
         // 设置键盘快捷键
         function setupKeyboardShortcuts(editor) {
+            // Ctrl+Enter 提交
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+                // 发起提交
+                atomEditor.submitEvent && atomEditor.submitEvent()
+            });
+
             // Ctrl+S 保存
             editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
                 saveCode();

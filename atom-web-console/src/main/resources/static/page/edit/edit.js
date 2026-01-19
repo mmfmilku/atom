@@ -11,7 +11,8 @@ function load() {
 
     let pageEdit = document.getElementById('page-edit')
     // ------------------------------编辑器相关---------------------------
-    let editorType = 'monaco'
+    // let editorType = 'monaco'
+    let editorType = 'simple'
     // 编辑器容器dom
     let editorContainer = pageEdit.querySelector('#editorContainer')
     // 编辑器操作对象
@@ -21,6 +22,12 @@ function load() {
         .then(html => {
             atom.SPA.router.loadJS(`/page/edit/editor/${editorType}.js`, editorContainer, () => {
                 editor = load()
+                editor.setSubmitEvent(() => {
+                    if ('EXECUTE_ORD' === selectTypeEnum) {
+                        // 执行发送
+                        submitJTerminal()
+                    }
+                })
             })
         })
     // ------------------------------编辑器相关---------------------------
