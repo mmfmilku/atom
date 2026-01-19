@@ -12,24 +12,46 @@ function load() {
     let pageEdit = document.getElementById('page-edit')
     // ------------------------------编辑器相关---------------------------
     // let editorType = 'monaco'
-    let editorType = 'simple'
+    // let editorType = 'simple'
     // 编辑器容器dom
     let editorContainer = pageEdit.querySelector('#editorContainer')
     // 编辑器操作对象
     let editor
     // 加载编辑器
-    atom.SPA.loadHtml(`/page/edit/editor/${editorType}.html`, editorContainer)
-        .then(html => {
-            atom.SPA.router.loadJS(`/page/edit/editor/${editorType}.js`, editorContainer, () => {
-                editor = load()
-                editor.setSubmitEvent(() => {
-                    if ('EXECUTE_ORD' === selectTypeEnum) {
-                        // 执行发送
-                        submitJTerminal()
-                    }
+    this.loadEditor = () => {
+        let editorType = localStorage.editorType || 'simple'
+
+        atom.SPA.loadHtml(`/page/edit/editor/${editorType}.html`, editorContainer)
+            .then(html => {
+                atom.SPA.router.loadJS(`/page/edit/editor/${editorType}.js`, editorContainer, () => {
+                    editor = load()
+                    editor.setSubmitEvent(() => {
+                        if ('EXECUTE_ORD' === selectTypeEnum) {
+                            // 执行发送
+                            submitJTerminal()
+                        }
+                    })
                 })
             })
-        })
+
+    }
+    this.loadEditor()
+    // 切换编辑器
+    this.switchEditor = () => {
+        let editorType = localStorage.editorType || 'simple'
+        if (editorType === 'simple') {
+            localStorage.editorType = 'monaco'
+            // TODO 多次加载monaco的处理
+            // if (window.monaco) {
+            //     atom.SPA.reload()
+            //     return
+            // }
+        } else {
+            localStorage.editorType = 'simple'
+        }
+        this.loadEditor()
+    }
+
     // ------------------------------编辑器相关---------------------------
 
     let btnClickChange = clickDom => {
@@ -153,9 +175,11 @@ function load() {
         "BASE_ORD": {
             type: 'file',
             '0': '<button onclick="atomPage.saveText(\'BASE_ORD\')">保存</button>' +
-                '<button onclick="atomPage.executeOrd()">执行</button>',
+                '<button onclick="atomPage.executeOrd()">执行</button>' +
+                '<button onclick="atomPage.switchEditor()">切换编辑</button>',
             '1': '<button onclick="atomPage.saveText(\'BASE_ORD\')">保存</button>' +
-                '<button onclick="atomPage.stopOrd()">还原</button>'
+                '<button onclick="atomPage.stopOrd()">还原</button>' +
+                '<button onclick="atomPage.switchEditor()">切换编辑</button>',
         },
         // 重写策略文件
         "STRATEGY_ORD": {
@@ -166,13 +190,15 @@ function load() {
         "EXECUTE_ORD": {
             type: 'executeConsole',
             '0': '<button onclick="atomPage.submitJTerminal()">提交</button>' +
-                '<button onclick="atomPage.showJTerminalContext()">变量</button>'
+                '<button onclick="atomPage.showJTerminalContext()">变量</button>' +
+                '<button onclick="atomPage.switchEditor()">切换编辑</button>',
         },
         // 脚本化执行文件
         "SCRIPT_ORD": {
             type: 'jScript',
             '0': '<button onclick="atomPage.saveText(\'SCRIPT_ORD\')">保存</button>' +
-                '<button onclick="atomPage.executeGoal()">运行</button>'
+                '<button onclick="atomPage.executeGoal()">运行</button>' +
+                '<button onclick="atomPage.switchEditor()">切换编辑</button>',
         }
     }
     let setType = (ordEnum, prop = '0') => {
