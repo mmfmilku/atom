@@ -20,6 +20,7 @@
         <junit.version>4.13</junit.version>
         <atom-core-version>0.0.1-SNAPSHOT</atom-core-version>
         <atom-agent-core-version>0.0.1-SNAPSHOT</atom-agent-core-version>
+        <atom-agent-loader-version>0.0.1-SNAPSHOT</atom-agent-loader-version>
         <atom-version>0.0.1-SNAPSHOT</atom-version>
         <spring.boot.version>2.2.10.RELEASE</spring.boot.version>
         <com.alibaba.fastjson.version>1.2.78</com.alibaba.fastjson.version>
