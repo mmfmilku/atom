@@ -182,14 +182,6 @@ input:disabled {
 #ordDialog {
     width: 75%;
 }
-#ordFileText {
-    color: white;
-    background-color: #000000cc;
-    font: caption;
-    height: 94%;
-    width: 100%;
-    resize: none;
-}
 
 .text-wrap {
     /*border: 1px solid #000; !* 为了清楚地展示换行效果，加上边框 *!*/

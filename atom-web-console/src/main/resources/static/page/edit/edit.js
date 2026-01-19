@@ -10,6 +10,20 @@ function load() {
     }
 
     let pageEdit = document.getElementById('page-edit')
+    // ------------------------------编辑器相关---------------------------
+    let editorType = 'monaco'
+    // 编辑器容器dom
+    let editorContainer = pageEdit.querySelector('#editorContainer')
+    // 编辑器操作对象
+    let editor
+    // 加载编辑器
+    atom.SPA.loadHtml(`/page/edit/editor/${editorType}.html`, editorContainer)
+        .then(html => {
+            atom.SPA.router.loadJS(`/page/edit/editor/${editorType}.js`, editorContainer, () => {
+                editor = load()
+            })
+        })
+    // ------------------------------编辑器相关---------------------------
 
     let btnClickChange = clickDom => {
         if (!clickDom) return
@@ -155,7 +169,7 @@ function load() {
         }
     }
     let setType = (ordEnum, prop = '0') => {
-        pageEdit.querySelector('#ordFileText').readOnly = typeArr[ordEnum].readOnly
+        editor.setReadOnly(typeArr[ordEnum].readOnly)
         pageEdit.querySelector('.edit-code-desc').innerHTML = typeArr[ordEnum][prop]
         selectTypeEnum = ordEnum
     }
@@ -194,7 +208,7 @@ function load() {
     }
 
     let saveText = (ordEnum) => {
-        if (pageEdit.querySelector('#ordFileText').readOnly) {
+        if (editor.getReadOnly()) {
             UI.showError('不可编辑')
             return
         }
@@ -203,7 +217,7 @@ function load() {
             UI.showError('请先选择文件')
             return
         }
-        let ordText = pageEdit.querySelector('#ordFileText').value
+        let ordText = editor.getText()
         post(`config/writeOrd?appName=${vmInfo.displayName}&ordFileName=${ordFileName}&ordEnum=${ordEnum}`
             , {fileName: ordFileName, text: ordText}
         )
@@ -285,93 +299,11 @@ function load() {
         // 标题
         pageEdit.querySelector('.edit-code-title').innerText = title
         // 内容
-        let textDom = pageEdit.querySelector('#ordFileText')
-        textDom.value = text
-        textDom.style.height = ''
+        editor.setText(text)
+        editorContainer.style.height = ''
         // terminal部分移除
         pageEdit.querySelector('.terminal-box').style.height = ''
         pageEdit.querySelector('.terminal-box').innerHTML = ''
-    }
-
-    let keydownHandle = (event) => {
-        // 内容
-        let textDom = pageEdit.querySelector('#ordFileText')
-        // 检查是否为回车键（Enter 的 keyCode 是 13，或直接判断 event.key）
-        if (event.key === 'Enter' || event.keyCode === 13) {
-            if (event.ctrlKey) {
-                // ctrl加回车，换行行为
-
-                // 获取当前光标位置
-                const start = textDom.selectionStart
-                const end = textDom.selectionEnd
-                const value = textDom.value
-                // 定义缩进（4个空格） 或者使用 '\t' 来插入制表符
-                const indent = '\n'
-
-                // 单行插入缩进
-                // 在光标位置插入缩进
-                textDom.value = value.substring(0, start) +
-                                indent +
-                                value.substring(end)
-
-                // 将光标移动到插入缩进后的位置
-                textDom.selectionStart = textDom.selectionEnd = start + indent.length
-            } else {
-                // 提交终端命令
-                if ('EXECUTE_ORD' == selectTypeEnum) {
-                    // 只有回车，执行发送
-                    event.preventDefault(); // 阻止默认行为（如表单提交或换行）
-                    console.log('回车键被按下，输入内容：', textDom.value)
-                    submitJTerminal()
-                }
-            }
-        }
-        // 检查是否是Tab键
-        else if (event.key === 'Tab' || event.keyCode === 9) {
-            // 阻止默认的Tab行为（切换焦点）
-            event.preventDefault();
-
-            // 获取当前光标位置
-            const start = textDom.selectionStart
-            const end = textDom.selectionEnd
-            const value = textDom.value
-            // 定义缩进（4个空格） 或者使用 '\t' 来插入制表符
-            const indent = '    '
-
-            // 如果选择了多行文本
-            if (start !== end) {
-                const linesBefore = value.substring(0, start).split('\n')
-                const linesSelected = value.substring(start, end).split('\n')
-
-                let newText = ''
-
-                // 为每一行添加缩进
-                linesSelected.forEach((line, index) => {
-                    newText += indent + line
-                    if (index < linesSelected.length - 1) {
-                        newText += '\n'
-                    }
-                })
-
-                textDom.value = value.substring(0, start) + newText + value.substring(end)
-
-                // 调整光标位置
-                textDom.selectionStart = start
-                textDom.selectionEnd = start + newText.length
-            } else {
-                // 单行插入缩进
-                // 在光标位置插入缩进
-                textDom.value = value.substring(0, start) +
-                                indent +
-                                value.substring(end)
-
-                // 将光标移动到插入缩进后的位置
-                textDom.selectionStart = textDom.selectionEnd = start + indent.length
-            }
-
-            // 触发input事件（如果需要实时保存或其他操作）
-            textDom.dispatchEvent(new Event('input'))
-        }
     }
 
     // ---------------terminal相关-------------- beg
@@ -411,10 +343,9 @@ function load() {
         // 标题
         pageEdit.querySelector('.edit-code-title').innerText = title
         // 内容
-        let textDom = pageEdit.querySelector('#ordFileText')
-        textDom.value = ''
+        editor.setText('')
         // 流程高度展示历史命令
-        textDom.style.height = '24%'
+        editorContainer.style.height = '24%'
         // terminal历史命令部分
         pageEdit.querySelector('.terminal-box').style.height = '70%'
         let lines = ''
@@ -443,7 +374,7 @@ function load() {
     }
 
     let submitJTerminal = () => {
-        let input = pageEdit.querySelector('#ordFileText').value
+        let input = editor.getText()
         if (!input) {
             return
         }
@@ -457,7 +388,7 @@ function load() {
                 pageEdit.querySelector('.terminal-box').innerHTML += terminalResultShow(res)
                 pageEdit.querySelector('.terminal-box').scrollTop = pageEdit.querySelector('.terminal-box').scrollHeight
                 // 上次内容清空
-                pageEdit.querySelector('#ordFileText').value = ''
+                editor.setText('')
             })
     }
 
@@ -602,11 +533,6 @@ function load() {
         }
     })
 
-    // 内容
-    let textDom = pageEdit.querySelector('#ordFileText')
-    // 监听键盘按键
-    textDom.addEventListener('keydown', keydownHandle);
-
     let contextmenu
     let fileRightMenu
     let classRightMenu
@@ -680,7 +606,6 @@ function load() {
             rightMenus && rightMenus.forEach(e => {
                 e.remove()
             })
-            // document.body.removeChild(contextmenu)
             contextmenu = null
         }
     }

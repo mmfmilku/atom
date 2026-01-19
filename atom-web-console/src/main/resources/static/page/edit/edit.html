@@ -98,6 +98,13 @@
         border-color: black;
         white-space: pre-wrap;
     }
+
+    #editorContainer {
+        height: 94%;
+        width: 100%;
+    }
+
+
 </style>
 <div id="page-edit">
     <div>
@@ -136,7 +143,9 @@
                         </div>
                     </div>
                     <div class="terminal-box scrollable-y"></div>
-                    <textarea id="ordFileText"></textarea>
+                    <div id="editorContainer">
+                        <textarea id="ordFileText"></textarea>
+                    </div>
                 </div>
             </div>
         </div>

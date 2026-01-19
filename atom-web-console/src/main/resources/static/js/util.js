@@ -372,7 +372,6 @@ spaRouters.prototype = {
         }))
     },
     loadJS: (path, dom, onload) => {
-        let _body = document.getElementsByTagName('body')[0];
         let scriptEle = document.createElement('script');
         scriptEle.type = 'text/javascript';
         scriptEle.src = path;
