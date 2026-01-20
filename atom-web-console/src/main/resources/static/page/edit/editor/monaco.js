@@ -1,4 +1,4 @@
-function load() {
+function load(initText = '') {
 
     let editorDom = document.getElementById('monacoEditor')
 
@@ -6,10 +6,108 @@ function load() {
     // 需要同步设置的函数
     atomEditor.setSubmitEvent = (event) => atomEditor.submitEvent = event
 
-    atom.SPA.router.loadJS('https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.min.js', editorDom, () => {
+    // 设置键盘快捷键
+    let setupKeyboardShortcuts = (editor) => {
+        // Ctrl+Enter 提交
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+            // 发起提交
+            atomEditor.submitEvent && atomEditor.submitEvent()
+        });
+
+        // Ctrl+S 保存
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+            saveCode();
+        });
+
+        // Ctrl+Space 触发代码补全
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
+            editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        });
+
+        // Alt+Shift+F 格式化
+        editor.addCommand(monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF, () => {
+            formatCode();
+        });
+
+        // Tab 键处理
+        editor.addCommand(monaco.KeyCode.Tab, () => {
+            // 检测当前是否提示代码片段模式中
+            let snippetController = editor.getContribution('snippetController2')
+            if (snippetController.isInSnippet()) {
+                // 在代码片段模式中：让Tab继续跳转到下一个占位符
+                editor.trigger('keyboard', 'jumpToNextSnippetPlaceholder', {});
+                return;
+            }
+            const selection = editor.getSelection();
+            if (selection.isEmpty()) {
+                // 插入4个空格
+                editor.executeEdits("", [{
+                    range: selection,
+                    text: "    ",
+                    forceMoveMarkers: true
+                }]);
+            } else {
+                // 多行缩进
+                editor.getAction('editor.action.indentLines').run();
+            }
+        });
+
+        // Shift+Tab 减少缩进
+        editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Tab, () => {
+            editor.getAction('editor.action.outdentLines').run();
+        });
+    }
+
+    let createMonaco = () => {
+        // 创建编辑器
+        let editor = monaco.editor.create(editorDom, {
+            value: initText,
+            language: 'java',
+            theme: 'vs-dark',
+            fontSize: 14,
+        	lineNumbers: 'on',
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 4,
+            insertSpaces: true,
+            wordWrap: 'on',
+            formatOnPaste: true,
+            formatOnType: true,
+            suggestOnTriggerCharacters: true,
+            acceptSuggestionOnEnter: 'on',
+            snippetSuggestions: 'inline',
+            parameterHints: {
+                enabled: true,
+                cycle: true
+            },
+        	// Java 特定配置
+            java: {
+                // 添加更多 Java 特定配置
+            }
+        })
+
+        // 添加键盘快捷键
+        setupKeyboardShortcuts(editor)
+
+        // 暴露相关函数
+        atomEditor.getText = () => editor.getValue()
+        atomEditor.setText = (text) => editor.setValue(text)
+        atomEditor.getReadOnly = () => editor.getOptions().get(monaco.editor.EditorOption.readOnly)
+        atomEditor.setReadOnly = (readOnly) => editor.updateOptions({ readOnly: readOnly })
+    }
+
+    if (window.monaco) {
+        // 非首次加载
+        createMonaco()
+        return atomEditor
+    }
+
+//    atom.SPA.router.loadJS('https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.min.js', editorDom, () => {
+    atom.SPA.router.loadJS('/lib/monaco/min/vs/loader.js', editorDom, () => {
 
         require.config({
-            paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs'}
+            paths: { vs: '/lib/monaco/min/vs'}
         })
 
         require(['vs/editor/editor.main'], function() {
@@ -123,59 +221,15 @@ function load() {
             // /*注释*/
 
             // 创建编辑器
-            const editor = monaco.editor.create(editorDom, {
-                value: '',
-                language: 'java',
-                theme: 'vs-dark',
-                fontSize: 14,
-        		lineNumbers: 'on',
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                tabSize: 4,
-                insertSpaces: true,
-                wordWrap: 'on',
-                formatOnPaste: true,
-                formatOnType: true,
-                suggestOnTriggerCharacters: true,
-                acceptSuggestionOnEnter: 'on',
-                snippetSuggestions: 'inline',
-                parameterHints: {
-                    enabled: true,
-                    cycle: true
-                },
-        		// Java 特定配置
-                java: {
-                    // 添加更多 Java 特定配置
-                }
-            });
+            createMonaco()
 
         	// 注册代码补全
-            setupJavaCompletion();
-
-            // 添加键盘快捷键
-            setupKeyboardShortcuts(editor);
+            setupJavaCompletion()
 
             // 监听内容变化
 //            editor.onDidChangeModelContent(function(e) {
 //                console.log('代码已更改');
 //            });
-
-            // 获取当前代码
-//            function getCode() {
-//                return editor.getValue();
-//            }
-//
-//            // 设置代码
-//            function setCode(code) {
-//                editor.setValue(code);
-//            }
-
-            // 暴露相关函数
-            atomEditor.getText = () => editor.getValue()
-            atomEditor.setText = (text) => editor.setValue(text)
-            atomEditor.getReadOnly = () => editor.getOptions().get(monaco.editor.EditorOption.readOnly)
-            atomEditor.setReadOnly = (readOnly) => editor.updateOptions({ readOnly: readOnly })
         })
 
          // 设置 Java 代码补全
@@ -196,6 +250,7 @@ function load() {
                         { label: 'public', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'public ' },
                         { label: 'private', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'private ' },
                         { label: 'protected', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'protected ' },
+                        { label: 'static', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'static ' },
                         { label: 'class', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'class ' },
                         { label: 'interface', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'interface ' },
                         { label: 'void', kind: monaco.languages.CompletionItemKind.Keyword, insertText: 'void ' },
@@ -212,24 +267,32 @@ function load() {
                             label: 'main',
                             kind: monaco.languages.CompletionItemKind.Snippet,
                             insertText: 'public static void main(String[] args) {\n\t${1:System.out.println("Hello, World!");}\n}',
+                            // 根据变量占位符跳转光标
+                            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                             documentation: '创建 main 方法'
                         },
                         {
                             label: 'fori',
                             kind: monaco.languages.CompletionItemKind.Snippet,
                             insertText: 'for (int ${1:i} = 0; ${1:i} < ${2:length}; ${1:i}++) {\n\t${3}\n}',
+                            // 根据变量占位符跳转光标
+                            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                             documentation: '创建 for 循环'
                         },
                         {
-                            label: 'sysout',
+                            label: 'sout',
                             kind: monaco.languages.CompletionItemKind.Snippet,
                             insertText: 'System.out.println(${1});',
+                            // 根据变量占位符跳转光标
+                            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                             documentation: '输出到控制台'
                         },
                         {
                             label: 'try',
                             kind: monaco.languages.CompletionItemKind.Snippet,
                             insertText: 'try {\n\t${1}\n} catch (Exception e) {\n\t${2}\n}',
+                            // 根据变量占位符跳转光标
+                            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                             documentation: 'try-catch 语句'
                         }
                     ];
@@ -239,50 +302,7 @@ function load() {
             });
         }
 
-        // 设置键盘快捷键
-        function setupKeyboardShortcuts(editor) {
-            // Ctrl+Enter 提交
-            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-                // 发起提交
-                atomEditor.submitEvent && atomEditor.submitEvent()
-            });
 
-            // Ctrl+S 保存
-            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-                saveCode();
-            });
-
-            // Ctrl+Space 触发代码补全
-            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
-                editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
-            });
-
-            // Alt+Shift+F 格式化
-            editor.addCommand(monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.KeyF, () => {
-                formatCode();
-            });
-
-            // Tab 键处理
-            editor.addCommand(monaco.KeyCode.Tab, () => {
-                const selection = editor.getSelection();
-                if (selection.isEmpty()) {
-                    // 插入4个空格
-                    editor.executeEdits("", [{
-                        range: selection,
-                        text: "    ",
-                        forceMoveMarkers: true
-                    }]);
-                } else {
-                    // 多行缩进
-                    editor.getAction('editor.action.indentLines').run();
-                }
-            });
-
-            // Shift+Tab 减少缩进
-            editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Tab, () => {
-                editor.getAction('editor.action.outdentLines').run();
-            });
-        }
 
     })
 

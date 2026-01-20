@@ -1,4 +1,4 @@
-function load() {
+function load(initText = '') {
 
     let editorDom = document.getElementById('simpleEditor')
 
@@ -9,6 +9,8 @@ function load() {
         getReadOnly: () => editorDom.readOnly,
         setReadOnly: (readOnly) => editorDom.readOnly = readOnly,
     }
+
+    editor.setText(initText)
 
     let keydownHandle = (event) => {
         // 检查是否为回车键（Enter 的 keyCode 是 13，或直接判断 event.key）
