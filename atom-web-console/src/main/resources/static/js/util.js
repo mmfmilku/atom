@@ -92,6 +92,7 @@ const UI = {
                     `
 
                     let windowDom = document.createElement("div")
+                    windowDom.style.zIndex = '99'
                     windowDom.classList.add('atom-float-window')
                     windowDom.innerHTML = windowHtml
                     parentDom.appendChild(windowDom)

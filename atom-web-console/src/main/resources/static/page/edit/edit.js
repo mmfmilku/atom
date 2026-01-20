@@ -18,13 +18,14 @@ function load() {
     // 编辑器操作对象
     let editor
     // 加载编辑器
-    this.loadEditor = () => {
-        let editorType = localStorage.editorType || 'simple'
+    this.loadEditor = (initText) => {
+        // let editorType = localStorage.editorType || 'simple'
+        let editorType = 'monaco'
 
         atom.SPA.loadHtml(`/page/edit/editor/${editorType}.html`, editorContainer)
             .then(html => {
                 atom.SPA.router.loadJS(`/page/edit/editor/${editorType}.js`, editorContainer, () => {
-                    editor = load()
+                    editor = load(initText)
                     editor.setSubmitEvent(() => {
                         if ('EXECUTE_ORD' === selectTypeEnum) {
                             // 执行发送
@@ -41,15 +42,10 @@ function load() {
         let editorType = localStorage.editorType || 'simple'
         if (editorType === 'simple') {
             localStorage.editorType = 'monaco'
-            // TODO 多次加载monaco的处理
-            // if (window.monaco) {
-            //     atom.SPA.reload()
-            //     return
-            // }
         } else {
             localStorage.editorType = 'simple'
         }
-        this.loadEditor()
+        this.loadEditor(editor.getText())
     }
 
     // ------------------------------编辑器相关---------------------------
@@ -174,12 +170,38 @@ function load() {
         // 重写ord文件
         "BASE_ORD": {
             type: 'file',
-            '0': '<button onclick="atomPage.saveText(\'BASE_ORD\')">保存</button>' +
-                '<button onclick="atomPage.executeOrd()">执行</button>' +
-                '<button onclick="atomPage.switchEditor()">切换编辑</button>',
-            '1': '<button onclick="atomPage.saveText(\'BASE_ORD\')">保存</button>' +
-                '<button onclick="atomPage.stopOrd()">还原</button>' +
-                '<button onclick="atomPage.switchEditor()">切换编辑</button>',
+            '0': `
+                <div title="保存" onclick="atomPage.saveText(\'BASE_ORD\')" class="btn btn-save">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+                              stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17 21v-8H7v8" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 3v5h8" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div title="执行" onclick="atomPage.executeOrd()" class="btn btn-run">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="#e74c3c" stroke-width="2"/>
+                        <path d="M10 8l6 4-6 4V8z" fill="#e74c3c"/>
+                    </svg>
+                </div>
+                `,
+            '1': `
+                <div title="保存" onclick="atomPage.saveText(\'BASE_ORD\')" class="btn btn-save">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+                              stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17 21v-8H7v8" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 3v5h8" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div title="还原" onclick="atomPage.stopOrd()" class="btn btn-stop">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="9" stroke="#c0392b" stroke-width="2"/>
+                        <rect x="8" y="8" width="8" height="8" rx="1" fill="#c0392b"/>
+                    </svg>
+                </div>
+                `,
         },
         // 重写策略文件
         "STRATEGY_ORD": {
@@ -189,16 +211,41 @@ function load() {
         // 控制台执行文件
         "EXECUTE_ORD": {
             type: 'executeConsole',
-            '0': '<button onclick="atomPage.submitJTerminal()">提交</button>' +
-                '<button onclick="atomPage.showJTerminalContext()">变量</button>' +
-                '<button onclick="atomPage.switchEditor()">切换编辑</button>',
+            '0': `
+                <div title="提交" onclick="atomPage.submitJTerminal()" class="btn btn-submit">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M22 2L11 13" stroke="#9b59b6" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M22 2L15 22l-4-9-9-4L22 2z" stroke="#9b59b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div title="变量上下文" onclick="atomPage.showJTerminalContext()" class="btn btn-context">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="6" r="1.5" fill="#d35400"/>
+                        <circle cx="12" cy="12" r="1.5" fill="#d35400"/>
+                        <circle cx="12" cy="18" r="1.5" fill="#d35400"/>
+                    </svg>
+                </div>
+                `,
         },
         // 脚本化执行文件
         "SCRIPT_ORD": {
             type: 'jScript',
-            '0': '<button onclick="atomPage.saveText(\'SCRIPT_ORD\')">保存</button>' +
-                '<button onclick="atomPage.executeGoal()">运行</button>' +
-                '<button onclick="atomPage.switchEditor()">切换编辑</button>',
+            '0': `
+                <div title="保存" onclick="atomPage.saveText(\'SCRIPT_ORD\')" class="btn btn-save">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+                              stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17 21v-8H7v8" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 3v5h8" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div title="执行" onclick="atomPage.executeGoal()" class="btn btn-run">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="#e74c3c" stroke-width="2"/>
+                        <path d="M10 8l6 4-6 4V8z" fill="#e74c3c"/>
+                    </svg>
+                </div>
+                `,
         }
     }
     let setType = (ordEnum, prop = '0') => {
@@ -491,8 +538,6 @@ function load() {
         }
         UI.openFloatWindow('/page/edit/logWindow', '日志', pageEdit)
             .then(dom => {
-                console.log(dom)
-
                 let logDom = dom.querySelector('.logWindow')
                 let timeFunc = () => {
                     post(`agent/allScreenLogs?appName=${vmInfo.displayName}`)
@@ -521,7 +566,12 @@ function load() {
                 UI.openPageWin('/page/edit/configView', '设置', data.configData)
             ).then(formData =>
                 post(`config/saveConfig?appName=${vmInfo.displayName}`, formData)
-            ).then(res => UI.showMessage(res))
+            ).then(res => {
+                UI.showMessage(res)
+                if (0 == selectTypeEnum) {
+                    listClass()
+                }
+            })
     }
 
     let agentInfo = () => {
@@ -675,9 +725,13 @@ function load() {
     this.readText = readText
     this.genCode = genCode
 
-    pageEdit.addEventListener('click', (event) => {
-        let actionClick = event.target.getAttribute('action-click')
-        actionClick && this[actionClick](event.target)
+    let clickableList = pageEdit.querySelectorAll('.clickable')
+    clickableList && clickableList.forEach(clickable => {
+        clickable.addEventListener('click', (event) => {
+            // 支持点击绑定事件标签的内部标签时也能触发事件，需要使用 currentTarget 而非 target，
+            let actionClick = event.currentTarget.getAttribute('action-click')
+            actionClick && this[actionClick](event.currentTarget)
+        })
     })
 
 }
