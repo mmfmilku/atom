@@ -67,6 +67,7 @@
     .edit-code-desc {
         color: red;
         width: 10%;
+        height: 28px;
         display: flex;
         justify-content: end;
     }
@@ -112,37 +113,37 @@
         <div class="edit-frame">
             <div class="edit-operate-bar hide">
                 <div class="vm-button-container">
-                    <div title="设置" action-click="configView" class="clickable btn btn-settings">
+                    <div title="连接" action-click="loadAgent" class="clickable agent-stop hide btn">
                         <svg viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="3" fill="#3498db"/>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
-                                  stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                                  stroke="#1abc9c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                                  stroke="#1abc9c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
-                    <div title="日志" action-click="showLog" class="clickable agent-run hide btn btn-log">
+                    <div title="断开" action-click="stopAgent" class="clickable agent-run hide btn">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                                  stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                                  stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 4l16 16" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div title="设置" action-click="configView" class="clickable btn">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="3" fill="#ffffff"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                                  stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div title="日志" action-click="showLog" class="clickable agent-run hide btn">
                         <svg viewBox="0 0 24 24" fill="none">
                             <path d="M21 10H7M21 6H3M21 14H3M21 18H7" stroke="#2c3e50" stroke-width="2" stroke-linecap="round"/>
                             <rect x="3" y="3" width="18" height="18" rx="2" stroke="#2c3e50" stroke-width="2" fill="none"/>
                         </svg>
                     </div>
-                    <div title="连接" action-click="loadAgent" class="clickable agent-stop hide btn btn-connect">
-                        <svg viewBox="0 0 24 24" fill="none">
-                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-                                  stroke="#1abc9c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-                                  stroke="#1abc9c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <div title="断开" action-click="stopAgent" class="clickable agent-run hide btn btn-disconnect">
-                        <svg viewBox="0 0 24 24" fill="none">
-                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-                                  stroke="#f39c12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-                                  stroke="#f39c12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M4 4l16 16" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <div title="状态信息" action-click="agentInfo" class="clickable agent-run hide btn btn-toggle">
+                    <div title="状态信息" action-click="agentInfo" class="clickable agent-run hide btn">
                         <svg viewBox="0 0 24 24" fill="none">
                             <path d="M8 7h12M8 12h12M8 17h12M4 7v0M4 12v0M4 17v0" stroke="#8e44ad" stroke-width="2" stroke-linecap="round"/>
                             <circle cx="4" cy="7" r="1.5" fill="#8e44ad"/>
@@ -150,11 +151,6 @@
                             <circle cx="4" cy="17" r="1.5" fill="#8e44ad"/>
                         </svg>
                     </div>
-
-
-
-
-
                 </div>
             </div>
             <div class="flex-row edit-area">
@@ -181,7 +177,13 @@
                         </div>
                     </div>
                     <div class="terminal-box scrollable-y"></div>
-                    <div id="editorContainer">
+                    <div id="editorContainer" class="agent-run hide">
+                    </div>
+                    <div class="flex-column agent-stop hide"
+                         style="height: 94%;
+                        width: 100%;
+                        background-color: gray;">
+                        <h1 class="text-err">未连接</h1>
                     </div>
                 </div>
             </div>

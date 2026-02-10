@@ -13,12 +13,47 @@
 <script src=./js/util.js></script>
 <script>
     console.log('welcome to atom web console')
-    if (!location.hash) {
-        atom.SPA.route('list')
-    }
+
 </script>
+<div id="switcher" class="flex-row" style="
+    position: fixed;
+    top: 10px;
+    left: 88%;">
+    <label>
+        <select class="selection">
+        </select>
+    </label>
+    <button onclick="UI.openPageWin('/page/envView', '新增环境').then(formData =>
+                post('master/addEnv', formData)
+            ).then(res => {})">新增</button>
+</div>
 <div id="app">
 
 </div>
+<script>
+    document.getElementById('switcher').querySelector('.selection').onchange = (event) => {
+        localStorage.env = event.target.value
+    }
+    post('master/envList')
+        .then(res => {
+            let selectDom = document.getElementById('switcher').querySelector('.selection')
+            let showHtml = res.map(e =>
+                `
+                    <option value='${e.name}'>${e.name}</option>
+                `
+            ).join('')
+            selectDom.innerHTML = '<option value="local">本机</option>' + showHtml
+            if (res.find(e => e.name == localStorage.env)) {
+                selectDom.value = localStorage.env
+            } else {
+                selectDom.value = 'local'
+                localStorage.env = 'local'
+            }
+
+            if (!location.hash) {
+                atom.SPA.route('list')
+            }
+        })
+</script>
 </body>
 </html>
