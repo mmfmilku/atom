@@ -41,6 +41,8 @@ public class ExpressionParser implements CodeParserHandle {
             Token peekNext3 = iterator.peekNext(3);
             if (iterator.isNext(TokenType.Words)
                     && iterator.isNext(2, TokenType.RParen)
+                    // 后续跟随右括号)，则认为是表达式包裹括号而非强转
+                    && !iterator.isNext(3, TokenType.RParen)
                     && peekNext3 != null
                     && !POINT.equals(peekNext3.getValue())
                     && !"?".equals(peekNext3.getValue())
@@ -107,6 +109,15 @@ public class ExpressionParser implements CodeParserHandle {
         if (isExpressionEnd(iterator)) {
             return expression;
         }
+        if (iterator.isNext(TokenType.Symbol, "[")) {
+            // 获取数组下标
+            iterator.needNext();
+            iterator.needNext();
+            Expression elementIndexExp = parse(iterator);
+            iterator.needNext(TokenType.Symbol, "]");
+            ArrayElement arrayElement = new ArrayElement(expression, elementIndexExp);
+            return parseToEnd(arrayElement, iterator);
+        }
         if (iterator.isNext(TokenType.Symbol, POINT)) {
             Expression callChain = parseCallChain(expression, iterator);
             return parseToEnd(callChain, iterator);
@@ -169,6 +180,7 @@ public class ExpressionParser implements CodeParserHandle {
                 || iterator.isNext(TokenType.Symbol, SEMICOLONS)
                 || iterator.isNext(TokenType.Symbol, COMMA)
                 || iterator.isNext(TokenType.Symbol, COLON)
+                || iterator.isNext(TokenType.Symbol, "]")
                 || iterator.isLast()
                 ;
     }
