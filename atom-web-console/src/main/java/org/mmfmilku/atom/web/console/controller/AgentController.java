@@ -12,8 +12,10 @@ import org.mmfmilku.atom.web.console.interfaces.IAgentService;
 import org.mmfmilku.atom.web.console.interfaces.IInstrumentService;
 import org.mmfmilku.atom.web.console.interfaces.IAgentConfigService;
 import org.mmfmilku.atom.web.console.interfaces.IOrdFileOperation;
+import org.mmfmilku.atom.web.console.interfaces.IPersistService;
 import org.mmfmilku.atom.web.console.interfaces.IProcessService;
 import org.mmfmilku.atom.web.console.service.AgentConfigService;
+import org.mmfmilku.atom.web.console.service.PersistDataOpt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,10 +56,14 @@ public class AgentController {
     @Autowired
     IProcessService processService;
 
+    @Autowired
+    PersistDataOpt dataOpt;
+
     @RequestMapping("listVm")
     @ResponseBody
     public List<Map<String, String>> listVm() {
         List<Map<String, String>> vmMapList = AgentClient.listVMMap();
+        Map<String, String> aliasMap = dataOpt.getAliasMap();
         return vmMapList.stream()
                 .filter(vmMap -> !vmMap.get("displayName").trim().isEmpty())
                 .peek(vmMap -> {
@@ -88,48 +94,14 @@ public class AgentController {
         return agentService.vmInfo(vmId);
     }
 
-    private final Map<String, String> aliasMap = new ConcurrentHashMap<>();
-
-    @PostConstruct
-    public void init() {
-        File localDir = new File(AgentConfigService.CONSOLE_BASE_DIR, "local");
-        if (!localDir.exists()) {
-            localDir.mkdir();
-        }
-        File dataFile = new File(localDir, "normal.data");
-        if (!dataFile.exists()) {
-            return;
-        }
-        try {
-            String s = FileUtils.readText(dataFile.getAbsolutePath());
-            Map<String, String> map = JSON.parseObject(s, new TypeReference<Map<String,String>>(){});
-            aliasMap.putAll(map);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     @RequestMapping("setAlias")
     public String setAlias(@RequestParam String appName,
                           @RequestParam String aliasName) {
-        aliasMap.put(appName, aliasName);
-        // TODO 临时写
-        File localDir = new File(AgentConfigService.CONSOLE_BASE_DIR, "local");
-        if (!localDir.exists()) {
-            localDir.mkdir();
-        }
-        File dataFile = new File(localDir, "normal.data");
-        if (!dataFile.exists()) {
-            try {
-                dataFile.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(dataFile))) {
-            String jsonString = JSON.toJSONString(aliasMap);
-            out.write(jsonString.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
+        try {
+            Map<String, String> aliasMap = dataOpt.getAliasMap();
+            aliasMap.put(appName, aliasName);
+            dataOpt.save("alias", aliasMap);
+        } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("setAlias fail");
         }

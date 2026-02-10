@@ -16,6 +16,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleAllExceptions(Exception ex) {
+        ex.printStackTrace();
         // 记录日志，处理其他逻辑
         return ex.getMessage(); // 返回错误页面
     }

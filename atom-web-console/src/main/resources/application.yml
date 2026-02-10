@@ -4,4 +4,7 @@ console:
   # 未设置目标应用配置时的默认值
   agentDefault:
     appBasePackage: org.mmfmilku
-    toStringMethod:
+    toStringMethod: com.hundsun.tbsp.common.utils.GsonUtil.toJson
+  run:
+    # 启动模式 1-主控模式(默认)   2-子节点模式   3-集群模式
+    mode: 1
