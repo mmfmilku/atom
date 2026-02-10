@@ -33,20 +33,20 @@ class Example1 {
     public Map importExample(Method m1, List list) {
         System.out.println(List.class);
         JavaAST javaAST = CompilerUtil.parseAST("");
-        JavaAST javaAST2 = org.mmfmilku.atom.agent.compiler.CompilerUtil.parseAST("");
-        long count = Stream.concat(java.util.stream.Stream.of(1, 2), Stream.of(3, 4, 5)).count();
+        JavaAST javaAST2 = CompilerUtil.parseAST("");
+        long count = Stream.concat(Stream.of(1, 2), Stream.of(3, 4, 5)).count();
         assertEquals(count, 5);
         return Collections.EMPTY_MAP;
     }
 }
 
 class Example2 {
-    public java.util.Map importExample(Method m1, java.util.List list) {
-        System.out.println(java.util.List.class);
-        org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST javaAST = CompilerUtil.parseAST("");
-        org.mmfmilku.atom.agent.compiler.parser.syntax.JavaAST javaAST2 = org.mmfmilku.atom.agent.compiler.CompilerUtil.parseAST("");
+    public Map importExample(Method m1, List list) {
+        System.out.println(List.class);
+        JavaAST javaAST = CompilerUtil.parseAST("");
+        JavaAST javaAST2 = CompilerUtil.parseAST("");
         long count = Stream.concat(Stream.of(1, 2), Stream.of(3, 4, 5)).count();
         org.junit.Assert.assertEquals(count, 5);
-        return java.util.Collections.EMPTY_MAP;
+        return Collections.EMPTY_MAP;
     }
 }

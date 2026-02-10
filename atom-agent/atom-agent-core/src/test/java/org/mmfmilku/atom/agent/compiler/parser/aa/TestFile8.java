@@ -21,11 +21,11 @@ for ( Map<String , Object> map : arr(null, null) ) {System.out.println(map);
 
 public Map<String , Object>[] arr(String[] strArr, int[] intArr) {int[] a;
 long[] b = new long[4];
-java.lang.String[] strArr1 = new String[3];
-java.lang.String[] strArr2 = new String[]{"a", "b", "c"};
-Map<String , java . lang . Object>[] mapArr1 = null;
+String[] strArr1 = new String[3];
+String[] strArr2 = new String[]{"a", "b", "c"};
+Map<String , Object>[] mapArr1 = null;
 System.out.println(new Object[]{"atom"});
-Map[] mapArr2 = new java.util.HashMap[6];
+Map[] mapArr2 = new HashMap[6];
 return new Map[]{new HashMap<String , Object>(3), new HashMap()};
 }
 

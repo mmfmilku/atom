@@ -74,6 +74,7 @@ public class Test1 {
         JavaAST javaAST = CompilerUtil.parseAST(javaText);
 
         ByteCodeUtils.toJavassistCode(javaAST);
+        System.out.println(javaAST.getSourceCode());
         Map<String, ClassORDDefine> ordDefineMap = OrdUtils.astToOrd(javaAST);
 
         ClassORDDefine classOrdDefine = ordDefineMap.get(testClassFullName);

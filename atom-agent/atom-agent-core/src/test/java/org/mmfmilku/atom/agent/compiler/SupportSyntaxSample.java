@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
  * 支持的语法样例
  */
 public class SupportSyntaxSample<T>
-        extends java.util.HashMap<String, T>
-        implements Consumer<String>, java.util.function.Function<String, String> {
+        extends HashMap<String, T>
+        implements Consumer<String>, Function<String, String> {
     public <G> SupportSyntaxSample(G g) {
         System.out.println(g);
     }
@@ -67,14 +67,19 @@ public class SupportSyntaxSample<T>
     public Map<String, Object>[] arr(String[] strArr, int[] intArr) {
         int[] a;
         long[] b = new long[4];
+//        b[0] ++;
 
-        java.lang.String[] strArr1 = new String[3];
-        java.lang.String[] strArr2 = new String[]{"a", "b", "c"};
-        Map<String, java.lang.Object>[] mapArr1 = null;
+        String[] strArr1 = new String[3];
+        strArr1[0] = "ddd";
+        strArr1[0] += "ddd";
+        String[] strArr2 = new String[]{"a", "b", "c"};
+        Map<String, Object>[] mapArr1 = null;
 
+        System.out.println(strArr2[0]);
+        System.out.println(strArr2["s".trim().length()]);
         System.out.println(new Object[]{"atom"});
 
-        Map[] mapArr2 = new java.util.HashMap[6];
+        Map[] mapArr2 = new HashMap[6];
 
         return new Map[]{new HashMap<String, Object>(3), new HashMap()};
     }
@@ -95,9 +100,9 @@ public class SupportSyntaxSample<T>
 
     public StringBuilder getStr() {
         String a = new String("aaa");
-        StringBuilder sb = new java.lang.StringBuilder();
+        StringBuilder sb = new StringBuilder();
         System.out.println(sb.toString());
-        return new java.lang.StringBuilder();
+        return new StringBuilder();
     }
 
     public void syntaxTry() throws NoSuchMethodException {
@@ -122,6 +127,7 @@ public class SupportSyntaxSample<T>
         map.put("c", "23324444");
         System.out.println((map));
         System.out.println(((HashMap)map).getClass());
+        System.out.println(((HashMap)(map)).getClass());
         map.forEach((k, v) -> {
             System.out.println(k);
             System.out.println(v);
@@ -150,14 +156,14 @@ public class SupportSyntaxSample<T>
         int len = (k == 0 ? "ff" : "ggg").length();
     }
 
-    static Map<String, List<Object>> MAP = new HashMap<String, List<java.lang.Object>>();
+    static Map<String, List<Object>> MAP = new HashMap<String, List<Object>>();
 
     protected <K, V extends Object> Map<K, V> generics(List<V> list,
                                                        BiFunction<String, Boolean, K> biFunction) {
         Map<String, Object> map1 = new HashMap<>();
-        Map<String, List<Object>> map2 = new HashMap<String, List<java.lang.Object>>();
+        Map<String, List<Object>> map2 = new HashMap<String, List<Object>>();
 
-        Map<String, java.lang.Object>[] mapArr1 = null;
+        Map<String, Object>[] mapArr1 = null;
         synchronized (this) {
             String v1 = "a";
             v1 += list.toString();
