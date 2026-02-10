@@ -73,14 +73,33 @@ function load() {
         post(`agent/listAllClass?appName=${vmInfo.displayName}&offset=1`)
             .then(res => {
                 let fileListDom = pageEdit.querySelector('.listClass')
-                let showHtml = res.map(e =>
-                    `
-                        <div onclick="atomPage.genCode('${e}', this)"
-                        rightClickEvent="classRightMenu"
-                        class="edit-file text-wrap">${e}</div>
-                        `
-                ).join('')
-                fileListDom.innerHTML = showHtml
+//                let showHtml = res.map(e =>
+//                    `
+//                        <div onclick="atomPage.genCode('${e}', this)"
+//                        rightClickEvent="classRightMenu"
+//                        class="edit-file text-wrap">${e}</div>
+//                        `
+//                ).join('')
+//                fileListDom.innerHTML = showHtml
+
+                atom.SPA.loadHtml('/page/edit/fileTree.html')
+                    .then(html => {
+                        fileListDom.innerHTML = html
+                        // 初始化文件浏览器
+                        const explorer = new FileExplorer('fileTree', node => {
+                            node.onclick = () => atomPage.genCode(node.dataset.path, node)
+                            node.setAttribute('rightClickEvent', 'classRightMenu')
+
+                            node.addEventListener('contextmenu', function(event) {
+                                event.preventDefault()
+                                let rightClickEvent = event.currentTarget.getAttribute('rightClickEvent')
+                                rightClickEvent && rightClickEventMap[rightClickEvent](event)
+                            })
+                        })
+                        // 添加数据并渲染
+                        explorer.addFiles(res)
+                        explorer.render()
+                    })
             })
 
     }
@@ -584,9 +603,9 @@ function load() {
 
     let genCode = (javaName, clickDom) => {
         // 文件选中
-        let oldSelect = pageEdit.querySelector('.edit-file-select')
-        oldSelect && oldSelect.classList.remove('edit-file-select')
-        clickDom.classList.add('edit-file-select')
+//        let oldSelect = pageEdit.querySelector('.edit-file-select')
+//        oldSelect && oldSelect.classList.remove('edit-file-select')
+//        clickDom.classList.add('edit-file-select')
         post(`agent/genSource?appName=${vmInfo.displayName}&fullClassName=${javaName}`)
             .then(res => {
                 setType(0)
